@@ -81,7 +81,7 @@
         // Simulate email verification
         if (valid.value && email.value) {
             try {
-                const response = await axios.post('https://localhost:7222/Zoho/zoho/checkEmail', {
+                const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/checkEmail', {
                     email: email.value
                 });
                 console.log(response);
@@ -103,7 +103,7 @@
         if (valid.value && otp.value) {
             try {
                 var response = "";
-                response = await axios.post('https://localhost:7222/Zoho/zoho/verifyOTP', {
+                response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/verifyOTP', {
                     email: email.value,
                     otp: otp.value,
                     password: password.value
@@ -130,12 +130,12 @@
             try {
                 var response = "";
                 if(otpVerified.value == true){
-                    response = await axios.post('https://localhost:7222/Zoho/zoho/login', {
+                    response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/login', {
                         email: email.value,
                         password: password.value
                     });
                 } else {
-                    response = await axios.post('https://localhost:7222/Zoho/zoho/verifyOTP', {
+                    response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/verifyOTP', {
                         email: email.value,
                         otp: otp.value,
                         password: password.value

@@ -125,7 +125,7 @@ const items = ref<Case[]>([]);
 const fetchCases = async () => {
   loading.value = true;
     try {
-      const response = await axios.get('https://localhost:7222/Zoho/zoho/cases');
+      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/cases');
       console.log(response);
       error.value = '';
       items.value = response.data.data;

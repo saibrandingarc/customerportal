@@ -69,7 +69,7 @@
             console.log('Email:', email.value);
             console.log('Password:', password.value);
             try {
-                const response = await axios.post('https://localhost:7222/Zoho/zoho/login', {
+                const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/login', {
                     email: email.value,
                     password: password.value
                 });
