@@ -10,7 +10,7 @@ export interface AuthResponse {
     Username: string;
     Email: string;
     Role: string;
-    ExpiresIn: Date;
+    expiresIn: Date;
     Auth0Status: boolean;
     Auth0AccountId?: string;
     CompanyName?: string;
@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', {
             if (!this.authResponse) return false; // Check directly on authResponse
 
             const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-            const tokenExpirationTime = Math.floor(new Date(this.authResponse.ExpiresIn).getTime() / 1000);
+            const tokenExpirationTime = Math.floor(new Date(this.authResponse.expiresIn).getTime() / 1000);
 
             return currentTime < tokenExpirationTime;
         },

@@ -31,12 +31,12 @@
           </ul>
           <ul class="navbar-nav d-none d-md-block">
             <li v-if="!isAuthenticated && !isLoading" class="nav-item">
-              <router-link to="/login" class="nav-link">Login</router-link>
-              <button
+              <router-link to="/login" class="btn btn-primary btn-margin">Login</router-link>
+              <!-- <button
                 id="qsLoginBtn"
                 class="btn btn-primary btn-margin"
                 @click.prevent="login"
-              >Login</button>
+              >Login</button> -->
             </li>
 
             <li class="nav-item dropdown" v-if="isAuthenticated">
@@ -46,9 +46,9 @@
             </li>
           </ul>
 
-          <ul class="navbar-nav d-md-none" v-if="!isAuthenticated && !isLoading">
+          <!-- <ul class="navbar-nav d-md-none" v-if="!isAuthenticated && !isLoading">
             <button id="qsLoginBtn" class="btn btn-primary btn-block" @click="login">Log in</button>
-          </ul>
+          </ul> -->
 
           <!-- <ul
             id="mobileAuthNavBar"
@@ -83,15 +83,15 @@
 </template>
 
 <script lang="ts" setup>
+import { useAuthStore } from '@/stores/userStore';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { ref, computed, watch, onMounted } from 'vue';
 const { isAuthenticated, isLoading, user, loginWithRedirect, logout } = useAuth0();
 const accessToken = localStorage.getItem('auth_token');
 
 onMounted(() => {
-    if (accessToken) {
-      isAuthenticated.value = true;
-    }
+  const authStore = useAuthStore();
+  isAuthenticated.value = authStore.isTokenValid();
 });
 
 const login = () => {
