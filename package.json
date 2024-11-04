@@ -1,9 +1,10 @@
 {
-  "name": "01-login",
+  "name": "Customer Portal",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vite",
+    "dev": "vite",
+    "serve": "vite preview",
     "build": "vite build"
   },
   "dependencies": {

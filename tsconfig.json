@@ -28,11 +28,13 @@
       "resolveJsonModule": true
     },
     "include": [
+      "src/**/*.js",
       "src/**/*.ts",
       "src/**/*.tsx",
       "src/**/*.vue",
       "tests/**/*.ts",
-      "tests/**/*.tsx"
+      "tests/**/*.tsx",
+      "vite-env.d.ts"
     ],
     "exclude": [
       "node_modules"
