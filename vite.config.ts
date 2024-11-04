@@ -10,22 +10,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
-    extensions: [
-      '.js',
-      '.json',
-      '.jsx',
-      '.mjs',
-      '.ts',
-      '.tsx',
-      '.vue',
-    ],
+    }
   },
   server: {
     https: {
       key: readFileSync(path.resolve(__dirname, 'ssl/localhost-key.pem')),
       cert: readFileSync(path.resolve(__dirname, 'ssl/localhost.pem'))
-    },
-    port: 3000
+    }
   }
 })
