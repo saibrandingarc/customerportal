@@ -75,7 +75,6 @@
                 });
                 if(response.status == 200) {
                     authStore.setAuthResponse(response.data);
-                    console.log(response);
                     router.push({ name: 'cases' });
                 } else {
                     console.log("failed");

@@ -85,12 +85,11 @@
                 const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/checkEmail', {
                     email: email.value
                 });
-                console.log(response);
-                // error.value = '';
                 emailVerified.value = response.data.emailVerified;
                 otpVerified.value = response.data.otpVerified;
                 errorMessage.value = response.data.message;
             } catch (err) {
+                console.log(err);
                 // error.value = err.message;
             } finally {
                 // loading.value = false;
@@ -107,13 +106,12 @@
                     email: email.value,
                     otp: otp.value,
                     password: password.value
-                });    
-                
-                console.log(response);
+                });
                 otpVerified.value = response.data.otpVerified;
                 emailVerified.value = response.data.emailVerified;
                 errorMessage.value = response.data.message;
             } catch (err) {
+                console.log(err);
                 // error.value = err.message;
             } finally {
                 // loading.value = false;

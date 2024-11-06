@@ -15,6 +15,7 @@ export interface AuthResponse {
     Auth0AccountId?: string;
     CompanyName?: string;
     CompanyId?: string;
+    companyId?: string;
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -32,6 +33,10 @@ export const useAuthStore = defineStore('auth', {
             const tokenExpirationTime = Math.floor(new Date(this.authResponse.expiresIn).getTime() / 1000);
 
             return currentTime < tokenExpirationTime;
+        },
+        getCompanyId(): string {
+            const companyId = this.authResponse?.companyId ?? "";
+            return companyId;
         },
     },
 });

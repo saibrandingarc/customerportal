@@ -102,6 +102,9 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
+import { useAuthStore } from '@/stores/userStore';
+
+const authStore = useAuthStore();
 
 interface Case {
   Case_Number: string;
@@ -136,7 +139,9 @@ const items = ref<Case[]>([]);
 const fetchCases = async () => {
   loading.value = true;
     try {
-      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/cases');
+      console.log(authStore);
+      var companyId = authStore.getCompanyId();
+      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/cases/'+companyId);
       console.log(response);
       error.value = '';
       items.value = response.data.data;
