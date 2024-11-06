@@ -124,93 +124,31 @@
     };
 
     const submit = async () => {
-        if (valid.value && password.value) {
-            // Perform login action
-            console.log('Email:', email.value);
-            console.log('Password:', password.value);
-            try {
-                const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/register', {
-                    email: email.value,
-                    password: password.value
-                });
-                console.log(response);
-                otpVerified.value = true;
-                emailVerified.value = true;
-                errorMessage.value = response.data.message;
-                setTimeout(() => {
-                    router.push({ name: 'login' });
-                }, 5000);
-            } catch (err) {
-                // error.value = err.message;
-            } finally {
-                // loading.value = false;
-            }
-            // try {
-                // let data = JSON.stringify({
-                //     "email": email.value,
-                //     "phone_number": "string",
-                //     "user_metadata": {},
-                //     "blocked": false,
-                //     "email_verified": false,
-                //     "phone_verified": false,
-                //     "app_metadata": {},
-                //     "given_name": "string",
-                //     "family_name": "string",
-                //     "name": "string",
-                //     "nickname": "string",
-                //     "picture": "string",
-                //     "user_id": "string",
-                //     "connection": "string",
-                //     "password": password.value,
-                //     "verify_email": false,
-                //     "username": "string"
-                // });
-
-                // let config = {
-                // method: 'post',
-                // maxBodyLength: Infinity,
-                // url: 'https://login.auth0.com/api/v2/users',
-                // headers: { 
-                //     'Content-Type': 'application/json', 
-                //     'Accept': 'application/json'
-                // },
-                // data : data
-                // };
-
-                // axios.request(config)
-                // .then((response) => {
-                // console.log(JSON.stringify(response.data));
-                // })
-                // .catch((error) => {
-                // console.log(error);
-                // });
-                // Call Auth0 Authentication API with email and password
-                // const response = await axios.post(
-                //     'https://'+authConfig.domain+'/oauth/token',
-                //     {
-                //         grant_type: 'password',
-                //         username: email.value,
-                //         password: password.value,
-                //         // audience: 'YOUR_API_IDENTIFIER',  // Optional, for API calls
-                //         client_id: authConfig.clientId,
-                //         client_secret: authConfig.clientSecret,  // Required if configured
-                //         scope: 'openid profile email',
-                //         connection: 'Username-Password-Authentication',
-                //     }
-                // );
-                // console.log(response);
-                // const { access_token } = response.data;
-
-                // // Store the token and redirect user
-                // localStorage.setItem('auth_token', access_token);
-
-                // router.push('/cases');  // Redirect to profile after login
-            // } catch (error) {
-            //     alert('Login failed, please try again.');
-            // }
-        } else {
-            alert('Please enter your password.');
-        }
+        setTimeout(() => {
+            router.push({ name: 'login' });
+        }, 5000);
+        // if (valid.value && password.value) {
+        //     try {
+        //         const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/register', {
+        //             email: email.value,
+        //             password: password.value
+        //         });
+        //         console.log(response);
+        //         otpVerified.value = true;
+        //         emailVerified.value = true;
+        //         errorMessage.value = response.data.message;
+        //         setTimeout(() => {
+        //             router.push({ name: 'login' });
+        //         }, 5000);
+        //     } catch (err) {
+        //         console.log(err);
+        //         // errorMessage.value = err.message;
+        //     } finally {
+        //         // loading.value = false;
+        //     }
+        // } else {
+        //     alert('Please enter your password.');
+        // }
     };
 </script>
   
