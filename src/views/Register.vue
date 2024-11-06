@@ -49,6 +49,7 @@
                     Register
                 </v-btn>
             </v-card-actions>
+            <a href="/" class="d-flex justify-center">Login</a><br>
           </v-card>
         </v-col>
       </v-row>

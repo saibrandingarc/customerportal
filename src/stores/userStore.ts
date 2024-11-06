@@ -16,15 +16,17 @@ export interface AuthResponse {
     CompanyName?: string;
     CompanyId?: string;
     companyId?: string;
+    companyName?: string;
 }
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        authResponse: {} as AuthResponse | null,
+        authResponse: (JSON.parse(localStorage.getItem('user') || 'null') as AuthResponse) || null,
     }),
     actions: {
         setAuthResponse(response: AuthResponse) {
             this.authResponse = response;
+            localStorage.setItem('user', JSON.stringify(response));
         },
         isTokenValid(): boolean {
             if (!this.authResponse) return false; // Check directly on authResponse
@@ -37,6 +39,10 @@ export const useAuthStore = defineStore('auth', {
         getCompanyId(): string {
             const companyId = this.authResponse?.companyId ?? "";
             return companyId;
+        },
+        getCompanyName(): string {
+            const companyName = this.authResponse?.companyName ?? "";
+            return companyName;
         },
     },
 });

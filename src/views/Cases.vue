@@ -26,7 +26,6 @@
                       </v-card-title>
 
                       <v-card-text>
-                        <v-container>
                           <v-row>
                             <v-col cols="12" md="12" sm="12">
                               <v-textarea v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-textarea>
@@ -40,13 +39,12 @@
                               ></v-select>
                             </v-col>
                           </v-row>
-                        </v-container>
+                        
                       </v-card-text>
 
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-                        <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
+                      <v-card-actions class="mr-4">
+                        <v-btn class="text-none mb-4" color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
+                        <v-btn class="text-none mb-4" color="indigo-darken-3" size="large" variant="flat" @click="save">Save</v-btn>
                       </v-card-actions>
                     </v-card>
                   </v-dialog>
@@ -206,13 +204,28 @@ const closeDelete = () => {
 }
 
 // Method to save the edited or new item
-const save = () => {
-  if (editedIndex.value > -1) {
-    Object.assign(items.value[editedIndex.value], editedItem.value)
-  } else {
-    items.value.push({ ...editedItem.value })
+const save = async () => {
+  console.log(editedItem);
+  var companyId = authStore.getCompanyId();
+  editedItem.value.Account_Name = companyId;
+  // if (editedIndex.value > -1) {
+  //   Object.assign(items.value[editedIndex.value], editedItem.value)
+  // } else {
+  //   items.value.push({ ...editedItem.value })
+  // }
+  // close()
+  loading.value = true;
+  try {
+    // const data = { key1: 'value1', key2: 'value2' };
+    const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/newcase', editedItem.value);
+    console.log('Form submitted:', response.data);
+    error.value = '';
+    items.value = response.data.data;
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loading.value = false;
   }
-  close()
 }
 
 </script>

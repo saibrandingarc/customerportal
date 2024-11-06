@@ -16,6 +16,7 @@
                 <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
                 <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
               </v-form>
+              <a href="/forgot_password" style="float: inline-end;">Forgot Password?</a><br>
             </v-card-text>
             <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
             <v-card-actions class="d-flex justify-center">
@@ -28,8 +29,8 @@
                     Login
                 </v-btn>
             </v-card-actions>
-            <a href="/register" class="v-btn v-btn--primary">Register</a><br>
-            <a href="/forgot_password" class="v-btn v-btn--primary">Forgot Password?</a>
+            <a href="/register" class="d-flex justify-center">Register</a><br>
+            
           </v-card>
         </v-col>
       </v-row>
