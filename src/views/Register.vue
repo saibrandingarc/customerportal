@@ -124,9 +124,7 @@
     };
 
     const submit = async () => {
-        setTimeout(() => {
-            router.push({ name: 'login' });
-        }, 5000);
+        router.push({ name: 'login' });
         // if (valid.value && password.value) {
         //     try {
         //         const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/register', {
