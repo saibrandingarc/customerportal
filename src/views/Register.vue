@@ -124,29 +124,28 @@
     };
 
     const submit = async () => {
-        router.push({ name: 'login' });
-        // if (valid.value && password.value) {
-        //     try {
-        //         const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/register', {
-        //             email: email.value,
-        //             password: password.value
-        //         });
-        //         console.log(response);
-        //         otpVerified.value = true;
-        //         emailVerified.value = true;
-        //         errorMessage.value = response.data.message;
-        //         setTimeout(() => {
-        //             router.push({ name: 'login' });
-        //         }, 5000);
-        //     } catch (err) {
-        //         console.log(err);
-        //         // errorMessage.value = err.message;
-        //     } finally {
-        //         // loading.value = false;
-        //     }
-        // } else {
-        //     alert('Please enter your password.');
-        // }
+        if (valid.value && password.value) {
+            try {
+                const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/register', {
+                    email: email.value,
+                    password: password.value
+                });
+                console.log(response);
+                otpVerified.value = true;
+                emailVerified.value = true;
+                errorMessage.value = response.data.message;
+                setTimeout(() => {
+                    router.push({ name: 'Login' });
+                }, 5000);
+            } catch (err) {
+                console.log(err);
+                // errorMessage.value = err.message;
+            } finally {
+                // loading.value = false;
+            }
+        } else {
+            alert('Please enter your password.');
+        }
     };
 </script>
   
