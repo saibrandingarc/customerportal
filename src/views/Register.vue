@@ -112,6 +112,7 @@
                 console.log(response);
                 otpVerified.value = response.data.otpVerified;
                 emailVerified.value = response.data.emailVerified;
+                errorMessage.value = response.data.message;
             } catch (err) {
                 // error.value = err.message;
             } finally {
@@ -128,14 +129,15 @@
             console.log('Email:', email.value);
             console.log('Password:', password.value);
             try {
-                var response = "";
-                response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/register', {
+                const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/register', {
                     email: email.value,
                     password: password.value
                 });
                 console.log(response);
                 otpVerified.value = true;
                 emailVerified.value = true;
+                errorMessage.value = response.data.message;
+                router.push({ name: 'login' });
             } catch (err) {
                 // error.value = err.message;
             } finally {
