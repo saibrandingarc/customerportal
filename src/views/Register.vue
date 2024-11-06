@@ -137,7 +137,9 @@
                 otpVerified.value = true;
                 emailVerified.value = true;
                 errorMessage.value = response.data.message;
-                router.push({ name: 'login' });
+                setTimeout(() => {
+                    router.push({ name: 'login' });
+                }, 5000);
             } catch (err) {
                 // error.value = err.message;
             } finally {
