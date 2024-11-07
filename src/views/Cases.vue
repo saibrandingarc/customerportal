@@ -28,18 +28,12 @@
                       <v-card-text>
                           <v-row>
                             <v-col cols="12" md="12" sm="12">
-                              <v-textarea v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-textarea>
+                              <v-text-field v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-text-field>
                             </v-col>
                             <v-col cols="12" md="12" sm="12">
-                              <v-select
-                                label="Status"
-                                :items="['-None-', 'Email', 'Internal(Automated)', 'Internal(Manual)', 'Phone', 'Web']"
-                                variant="outlined"
-                                v-model="editedItem.Status"
-                              ></v-select>
+                              <v-textarea v-model="editedItem.Description" clearable label="Description" variant="outlined"></v-textarea>
                             </v-col>
                           </v-row>
-                        
                       </v-card-text>
 
                       <v-card-actions class="mr-4">
@@ -104,11 +98,23 @@ import { useAuthStore } from '@/stores/userStore';
 
 const authStore = useAuthStore();
 
+interface Account {
+  id: string;
+}
+
 interface Case {
-  Case_Number: string;
-  Subject: string;
+  Account_Name: Account;
   Status: string;
-  Account_Name: string;
+  Email: string;
+  Description: string;
+  Internal_Comments: string;
+  Priority: string;
+  Reported_By: string;
+  Case_Origin: string;
+  Case_Reason: string;
+  Subject: string;
+  Type: string;
+  Phone: string;
 }
 
 const heading = ref("Cases")
@@ -152,11 +158,19 @@ const fetchCases = async () => {
 
 const editedIndex = ref(-1)
 const defaultItem: Case = {
-  Case_Number: '',
-  Subject: '',
-  Status: '',
-  Account_Name: ''
-}
+  Account_Name: { id: "" },
+  Status: "",
+  Email: "",
+  Description: "",
+  Internal_Comments: "",
+  Priority: "",
+  Reported_By: "",
+  Case_Origin: "",
+  Case_Reason: "",
+  Subject: "",
+  Type: "",
+  Phone: ""
+};
 const editedItem = ref<Case>({ ...defaultItem })
 
 const formTitle = computed(() => (editedIndex.value === -1 ? 'New Case' : 'Edit Case'))
@@ -206,14 +220,12 @@ const closeDelete = () => {
 // Method to save the edited or new item
 const save = async () => {
   console.log(editedItem);
+  var user = authStore.authResponse;
+  console.log(user);
   var companyId = authStore.getCompanyId();
-  editedItem.value.Account_Name = companyId;
-  // if (editedIndex.value > -1) {
-  //   Object.assign(items.value[editedIndex.value], editedItem.value)
-  // } else {
-  //   items.value.push({ ...editedItem.value })
-  // }
-  // close()
+
+  editedItem.value.Account_Name.id = companyId;
+  editedItem.value.Email = user.Email;
   loading.value = true;
   try {
     // const data = { key1: 'value1', key2: 'value2' };
@@ -221,6 +233,12 @@ const save = async () => {
     console.log('Form submitted:', response.data);
     error.value = '';
     items.value = response.data.data;
+    if (editedIndex.value > -1) {
+      Object.assign(items.value[editedIndex.value], editedItem.value)
+    } else {
+      items.value.push({ ...editedItem.value })
+    }
+    close()
   } catch (err) {
     error.value = err.message;
   } finally {
