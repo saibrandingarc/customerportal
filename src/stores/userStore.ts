@@ -21,7 +21,7 @@ export interface AuthResponse {
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        authResponse: (JSON.parse(localStorage.getItem('user') || 'null') as AuthResponse) || null,
+        authResponse: JSON.parse(localStorage.getItem('user') || 'null') as AuthResponse | null,
     }),
     actions: {
         setAuthResponse(response: AuthResponse) {
@@ -43,6 +43,11 @@ export const useAuthStore = defineStore('auth', {
         getCompanyName(): string {
             const companyName = this.authResponse?.companyName ?? "";
             return companyName;
+        },
+        logout() {
+            // Clear the state and localStorage
+            this.authResponse = null;
+            localStorage.removeItem('user');
         },
     },
 });

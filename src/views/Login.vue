@@ -16,9 +16,9 @@
                 <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
                 <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
               </v-form>
+              <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
               <a href="/forgot_password" style="float: inline-end;">Forgot Password?</a><br>
             </v-card-text>
-            <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
             <v-card-actions class="d-flex justify-center">
                 <v-btn
                     class="text-none mb-4"
@@ -76,8 +76,10 @@
                 });
                 if(response.status == 200) {
                     authStore.setAuthResponse(response.data);
+                    errorMessage.value = "";
                     router.push({ name: 'cases' });
                 } else {
+                    errorMessage.value = "Please check your credentials";
                     console.log("failed");
                 }
             } catch (err) {

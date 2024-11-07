@@ -86,7 +86,8 @@
 import { useAuthStore } from '@/stores/userStore';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { ref, computed, watch, onMounted } from 'vue';
-const { isAuthenticated, isLoading, user, loginWithRedirect, logout } = useAuth0();
+import router from '@/router';
+const { isAuthenticated, isLoading, user, loginWithRedirect } = useAuth0();
 const accessToken = localStorage.getItem('auth_token');
 
 onMounted(() => {
@@ -98,12 +99,10 @@ const login = () => {
   loginWithRedirect();
 };
 
-const logoutUser = () => {
-  logout({
-    logoutParams: {
-      returnTo: window.location.origin
-    }
-  });
+const logout = async () => {
+  const authStore = useAuthStore();
+  await authStore.logout();
+  router.push({ name: 'cases' });
 };
 </script>
 
