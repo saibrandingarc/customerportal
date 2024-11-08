@@ -67,14 +67,6 @@
                 <!-- <v-icon class="me-2" color="red" size="large" @click="editItem(item)">mdi-pencil</v-icon>
                 <v-icon size="large" color="red" @click="deleteItem(item)">mdi-delete</v-icon> -->
               </template>
-              <template v-slot:no-data>
-                <v-btn
-                  color="primary"
-                  @click="initialize"
-                >
-                  Reset
-                </v-btn>
-              </template>
             </v-data-table>
             <!-- <v-data-table
                 :headers="headers"
@@ -104,9 +96,11 @@ const authStore = useAuthStore();
 
 interface Account {
   id: string;
+  name: string | null;
 }
 
 interface Case {
+  Case_Number: string;
   Account_Name: Account;
   Status: string;
   Email: string;
@@ -162,7 +156,8 @@ const fetchCases = async () => {
 
 const editedIndex = ref(-1)
 const defaultItem: Case = {
-  Account_Name: { id: "" },
+  Case_Number: "",
+  Account_Name: { id: "", name: "" },
   Status: "",
   Email: "",
   Description: "",
@@ -235,14 +230,11 @@ const save = async () => {
     // const data = { key1: 'value1', key2: 'value2' };
     const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/newcase', editedItem.value);
     console.log('Form submitted:', response.data);
+    editedItem.value.Account_Name.name = authStore.getCompanyName();
+    editedItem.value.Case_Number = response.data.data[0].details.id;
+    editedItem.value.Status = "New";
     error.value = '';
-    // items.value = response.data.data;
-    // if (editedIndex.value > -1) {
-    //   Object.assign(items.value[editedIndex.value], editedItem.value)
-    // } else {
-    //   items.value.push({ ...editedItem.value })
-    // }
-    fetchCases();
+    items.value.push({ ...editedItem.value })
     close()
   } catch (err) {
     error.value = err.message;
