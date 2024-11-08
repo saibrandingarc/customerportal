@@ -1,5 +1,9 @@
 <template>
     <v-container fluid fill-height>
+        <!-- Loading Spinner -->
+        <div v-if="loading" class="spinner-overlay">
+            <div class="spinner"></div>
+        </div>
       <v-row align="center" justify="center" style="height: 100vh;">
         <v-col cols="12" sm="8" md="4">
           <v-card>

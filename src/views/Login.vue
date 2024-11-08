@@ -1,5 +1,9 @@
 <template>
     <v-container fluid fill-height>
+        <!-- Loading Spinner -->
+        <div v-if="loading" class="spinner-overlay">
+            <div class="spinner"></div>
+        </div>
       <v-row align="center" justify="center" style="height: 100vh;">
         <v-col cols="12" sm="8" md="4">
           <v-card>
@@ -14,7 +18,7 @@
             <v-card-text>
               <v-form ref="form" v-model="valid" lazy-validation>
                 <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
-                <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
+                <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required @input="validatePassword"></v-text-field>
               </v-form>
               <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
               <a href="/forgot_password" style="float: inline-end;">Forgot Password?</a><br>
@@ -30,7 +34,6 @@
                 </v-btn>
             </v-card-actions>
             <a href="/register" class="d-flex justify-center">Register</a><br>
-            
           </v-card>
         </v-col>
       </v-row>
@@ -43,15 +46,17 @@
     import authConfig from "../../auth_config.json";
     import router from '@/router';
     import { useAuthStore } from '@/stores/userStore';
+    import { checkPasswordComplexity } from '@/plugins/passwordUtils';
 
     const authStore = useAuthStore();
-    
+
     const email = ref('');
     const password = ref('');
     const otp = ref('');
     const valid = ref(false);
     const emailVerified = ref(false);
     const otpVerified = ref(true);
+    const loading = ref<boolean>(false);
 
     const errorMessage = ref<string | null>(null);
 
@@ -65,6 +70,7 @@
 
     
     const submit = async () => {
+        loading.value = true;
         if (valid.value && password.value) {
             // Perform login action
             console.log('Email:', email.value);
@@ -82,15 +88,22 @@
                     errorMessage.value = "Please check your credentials";
                     console.log("failed");
                 }
+                loading.value = false;
             } catch (err) {
                 // error.value = err.message;
             } finally {
-                // loading.value = false;
+                loading.value = false;
             }
         } else {
+            loading.value = false;
             alert('Please enter your password.');
         }
     };
+
+    function validatePassword() {
+        const result = checkPasswordComplexity(password.value);
+        errorMessage.value = result.message;
+    }
 </script>
   
 <style scoped>

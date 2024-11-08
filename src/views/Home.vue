@@ -10,14 +10,14 @@
 <script lang="ts">
 import Hero from "../components/Hero.vue";
 import HomeContent from "../components/HomeContent.vue";
-import NavBar from "../components/NavBar.vue";
+// import NavBar from "../components/NavBar.vue";
 
 export default {
   name: "home-view",
   components: {
     Hero,
     HomeContent,
-    NavBar,
+    // NavBar,
   },
 };
 </script>

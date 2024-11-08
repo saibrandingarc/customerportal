@@ -1,8 +1,12 @@
 <template>
   <nav-bar />
   <v-container fluid class="down-top-padding">
+    <!-- Loading Spinner -->
+    <div v-if="loading" class="spinner-overlay">
+            <div class="spinner"></div>
+        </div>
     <v-card>
-      <div class="pa-5">
+      <div class="pa-1">
         <v-row>
           <v-col cols="12" sm="12">
             <v-data-table
@@ -232,12 +236,13 @@ const save = async () => {
     const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/newcase', editedItem.value);
     console.log('Form submitted:', response.data);
     error.value = '';
-    items.value = response.data.data;
-    if (editedIndex.value > -1) {
-      Object.assign(items.value[editedIndex.value], editedItem.value)
-    } else {
-      items.value.push({ ...editedItem.value })
-    }
+    // items.value = response.data.data;
+    // if (editedIndex.value > -1) {
+    //   Object.assign(items.value[editedIndex.value], editedItem.value)
+    // } else {
+    //   items.value.push({ ...editedItem.value })
+    // }
+    fetchCases();
     close()
   } catch (err) {
     error.value = err.message;

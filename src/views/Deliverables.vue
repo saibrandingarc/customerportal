@@ -1,6 +1,10 @@
 <template>
   <nav-bar />
   <v-container fluid class="down-top-padding">
+    <!-- Loading Spinner -->
+    <div v-if="loading" class="spinner-overlay">
+            <div class="spinner"></div>
+        </div>
     <v-card>
       <div class="pa-5">
         <v-row>
@@ -60,27 +64,7 @@
                   </v-dialog>
                 </v-toolbar>
               </template>
-              
-              <template v-slot:no-data>
-                <v-btn
-                  color="primary"
-                  @click="initialize"
-                >
-                  Reset
-                </v-btn>
-              </template>
             </v-data-table>
-            <!-- <v-data-table
-                :headers="headers"
-                :items="items"
-                item-key="id"
-                :search="search"
-              >
-                <template v-slot:[`item.actions`]="{ item }">
-                  <v-btn icon="$edit" @click="editItem(item)" class="mr-5"></v-btn>
-                  <v-btn icon="$delete" @click="deleteItem(item)" class="mr-5"></v-btn>
-                </template>
-              </v-data-table> -->
           </v-col>
         </v-row>
       </div>
@@ -92,6 +76,9 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
+import { useAuthStore } from '@/stores/userStore';
+import { Deliverable } from '@/interfaces/deliverables';
+const authStore = useAuthStore();
 
 interface Case {
   Case_Number: string;
@@ -104,17 +91,17 @@ const heading = ref("Deliverables")
 const search = ref('');
 
 const headers = [
-  { title: 'Case Number', key: 'Case_Number' },
-  { title: 'Company Name', key: 'Account_Name.name' },
-  { title: 'Subject', key: 'Subject' },
-  { title: 'Status', key: 'Status' }
+  { title: 'Topic', key: 'Name' },
+  { title: 'Content Type', key: 'Main_Status' },
+  { title: 'Block', key: 'Block' },
+  { title: 'Status', key: 'Main_Status1' }
 ];
 
 const dialog = ref(false)
 const dialogDelete = ref(false)
 
 onMounted(() => {
-  fetchCases();
+  fetchDeliverables();
 });
 
 const isChecked = ref(false);
@@ -122,10 +109,12 @@ const isDisabled = ref(false)
 const loading = ref(false);
 const error = ref('');
 const items = ref<Case[]>([]);
-const fetchCases = async () => {
+const fetchDeliverables = async () => {
   loading.value = true;
     try {
-      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/cases');
+      console.log(authStore);
+      var companyId = authStore.getCompanyId();
+      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/'+companyId);
       console.log(response);
       error.value = '';
       items.value = response.data.data;

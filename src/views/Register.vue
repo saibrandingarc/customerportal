@@ -1,5 +1,9 @@
 <template>
     <v-container fluid fill-height>
+        <!-- Loading Spinner -->
+        <div v-if="loading" class="spinner-overlay">
+            <div class="spinner"></div>
+        </div>
       <v-row align="center" justify="center" style="height: 100vh;">
         <v-col cols="12" sm="8" md="4">
           <v-card>
@@ -15,8 +19,8 @@
               <v-form ref="form" v-model="valid" lazy-validation>
                 <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
                 <v-text-field v-if="emailVerified && !otpVerified" v-model="otp" label="OTP" variant="outlined" :rules="[rules.required]" type="text" required></v-text-field>
-                <v-text-field v-if="emailVerified && otpVerified" v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
-                <v-text-field v-if="emailVerified && otpVerified" v-model="confirmpassword" label="Conform Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
+                <v-text-field v-if="emailVerified && otpVerified" v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required @input="validatePassword"></v-text-field>
+                <v-text-field v-if="emailVerified && otpVerified" v-model="confirmpassword" label="Conform Password" variant="outlined" :rules="[rules.required]" type="password" required @input="validateConfirmPassword"></v-text-field>
               </v-form>
             </v-card-text>
             <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -61,13 +65,16 @@
     import axios from 'axios';
     import authConfig from "../../auth_config.json";
     import router from '@/router';
+    import { checkPasswordComplexity, checkPasswordsMatch } from '@/plugins/passwordUtils';
     
     const email = ref('');
     const password = ref('');
+    const confirmpassword = ref('');
     const otp = ref('');
     const valid = ref(false);
     const emailVerified = ref(false);
     const otpVerified = ref(true);
+    const loading = ref<boolean>(false);
 
     const errorMessage = ref<string | null>(null);
 
@@ -80,20 +87,31 @@
     };
 
     const verifyEmail = async () => {
+        loading.value = true;
         // Simulate email verification
         if (valid.value && email.value) {
             try {
                 const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/checkEmail', {
                     email: email.value
                 });
-                emailVerified.value = response.data.emailVerified;
-                otpVerified.value = response.data.otpVerified;
-                errorMessage.value = response.data.message;
+                if(response.data.obj != ""){
+                    const obj = JSON.parse(response.data.obj);
+                    console.log(obj);
+                    if(obj.Auth0Status) {
+                        errorMessage.value = "Email already registered";
+                    } else {
+                        emailVerified.value = response.data.emailVerified;
+                        otpVerified.value = response.data.otpVerified;
+                        errorMessage.value = response.data.message;
+                    }
+                } else {
+                    errorMessage.value = response.data.message;
+                }
             } catch (err) {
                 console.log(err);
                 // error.value = err.message;
             } finally {
-                // loading.value = false;
+                loading.value = false;
             }
         } else {
             alert('Please enter a valid email.');
@@ -101,6 +119,7 @@
     };
 
     const verifyOTP = async () => {
+        loading.value = true;
         if (valid.value && otp.value) {
             try {
                 const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/verifyOTP', {
@@ -115,14 +134,16 @@
                 console.log(err);
                 // error.value = err.message;
             } finally {
-                // loading.value = false;
+                loading.value = false;
             }
         } else {
             alert('Please enter your password.');
+            loading.value = false;
         }
     };
 
     const submit = async () => {
+        loading.value = true;
         if (valid.value && password.value) {
             try {
                 const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/register', {
@@ -140,12 +161,22 @@
                 console.log(err);
                 // errorMessage.value = err.message;
             } finally {
-                // loading.value = false;
+                loading.value = false;
             }
         } else {
+            loading.value = false;
             alert('Please enter your password.');
         }
     };
+
+    function validatePassword() {
+        const result = checkPasswordComplexity(password.value);
+        errorMessage.value = result.message;
+    }
+    function validateConfirmPassword() {
+        const result = checkPasswordsMatch(password.value, confirmpassword.value);
+        errorMessage.value = result.message;
+    }
 </script>
   
 <style scoped>

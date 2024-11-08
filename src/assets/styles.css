@@ -1,0 +1,40 @@
+.container {
+    max-width: 100%;
+}
+
+.navbar {
+    padding: 0.75rem 0;
+}
+.v-toolbar__content {
+    height: 50px !important;
+}
+/* Spinner overlay */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 10;
+  }
+  
+  /* Spinner styling */
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ccc;
+    border-top-color: #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
