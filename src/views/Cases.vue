@@ -1,95 +1,93 @@
 <template>
   <nav-bar />
-  <v-container fluid class="down-top-padding">
-    <!-- Loading Spinner -->
-    <div v-if="loading" class="spinner-overlay">
-            <div class="spinner"></div>
-        </div>
-    <v-card>
-      <div class="pa-1">
-        <v-row>
-          <v-col cols="12" sm="12">
-            <v-data-table
-              :headers="headers"
-              :items="items"
-              item-key="id"
-              :sort-by="[{ key: 'calories', order: 'asc' }]"
-            >
-              <template v-slot:top>
-                <v-toolbar flat>
-                  <v-toolbar-title>{{ heading }}</v-toolbar-title>
-                  <v-divider class="mx-8" inset vertical></v-divider>
-                  <v-spacer></v-spacer>
-                  <v-dialog v-model="dialog" max-width="800px">
-                    <template v-slot:activator="{ props }">
-                      <v-btn class="mb-2" color="primary" dark v-bind="props">New Case</v-btn>
-                    </template>
-                    <v-card>
-                      <v-card-title>
-                        <span class="text-h5">{{ formTitle }}</span>
-                      </v-card-title>
-
-                      <v-card-text>
-                          <v-row>
-                            <v-col cols="12" md="12" sm="12">
-                              <v-text-field v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" md="12" sm="12">
-                              <v-textarea v-model="editedItem.Description" clearable label="Description" variant="outlined"></v-textarea>
-                            </v-col>
-                          </v-row>
-                      </v-card-text>
-
-                      <v-card-actions class="mr-4">
-                        <v-btn class="text-none mb-4" color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-                        <v-btn class="text-none mb-4" color="indigo-darken-3" size="large" variant="flat" @click="save">Save</v-btn>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                  <v-dialog v-model="dialogDelete" max-width="500px">
-                    <v-card>
-                      <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-                        <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-                        <v-spacer></v-spacer>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                </v-toolbar>
-              </template>
-              <template v-slot:item.actions="{ item }">
-                <v-btn-group variant="outlined" divided>
-                  <v-btn icon="mdi-pencil" @click="editItem(item)"></v-btn>
-                  <v-btn icon="mdi-delete" @click="deleteItem(item)"></v-btn>
-                </v-btn-group>
-                <!-- <v-icon class="me-2" color="red" size="large" @click="editItem(item)">mdi-pencil</v-icon>
-                <v-icon size="large" color="red" @click="deleteItem(item)">mdi-delete</v-icon> -->
-              </template>
-            </v-data-table>
-            <!-- <v-data-table
-                :headers="headers"
-                :items="items"
-                item-key="id"
-                :search="search"
-              >
-                <template v-slot:[`item.actions`]="{ item }">
-                  <v-btn icon="$edit" @click="editItem(item)" class="mr-5"></v-btn>
-                  <v-btn icon="$delete" @click="deleteItem(item)" class="mr-5"></v-btn>
+  <SidebarMenu />
+  <!-- Loading Spinner -->
+  <div v-if="loading" class="spinner-overlay">
+    <div class="spinner"></div>
+  </div>
+  <v-card>
+    <v-row>
+      <v-col cols="12" sm="12">
+        <v-data-table
+          :headers="headers"
+          :items="items"
+          item-key="id"
+          :sort-by="[{ key: 'calories', order: 'asc' }]"
+        >
+          <template v-slot:top>
+            <v-toolbar flat>
+              <v-toolbar-title>{{ heading }}</v-toolbar-title>
+              <v-divider class="mx-8" inset vertical></v-divider>
+              <v-spacer></v-spacer>
+              <v-dialog v-model="dialog" max-width="800px">
+                <template v-slot:activator="{ props }">
+                  <v-btn class="mb-2" color="primary" dark v-bind="props">New Case</v-btn>
                 </template>
-              </v-data-table> -->
-          </v-col>
-        </v-row>
-      </div>
-    </v-card>
-  </v-container>
+                <v-card>
+                  <v-card-title>
+                    <span class="text-h5">{{ formTitle }}</span>
+                  </v-card-title>
+
+                  <v-card-text>
+                      <v-row>
+                        <v-col cols="12" md="12" sm="12">
+                          <v-text-field v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="12" sm="12">
+                          <v-textarea v-model="editedItem.Description" clearable label="Description" variant="outlined"></v-textarea>
+                        </v-col>
+                      </v-row>
+                  </v-card-text>
+
+                  <v-card-actions class="mr-4">
+                    <v-btn class="text-none mb-4" color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
+                    <v-btn class="text-none mb-4" color="indigo-darken-3" size="large" variant="flat" @click="save">Save</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+              <v-dialog v-model="dialogDelete" max-width="500px">
+                <v-card>
+                  <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
+                    <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
+                    <v-spacer></v-spacer>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+            </v-toolbar>
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn-group variant="outlined" divided>
+              <v-btn icon="mdi-pencil" @click="editItem(item)"></v-btn>
+              <v-btn icon="mdi-delete" @click="deleteItem(item)"></v-btn>
+            </v-btn-group>
+            <!-- <v-icon class="me-2" color="red" size="large" @click="editItem(item)">mdi-pencil</v-icon>
+            <v-icon size="large" color="red" @click="deleteItem(item)">mdi-delete</v-icon> -->
+          </template>
+        </v-data-table>
+        <!-- <v-data-table
+            :headers="headers"
+            :items="items"
+            item-key="id"
+            :search="search"
+          >
+            <template v-slot:[`item.actions`]="{ item }">
+              <v-btn icon="$edit" @click="editItem(item)" class="mr-5"></v-btn>
+              <v-btn icon="$delete" @click="deleteItem(item)" class="mr-5"></v-btn>
+            </template>
+          </v-data-table> -->
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
+import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 
 const authStore = useAuthStore();

@@ -1,81 +1,81 @@
 <template>
   <nav-bar />
-  <v-container fluid class="down-top-padding">
-    <!-- Loading Spinner -->
-    <div v-if="loading" class="spinner-overlay">
-            <div class="spinner"></div>
-        </div>
-    <v-card>
-      <div class="pa-5">
-        <v-row>
-          <v-col cols="12" sm="12">
-            <v-data-table
-              :headers="headers"
-              :items="items"
-              item-key="id"
-              :sort-by="[{ key: 'calories', order: 'asc' }]"
-            >
-              <template v-slot:top>
-                <v-toolbar flat>
-                  <v-toolbar-title>{{ heading }}</v-toolbar-title>
-                  <v-divider class="mx-8" inset vertical></v-divider>
-                  <v-spacer></v-spacer>
-                  <v-dialog v-model="dialog" max-width="800px">
-                    <v-card>
-                      <v-card-title>
-                        <span class="text-h5">{{ formTitle }}</span>
-                      </v-card-title>
+  <SidebarMenu />
+  <!-- Loading Spinner -->
+  <div v-if="loading" class="spinner-overlay">
+    <div class="spinner"></div>
+  </div>
+  <v-card>
+    <div class="pa-5">
+      <v-row>
+        <v-col cols="12" sm="12">
+          <v-data-table
+            :headers="headers"
+            :items="items"
+            item-key="id"
+            :sort-by="[{ key: 'calories', order: 'asc' }]"
+          >
+            <template v-slot:top>
+              <v-toolbar flat>
+                <v-toolbar-title>{{ heading }}</v-toolbar-title>
+                <v-divider class="mx-8" inset vertical></v-divider>
+                <v-spacer></v-spacer>
+                <v-dialog v-model="dialog" max-width="800px">
+                  <v-card>
+                    <v-card-title>
+                      <span class="text-h5">{{ formTitle }}</span>
+                    </v-card-title>
 
-                      <v-card-text>
-                        <v-container>
-                          <v-row>
-                            <v-col cols="12" md="12" sm="12">
-                              <v-textarea v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-textarea>
-                            </v-col>
-                            <v-col cols="12" md="12" sm="12">
-                              <v-select
-                                label="Status"
-                                :items="['-None-', 'Email', 'Internal(Automated)', 'Internal(Manual)', 'Phone', 'Web']"
-                                variant="outlined"
-                                v-model="editedItem.Status"
-                              ></v-select>
-                            </v-col>
-                          </v-row>
-                        </v-container>
-                      </v-card-text>
+                    <v-card-text>
+                      <v-container>
+                        <v-row>
+                          <v-col cols="12" md="12" sm="12">
+                            <v-textarea v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-textarea>
+                          </v-col>
+                          <v-col cols="12" md="12" sm="12">
+                            <v-select
+                              label="Status"
+                              :items="['-None-', 'Email', 'Internal(Automated)', 'Internal(Manual)', 'Phone', 'Web']"
+                              variant="outlined"
+                              v-model="editedItem.Status"
+                            ></v-select>
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                    </v-card-text>
 
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-                        <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                  <v-dialog v-model="dialogDelete" max-width="500px">
-                    <v-card>
-                      <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-                        <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-                        <v-spacer></v-spacer>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                </v-toolbar>
-              </template>
-            </v-data-table>
-          </v-col>
-        </v-row>
-      </div>
-    </v-card>
-  </v-container>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
+                      <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+                <v-dialog v-model="dialogDelete" max-width="500px">
+                  <v-card>
+                    <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
+                      <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
+                      <v-spacer></v-spacer>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-toolbar>
+            </template>
+          </v-data-table>
+        </v-col>
+      </v-row>
+    </div>
+  </v-card>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
+import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 import { Deliverable } from '@/interfaces/deliverables';
 const authStore = useAuthStore();

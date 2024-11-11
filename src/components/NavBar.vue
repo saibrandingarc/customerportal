@@ -1,49 +1,18 @@
 <template>
-  <div class="nav-container mb-3">
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-      <div class="container">
-        <div class="navbar-brand">
-          <img class="app-logo" src="/logo.png" alt="Vue.js logo" width="120">
-        </div>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
+  <v-app-bar app color="default" dark class="pa-2">
+    <!-- Left Logo -->
+    <v-toolbar-title class="d-flex align-center">
+      <img src="/logo.png" alt="Logo" class="app-logo" width="120" />
+    </v-toolbar-title>
 
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav mr-auto">
-            <!-- <li class="nav-item">
-              <router-link to="/" class="nav-link">Home</router-link>
-            </li> -->
-            <li class="nav-item" v-if="isAuthenticated">
-              <router-link to="/cases" class="nav-link">Cases</router-link>
-            </li>
-            <li class="nav-item" v-if="isAuthenticated">
-              <router-link to="/deliverables" class="nav-link">Deliverables</router-link>
-            </li>
-          </ul>
-          <ul class="navbar-nav d-none d-md-block">
-            <li v-if="!isAuthenticated && !isLoading" class="nav-item">
-              <router-link to="/login" class="btn btn-primary btn-margin">Login</router-link>
-            </li>
+    <!-- Spacer to push logout button to the right -->
+    <v-spacer />
 
-            <li class="nav-item dropdown" v-if="isAuthenticated">
-              <a id="qsLogoutBtn" href="#" class="dropdown-item" @click.prevent="logout">
-                <font-awesome-icon class="mr-3" icon="power-off" />Log out
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  </div>
+    <!-- Right Logout Button -->
+    <v-btn @click.prevent="logout" color="secondary" outlined v-if="isAuthenticated">
+      <v-icon class="mr-2">mdi-power</v-icon> Logout
+    </v-btn>
+  </v-app-bar>
 </template>
 
 <script lang="ts" setup>

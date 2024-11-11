@@ -38,3 +38,22 @@
     }
   }
   
+  .sidebar-menu {
+    background-color: #1976d2;
+    color: white;
+  }
+  
+  .sidebar-menu .v-list-item-title {
+    font-weight: 500;
+  }
+  
+  .sidebar-menu .v-icon {
+    color: white;
+  }
+
+  .v-list-item__prepend {
+    align-items: center;
+    align-self: center;
+    display: contents !important;
+    grid-area: prepend;
+}

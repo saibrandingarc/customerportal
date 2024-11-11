@@ -47,6 +47,12 @@ const routes = [
     component: () => import('../views/Deliverables.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/admin/users',
+    name: 'users',
+    component: () => import('../views/admin/Users.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({
