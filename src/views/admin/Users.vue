@@ -199,7 +199,7 @@ const deleteItem = (item: User) => {
 const deleteItemConfirm = async () => {
   // items.value.splice(editedIndex.value, 1);
   try {
-    const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/auth0/deleteUser', editedItem.value);
+    const response = await axios.delete('https://zohodeliverablesapi.azurewebsites.net/auth0/deleteUser', editedItem.value);
     console.log(response);
     // responseMessage.value = `User with ID ${userId} deleted successfully`;
     // // Refresh the users list after deletion
