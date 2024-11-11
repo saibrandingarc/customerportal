@@ -196,8 +196,18 @@ const deleteItem = (item: User) => {
 }
 
 // Confirm deletion of an item
-const deleteItemConfirm = () => {
-  items.value.splice(editedIndex.value, 1)
+const deleteItemConfirm = async () => {
+  // items.value.splice(editedIndex.value, 1);
+  try {
+    const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/auth0/deleteUser', editedItem.value);
+    console.log(response);
+    // responseMessage.value = `User with ID ${userId} deleted successfully`;
+    // // Refresh the users list after deletion
+    // await fetchUsers();
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    // responseMessage.value = 'Failed to delete user';
+  }
   closeDelete()
 }
 
