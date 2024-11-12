@@ -18,7 +18,7 @@
             <v-card-text>
               <v-form ref="form" v-model="valid" lazy-validation>
                 <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
-                <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required @input="validatePassword"></v-text-field>
+                <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
               </v-form>
               <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
               <a href="/forgot_password" style="float: inline-end;">Forgot Password?</a><br>
