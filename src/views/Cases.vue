@@ -60,24 +60,16 @@
           </template>
           <template v-slot:item.actions="{ item }">
             <v-btn-group variant="outlined" divided>
-              <v-btn icon="mdi-pencil" @click="editItem(item)"></v-btn>
+              <!-- <v-btn icon="mdi-pencil" @click="editItem(item)"></v-btn> -->
               <v-btn icon="mdi-delete" @click="deleteItem(item)"></v-btn>
             </v-btn-group>
             <!-- <v-icon class="me-2" color="red" size="large" @click="editItem(item)">mdi-pencil</v-icon>
             <v-icon size="large" color="red" @click="deleteItem(item)">mdi-delete</v-icon> -->
           </template>
         </v-data-table>
-        <!-- <v-data-table
-            :headers="headers"
-            :items="items"
-            item-key="id"
-            :search="search"
-          >
-            <template v-slot:[`item.actions`]="{ item }">
-              <v-btn icon="$edit" @click="editItem(item)" class="mr-5"></v-btn>
-              <v-btn icon="$delete" @click="deleteItem(item)" class="mr-5"></v-btn>
-            </template>
-          </v-data-table> -->
+        <v-snackbar v-model="snackbar" :timeout="3000">
+          {{ text }}
+        </v-snackbar>
       </v-col>
     </v-row>
   </v-card>
@@ -91,6 +83,8 @@ import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 
 const authStore = useAuthStore();
+const text = ref("Hello, I'm a snackbar");
+const snackbar = ref<boolean>(false);
 
 interface Account {
   id: string;
@@ -98,19 +92,20 @@ interface Account {
 }
 
 interface Case {
-  Case_Number: string;
-  Account_Name: Account;
-  Status: string;
-  Email: string;
-  Description: string;
-  Internal_Comments: string;
-  Priority: string;
-  Reported_By: string;
-  Case_Origin: string;
-  Case_Reason: string;
-  Subject: string;
-  Type: string;
-  Phone: string;
+  id: number | null;
+  Case_Number: string | null;
+  Account_Name: Account | null;
+  Status: string | null;
+  Email: string | null;
+  Description: string | null;
+  Internal_Comments: string | null;
+  Priority: string | null;
+  Reported_By: string | null;
+  Case_Origin: string | null;
+  Case_Reason: string | null;
+  Subject: string | null;
+  Type: string | null;
+  Phone: string | null;
 }
 
 const heading = ref("Cases")
@@ -154,6 +149,7 @@ const fetchCases = async () => {
 
 const editedIndex = ref(-1)
 const defaultItem: Case = {
+  id:0,
   Case_Number: "",
   Account_Name: { id: "", name: "" },
   Status: "",
@@ -192,11 +188,31 @@ const deleteItem = (item: Case) => {
   editedIndex.value = items.value.indexOf(item)
   editedItem.value = { ...item }
   dialogDelete.value = true
+  console.log("deleted");
 }
 
 // Confirm deletion of an item
-const deleteItemConfirm = () => {
-  items.value.splice(editedIndex.value, 1)
+const deleteItemConfirm = async () => {
+  // items.value.splice(editedIndex.value, 1)
+  console.log(editedItem);
+  var user = authStore.authResponse;
+  console.log(user);
+  loading.value = true;
+  const id = editedItem.value?.id;
+  try {
+    // const data = { key1: 'value1', key2: 'value2' };
+    const response = await axios.delete('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deleteCase/'+id);
+    console.log('Form submitted:', response.data);
+    items.value.splice(editedIndex.value, 1)
+    close()
+    snackbar.value = true;
+    text.value = "Case deleted";
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loading.value = false;
+  }
+  console.log(editedItem.value);
   closeDelete()
 }
 
@@ -216,13 +232,16 @@ const closeDelete = () => {
 
 // Method to save the edited or new item
 const save = async () => {
+  text.value = "Case added";
+  snackbar.value = true;
+    
   console.log(editedItem);
   var user = authStore.authResponse;
   console.log(user);
   var companyId = authStore.getCompanyId();
 
   editedItem.value.Account_Name.id = companyId;
-  editedItem.value.Email = user.Email;
+  editedItem.value.Email = user?.Email;
   loading.value = true;
   try {
     // const data = { key1: 'value1', key2: 'value2' };
@@ -233,6 +252,8 @@ const save = async () => {
     editedItem.value.Status = "New";
     error.value = '';
     items.value.push({ ...editedItem.value })
+    snackbar.value = true;
+    text.value = "Case added";
     close()
   } catch (err) {
     error.value = err.message;

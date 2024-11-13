@@ -26,7 +26,7 @@
         { title: 'Dashboard', icon: 'mdi-view-dashboard', route: '/dashboard', roles: ['Admin', 'User'] },
         { title: 'Cases', icon: 'mdi-file-document', route: '/cases', roles: ['Admin', 'User'] },
         { title: 'Deliverables', icon: 'mdi-package-variant', route: '/deliverables', roles: ['Admin', 'User'] },
-        { title: 'Admin User', icon: 'mdi-package-variant', route: '/admin/users', roles: ['Admin'] },
+        { title: 'Admin User', icon: 'mdi-account', route: '/admin/users', roles: ['Admin'] },
         // { title: 'Profile', icon: 'mdi-account-circle', route: '/profile' },
         // { title: 'Settings', icon: 'mdi-cog', route: '/settings' },
         // { title: 'Logout', icon: 'mdi-logout', route: '/logout' },
