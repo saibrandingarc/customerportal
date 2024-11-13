@@ -9,6 +9,7 @@
     <v-spacer />
 
     <!-- Right Logout Button -->
+    {{username}}
     <v-btn @click.prevent="logout" color="secondary" outlined v-if="isAuthenticated">
       <v-icon class="mr-2">mdi-power</v-icon> Logout
     </v-btn>
@@ -23,6 +24,8 @@ import router from '@/router';
 const { isAuthenticated, isLoading, user, loginWithRedirect } = useAuth0();
 const accessToken = localStorage.getItem('auth_token');
 const authStore = useAuthStore();
+const username = ref("");
+username.value = authStore.getUsername();
 
 onMounted(() => {
   isAuthenticated.value = authStore.isTokenValid();

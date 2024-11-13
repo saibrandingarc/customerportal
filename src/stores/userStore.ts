@@ -17,6 +17,7 @@ export interface AuthResponse {
     CompanyId?: string;
     companyId?: string;
     companyName?: string;
+    email?: string;
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -46,6 +47,9 @@ export const useAuthStore = defineStore('auth', {
         },
         getRoles(): string[] {
             return this.authResponse?.role ?? ['User'];
+        },
+        getUsername(): string {
+            return this.authResponse?.email ?? 'Guest';
         },
         logout() {
             // Clear the state and localStorage
