@@ -9,7 +9,7 @@ export interface AuthResponse {
     UserId: string;
     Username: string;
     Email: string;
-    Role: string;
+    role: string[];
     expiresIn: Date;
     Auth0Status: boolean;
     Auth0AccountId?: string;
@@ -43,6 +43,9 @@ export const useAuthStore = defineStore('auth', {
         getCompanyName(): string {
             const companyName = this.authResponse?.companyName ?? "";
             return companyName;
+        },
+        getRoles(): string[] {
+            return this.authResponse?.role ?? ['User'];
         },
         logout() {
             // Clear the state and localStorage
