@@ -34,6 +34,13 @@
                 </v-btn>
             </v-card-actions>
             <a href="/register" class="d-flex justify-center">Register</a><br>
+            <button @click="loginWithGoogle">Login with Google</button>
+            <button @click="loginWithMicrosoft">Login with Microsoft</button>
+            <button v-if="isAuthenticated" @click="logoutUser">Logout</button>
+
+    <div v-if="isAuthenticated">
+      <p>Welcome, {{ user }}</p>
+    </div>
           </v-card>
         </v-col>
       </v-row>
@@ -41,14 +48,42 @@
 </template>
   
 <script lang="ts" setup>
-    import { ref } from 'vue';
+    import { ref, onMounted } from 'vue';
     import axios from 'axios';
     import authConfig from "../../auth_config.json";
     import router from '@/router';
     import { useAuthStore } from '@/stores/userStore';
     import { checkPasswordComplexity } from '@/plugins/passwordUtils';
+    import { useAuth0 } from "@auth0/auth0-vue";
 
-    const authStore = useAuthStore();
+    const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently } = useAuth0();
+    const userData = ref<any>(null);
+    const tokenValid = ref(false);
+
+    const validateToken = async () => {
+        try {
+            // Get the access token
+            const token = await getAccessTokenSilently();
+
+            // Add logic to validate token, e.g., checking expiration (optional)
+            if (token) {
+            tokenValid.value = true;
+            }
+        } catch (error) {
+            console.error("Error validating token:", error);
+        }
+    };
+
+    // Function to check user and redirect
+    const checkUserAndRedirect = () => {
+        if (user.value?.sub && tokenValid.value) {
+            router.push("/cases"); // Redirect to another screen
+        } else {
+            console.error("User not valid or token invalid.");
+        }
+    };
+
+    // const authStore = useAuthStore();
 
     const email = ref('');
     const password = ref('');
@@ -81,7 +116,7 @@
                     password: password.value
                 });
                 if(response.status == 200) {
-                    authStore.setAuthResponse(response.data);
+                    // authStore.setAuthResponse(response.data);
                     errorMessage.value = "";
                     router.push({ name: 'cases' });
                 } else {
@@ -99,6 +134,39 @@
             alert('Please enter your password.');
         }
     };
+
+    const loginWithGoogle = async () => {
+        loginWithRedirect({
+            connection: "google-oauth2", // Specify Google as the connection
+        });
+        // Ensure the user is authenticated
+        if (isAuthenticated.value) {
+            // authStore.setAuthResponse(user);
+            userData.value = user.value;
+            await validateToken();
+            checkUserAndRedirect();
+        } else {
+            router.push("/login"); // Redirect to login if not authenticated
+        }
+    };
+
+    const loginWithMicrosoft = () => {
+        loginWithRedirect({
+            connection: "microsoft", // Specify Microsoft as the connection
+        });
+    };
+
+    onMounted(async () => {
+        await validateToken();
+        // Ensure the user is authenticated
+        if (isAuthenticated.value) {
+            userData.value = user.value;
+            await validateToken();
+            checkUserAndRedirect();
+        } else {
+            router.push("/login"); // Redirect to login if not authenticated
+        }
+    });
 
     function validatePassword() {
         const result = checkPasswordComplexity(password.value);

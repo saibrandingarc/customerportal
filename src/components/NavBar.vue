@@ -21,24 +21,25 @@ import { useAuthStore } from '@/stores/userStore';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { ref, computed, watch, onMounted } from 'vue';
 import router from '@/router';
-const { isAuthenticated, isLoading, user, loginWithRedirect } = useAuth0();
+
 const accessToken = localStorage.getItem('auth_token');
 const authStore = useAuthStore();
 const username = ref("");
 username.value = authStore.getUsername();
+const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently } = useAuth0();
 
 onMounted(() => {
-  isAuthenticated.value = authStore.isTokenValid();
+  // isAuthenticated.value = authStore.isTokenValid();
 });
 
 const login = () => {
   loginWithRedirect();
 };
 
-const logout = () => {
-  authStore.logout();
-  router.push('/');
-};
+// const logout = () => {
+//   authStore.logout();
+//   router.push('/');
+// };
 
 const logoutUser = () => {
   // logout({

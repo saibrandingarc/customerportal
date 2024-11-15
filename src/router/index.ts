@@ -8,6 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/stores/userStore';
 
 const routes = [
+  // { path: "/callback", name: 'Callback', component: Callback },
   {
     path: '/',
     name: 'Home',
@@ -78,8 +79,9 @@ function isTokenExpired(token: string): boolean {
 }
 
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
-  const isAuthenticated = authStore.isTokenValid();
+  // const authStore = useAuthStore();
+  // const isAuthenticated = authStore.isTokenValid();
+  const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently } = useAuth0();
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (to.meta.requiresAuth && !isAuthenticated) {
