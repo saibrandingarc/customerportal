@@ -34,13 +34,12 @@
                 </v-btn>
             </v-card-actions>
             <a href="/register" class="d-flex justify-center">Register</a><br>
-            <button @click="loginWithGoogle">Login with Google</button>
-            <button @click="loginWithMicrosoft">Login with Microsoft</button>
-            <button v-if="isAuthenticated" @click="logoutUser">Logout</button>
-
-    <div v-if="isAuthenticated">
-      <p>Welcome, {{ user }}</p>
-    </div>
+            <v-card-footer class="d-flex justify-center">
+                <button @click="loginWithGoogle">
+                    <img src="https://developers.google.com/identity/images/btn_google_signin_light_normal_web.png" alt="Sign in with Google">
+                </button>
+                <button @click="loginWithMicrosoft">Login with Microsoft</button>
+            </v-card-footer>
           </v-card>
         </v-col>
       </v-row>
@@ -48,29 +47,48 @@
 </template>
   
 <script lang="ts" setup>
-    import { ref, onMounted } from 'vue';
+    import { ref, onMounted, Ref, computed, watch } from 'vue';
     import axios from 'axios';
     import authConfig from "../../auth_config.json";
     import router from '@/router';
     import { useAuthStore } from '@/stores/userStore';
     import { checkPasswordComplexity } from '@/plugins/passwordUtils';
-    import { useAuth0 } from "@auth0/auth0-vue";
-
-    const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently } = useAuth0();
+    import { useAuth0, User } from "@auth0/auth0-vue";
+    import { AnyAuthResponse } from '@/interfaces/AnyAuthResponse';
+    
+    const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently, handleRedirectCallback } = useAuth0();
     const userData = ref<any>(null);
     const tokenValid = ref(false);
+
+    // Define the AuthResponse object with default values
+    const authResponseTemp = ref<AnyAuthResponse>({
+        access_token: '',
+        id_token: '',
+        scope: '',
+        expires_in: 0,
+        token_type: '',
+        userId: '',
+        username: null,
+        email: '',
+        role: [],
+        expiresIn: '',
+        auth0Status: false,
+        auth0AccountId: '',
+        companyName: '',
+        companyId: ''
+    });
 
     const validateToken = async () => {
         try {
             // Get the access token
             const token = await getAccessTokenSilently();
-
+            
             // Add logic to validate token, e.g., checking expiration (optional)
             if (token) {
-            tokenValid.value = true;
+                tokenValid.value = true;
             }
         } catch (error) {
-            console.error("Error validating token:", error);
+            console.log("Error validating token:", error);
         }
     };
 
@@ -83,7 +101,7 @@
         }
     };
 
-    // const authStore = useAuthStore();
+    const authStore = useAuthStore();
 
     const email = ref('');
     const password = ref('');
@@ -102,21 +120,20 @@
             return pattern.test(value) || 'Invalid e-mail.';
         },
     };
-
     
     const submit = async () => {
         loading.value = true;
         if (valid.value && password.value) {
-            // Perform login action
-            console.log('Email:', email.value);
-            console.log('Password:', password.value);
             try {
                 const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/login', {
                     email: email.value,
                     password: password.value
                 });
                 if(response.status == 200) {
-                    // authStore.setAuthResponse(response.data);
+                    console.log(isAuthenticated);
+                    localStorage.setItem("loginType", "username-password");
+                    authStore.setAuthResponse(response.data);
+                    isAuthenticated.value = authStore.isTokenValid();
                     errorMessage.value = "";
                     router.push({ name: 'cases' });
                 } else {
@@ -136,14 +153,22 @@
     };
 
     const loginWithGoogle = async () => {
+        localStorage.setItem("loginType", "google");
         loginWithRedirect({
-            connection: "google-oauth2", // Specify Google as the connection
+            connection: "google-oauth2",
+            state: JSON.stringify({ loginType: "google" })
         });
+        await handleRedirectCallback();
         // Ensure the user is authenticated
         if (isAuthenticated.value) {
-            // authStore.setAuthResponse(user);
-            userData.value = user.value;
-            await validateToken();
+            authResponseTemp.value.access_token = await getAccessTokenSilently();
+            email.value = user.value?.email ?? '';
+            const zohoInfo = await verifyEmail();
+            console.log(zohoInfo);
+            authResponseTemp.value.companyId = zohoInfo.CompanyId;
+            authResponseTemp.value.companyName = zohoInfo.CompanyName;
+            localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
+            console.log(authResponseTemp);
             checkUserAndRedirect();
         } else {
             router.push("/login"); // Redirect to login if not authenticated
@@ -156,13 +181,54 @@
         });
     };
 
+    const verifyEmail = async () => {
+        loading.value = true;
+        try {
+            const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/checkEmail', {
+                email: email.value
+            });
+            if(response.data.obj != ""){
+                const obj = JSON.parse(response.data.obj);
+                return obj;
+            } else {
+                return null;
+            }
+        } catch (err) {
+            console.log(err);
+            // error.value = err.message;
+        } finally {
+            loading.value = false;
+        }
+    };
+
+    watch(
+        () => user.value,
+        (newUser: unknown) => {
+            if (newUser) {
+                // Perform type casting only when `user.value` is available
+                authResponseTemp.value = newUser as unknown as AnyAuthResponse;
+            }
+        },
+        { immediate: true }
+    );
+
     onMounted(async () => {
-        await validateToken();
-        // Ensure the user is authenticated
+        const logintype = localStorage.getItem("loginType");
+        if(logintype == "username-password") {
+            const authStore = useAuthStore();
+            isAuthenticated.value = authStore.isTokenValid();
+        } else {
+            authResponseTemp.value.access_token = await getAccessTokenSilently();
+            email.value = user.value?.email ?? '';
+            const zohoInfo = await verifyEmail();
+            console.log(zohoInfo);
+            authResponseTemp.value.companyId = zohoInfo.CompanyId;
+            authResponseTemp.value.companyName = zohoInfo.CompanyName;
+            localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
+            console.log(authResponseTemp);
+        }
         if (isAuthenticated.value) {
-            userData.value = user.value;
-            await validateToken();
-            checkUserAndRedirect();
+            router.push("/cases");
         } else {
             router.push("/login"); // Redirect to login if not authenticated
         }

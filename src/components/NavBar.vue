@@ -10,7 +10,7 @@
 
     <!-- Right Logout Button -->
     {{username}}
-    <v-btn @click.prevent="logout" color="secondary" outlined v-if="isAuthenticated">
+    <v-btn @click.prevent="logoutUser" color="secondary" outlined v-if="isAuthenticated">
       <v-icon class="mr-2">mdi-power</v-icon> Logout
     </v-btn>
   </v-app-bar>
@@ -29,7 +29,11 @@ username.value = authStore.getUsername();
 const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently } = useAuth0();
 
 onMounted(() => {
-  // isAuthenticated.value = authStore.isTokenValid();
+  const logintype = localStorage.getItem("loginType");
+  if(logintype == "username-password") {
+    const authStore = useAuthStore();
+    isAuthenticated.value = authStore.isTokenValid();
+  }
 });
 
 const login = () => {
@@ -42,11 +46,9 @@ const login = () => {
 // };
 
 const logoutUser = () => {
-  // logout({
-  //   logoutParams: {
-  //     returnTo: window.location.origin
-  //   }
-  // });
+  authStore.logout();
+  logout();
+  router.push('/');
 };
 </script>
 

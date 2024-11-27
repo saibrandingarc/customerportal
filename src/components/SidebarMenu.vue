@@ -12,41 +12,43 @@
 </template>
   
 <script lang="ts" setup>
-    import { ref, computed, watch, onMounted } from 'vue';
-    import { useRouter } from 'vue-router';
-    import { useAuthStore } from '@/stores/userStore';
+  import { ref, computed, watch, onMounted } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { useAuthStore } from '@/stores/userStore';
+  import { useAuth0 } from '@auth0/auth0-vue';
   
-    const router = useRouter();
-    const drawer = ref(true);
-    const authStore = useAuthStore();
-    const userRoles = ref();
-    userRoles.value = authStore.getRoles();
+  const router = useRouter();
+  const drawer = ref(true);
+  const authStore = useAuthStore();
+  const userRoles = ref();
+  userRoles.value = authStore.getRoles();
+  const { isAuthenticated } = useAuth0();
   
-    const menuItems = [
-        { title: 'Dashboard', icon: 'mdi-view-dashboard', route: '/dashboard', roles: ['Admin', 'User'] },
-        { title: 'Cases', icon: 'mdi-file-document', route: '/cases', roles: ['Admin', 'User'] },
-        { title: 'Deliverables', icon: 'mdi-package-variant', route: '/deliverables', roles: ['Admin', 'User'] },
-        { title: 'Admin User', icon: 'mdi-account', route: '/admin/users', roles: ['Admin'] },
-        // { title: 'Profile', icon: 'mdi-account-circle', route: '/profile' },
-        // { title: 'Settings', icon: 'mdi-cog', route: '/settings' },
-        // { title: 'Logout', icon: 'mdi-logout', route: '/logout' },
-    ];
+  const menuItems = [
+      { title: 'Dashboard', icon: 'mdi-view-dashboard', route: '/dashboard', roles: ['Admin', 'User'] },
+      { title: 'Cases', icon: 'mdi-file-document', route: '/cases', roles: ['Admin', 'User'] },
+      { title: 'Deliverables', icon: 'mdi-package-variant', route: '/deliverables', roles: ['Admin', 'User'] },
+      { title: 'Invoices', icon: 'mdi-package-variant', route: '/invoices', roles: ['Admin', 'User'] },
+      { title: 'Admin User', icon: 'mdi-account', route: '/admin/users', roles: ['Admin'] },
+      // { title: 'Profile', icon: 'mdi-account-circle', route: '/profile' },
+      // { title: 'Settings', icon: 'mdi-cog', route: '/settings' },
+      // { title: 'Logout', icon: 'mdi-logout', route: '/logout' },
+  ];
 
-    const filteredMenuItems = computed(() => {
-      return menuItems.filter(item => item.roles.some(role => userRoles.value.includes(role)));
-    });
-  
-    const navigate = (route: string) => {
-        router.push(route);
-    };
+  const filteredMenuItems = computed(() => {
+    return menuItems.filter(item => item.roles.some(role => userRoles.value.includes(role)));
+  });
 
-    const isAuthenticated = ref(false);
-    const accessToken = localStorage.getItem('auth_token');
-    
+  const navigate = (route: string) => {
+      router.push(route);
+  };
 
-    onMounted(() => {
-        isAuthenticated.value = authStore.isTokenValid();
-    });
+  // const isAuthenticated = ref(false);
+  const accessToken = localStorage.getItem('auth_token');
+
+  onMounted(() => {
+      // isAuthenticated.value = authStore.isTokenValid();
+  });
 </script>
   
   <style scoped>

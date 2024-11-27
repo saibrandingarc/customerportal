@@ -6,6 +6,7 @@ import ForgotPassword from '../views/ForgotPassword.vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/stores/userStore';
+import { ref } from 'vue';
 
 const routes = [
   // { path: "/callback", name: 'Callback', component: Callback },
@@ -49,6 +50,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/invoices',
+    name: 'invoices',
+    component: () => import('../views/Invoices.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/admin/users',
     name: 'users',
     component: () => import('../views/admin/Users.vue'),
@@ -79,12 +86,18 @@ function isTokenExpired(token: string): boolean {
 }
 
 router.beforeEach((to, from, next) => {
-  // const authStore = useAuthStore();
+  // const logintype = localStorage.getItem("loginType");
+  // const isAuthenticated = ref(false);
+  // if(logintype == "username-password") {
+  //   const authStore = useAuthStore();
+  //   isAuthenticated.value = authStore.isTokenValid();
+  // }
+  
   // const isAuthenticated = authStore.isTokenValid();
-  const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated } = useAuth0();
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (to.meta.requiresAuth && !isAuthenticated) {
+    if (!isAuthenticated.value) {
       // No token found, redirect to login page
       next({ name: 'Login' });
     } else {

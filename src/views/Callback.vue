@@ -10,6 +10,13 @@
   
   const { handleRedirectCallback, isAuthenticated, error } = useAuth0();
   
+  // In the callback handler (if required)
+  const handleAuthCallback = async () => {
+    const { appState } = await handleRedirectCallback();
+    const loginType = appState?.loginType || "unknown";
+    localStorage.setItem("loginType", loginType);
+  };
+
   onMounted(async () => {
     await handleRedirectCallback();
   });
