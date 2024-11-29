@@ -58,9 +58,12 @@
               </v-dialog>
             </v-toolbar>
           </template>
+          <template #item.Case_Number="{ item }">
+            {{ item.Case_Number ? item.Case_Number.slice(-8) : 'N/A' }}
+          </template>
           <template v-slot:item.actions="{ item }">
             <v-btn-group variant="outlined" divided>
-              <!-- <v-btn icon="mdi-pencil" @click="editItem(item)"></v-btn> -->
+              <v-btn icon="mdi-pencil" @click="editItem(item)"></v-btn>
               <v-btn icon="mdi-delete" @click="deleteItem(item)"></v-btn>
             </v-btn-group>
             <!-- <v-icon class="me-2" color="red" size="large" @click="editItem(item)">mdi-pencil</v-icon>
@@ -113,7 +116,7 @@ const search = ref('');
 
 const headers = [
   { title: 'Case Number', key: 'Case_Number' },
-  { title: 'Company Name', key: 'Account_Name.name' },
+  // { title: 'Company Name', key: 'Account_Name.name' },
   { title: 'Subject', key: 'Subject' },
   { title: 'Status', key: 'Status' },
   { title: 'Actions', key: 'actions', sortable: false }

@@ -91,9 +91,9 @@ const heading = ref("Deliverables")
 const search = ref('');
 
 const headers = [
-  { title: 'Topic', key: 'Name' },
+  { title: 'Topic', key: 'Name', class: "topicWidth" },
   { title: 'Content Type', key: 'Main_Status' },
-  { title: 'Block', key: 'Block' },
+  { title: 'Due Date', key: 'Due_Date' },
   { title: 'Status', key: 'Main_Status1' }
 ];
 
@@ -193,5 +193,8 @@ const save = () => {
 <style scoped>
 .v-btn {
   min-width: 80px;
+}
+.topicWidth {
+  width: 150px;
 }
 </style>
