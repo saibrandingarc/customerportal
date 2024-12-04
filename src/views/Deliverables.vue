@@ -8,11 +8,25 @@
   <v-card>
     <div class="pa-5">
       <v-row>
+        <v-col cols="4" sm="4">
+          <v-select
+            v-model="selectedBlock"
+            :items="monthsArray"
+            label="Select Block"
+            variant="outlined"
+            @update:modelValue="fetchDataForBlock"
+            @input="fetchDataForBlock"
+            dense
+          ></v-select>
+        </v-col>
+      </v-row>
+      <v-row>
         <v-col cols="12" sm="12">
           <v-data-table
             :headers="headers"
             :items="items"
             item-key="id"
+            class="custom-data-table"
             :sort-by="[{ key: 'calories', order: 'asc' }]"
           >
             <template v-slot:top>
@@ -87,6 +101,40 @@ interface Case {
   Account_Name: string;
 }
 
+// Function to generate months relative to the current date
+const generateRelativeMonthsArray = (past: number, future: number): string[] => {
+  const today = new Date();
+  const months: string[] = [];
+
+  // Generate past months
+  for (let i = past; i > 0; i--) {
+    const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Zero-padded month
+    months.push(`${year}-${month}`);
+  }
+
+  // Add the current month
+  const currentYear = today.getFullYear();
+  const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0');
+  months.push(`${currentYear}-${currentMonth}`);
+
+  // Generate future months
+  for (let i = 1; i <= future; i++) {
+    const date = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Zero-padded month
+    months.push(`${year}-${month}`);
+  }
+
+  return months;
+};
+
+// Generate array of past 12 months and next 12 months
+const monthsArray = ref<string[]>(generateRelativeMonthsArray(12, 12));
+
+const selectedBlock = ref<string | null>(null);
+
 const heading = ref("Deliverables")
 const search = ref('');
 
@@ -123,6 +171,22 @@ const fetchDeliverables = async () => {
     } finally {
       loading.value = false;
     }
+};
+
+// Function to call the API when a month is selected
+const fetchDataForBlock = async () => {
+  if (!selectedBlock.value) return;
+
+  try {
+    var companyId = authStore.getCompanyId();
+    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/'+companyId+'/'+selectedBlock.value);
+    console.log(response);
+    error.value = '';
+    items.value = response.data.data;
+  } catch (err) {
+    error.value = err.message;
+    console.error("Error fetching data:", error);
+  }
 };
 
 const editedIndex = ref(-1)
@@ -196,5 +260,11 @@ const save = () => {
 }
 .topicWidth {
   width: 150px;
+}
+.custom-data-table th:nth-child(0),
+.custom-data-table td:nth-child(0) {
+  width: 150px;
+  text-align: center;
+  white-space: nowrap;
 }
 </style>
