@@ -22,6 +22,12 @@
   const authStore = useAuthStore();
   const userRoles = ref();
   userRoles.value = authStore.getRoles();
+  if(userRoles.value.length == 0) {
+    console.log("zero");
+    userRoles.value.push('User');
+  } else {
+    console.log("not zero");
+  }
   const { isAuthenticated } = useAuth0();
   
   const menuItems = [
