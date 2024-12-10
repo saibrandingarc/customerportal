@@ -61,6 +61,12 @@ const routes = [
     component: () => import('../views/admin/Users.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/case/:Case_Number',
+    name: 'case',
+    component: () => import('@/views/Case.vue'),
+    props: true, // Pass route params as props
+  },
 ];
 
 const router = createRouter({

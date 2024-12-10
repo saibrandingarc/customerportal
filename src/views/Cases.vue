@@ -63,6 +63,7 @@
           </template>
           <template v-slot:item.actions="{ item }">
             <v-btn-group variant="outlined" divided>
+              <v-btn icon="mdi-eye" @click="viewItem(item)"></v-btn>
               <v-btn icon="mdi-pencil" @click="editItem(item)"></v-btn>
               <v-btn icon="mdi-delete" @click="deleteItem(item)"></v-btn>
             </v-btn-group>
@@ -80,11 +81,13 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 
+const router = useRouter();
 const authStore = useAuthStore();
 const text = ref("Hello, I'm a snackbar");
 const snackbar = ref<boolean>(false);
@@ -168,7 +171,9 @@ const defaultItem: Case = {
   Phone: ""
 };
 const editedItem = ref<Case>({ ...defaultItem })
-
+const viewItem = (item: { id: string }) => {
+  router.push({ name: 'case', params: { Case_Number: item.id } });
+};
 const formTitle = computed(() => (editedIndex.value === -1 ? 'New Case' : 'Edit Case'))
 
 // Watchers for dialog and dialogDelete
