@@ -9,8 +9,10 @@
   <v-row>
     <v-col cols="12" sm="4">
       <v-card>
+        <template v-slot:title>
+          <span class="font-weight-black">Case Details</span>
+        </template>
         <div class="ma-2 pa-2">
-          <h4>Case Details</h4>
           <p><strong>ID:</strong> {{ Case_Number }}</p>
           <p><strong>Name:</strong> {{ item?.Subject }}</p>
           <p><strong>Description:</strong> {{ item?.Description }}</p>
@@ -19,8 +21,10 @@
     </v-col>
     <v-col cols="8">
       <v-card>
+        <template v-slot:title>
+          <span class="font-weight-black">Time Lines</span>
+        </template>
         <div class="ma-2 pa-2">
-          <h5>Time Lines</h5>
           <div class="mb-2"><b>Admin :</b> {{ item?.Description }}</div>
           <div class="mb-2"><b>Customer :</b> {{ item?.Description }}</div>
         </div>

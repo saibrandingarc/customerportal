@@ -95,7 +95,7 @@
     // Function to check user and redirect
     const checkUserAndRedirect = () => {
         if (user.value?.sub && tokenValid.value) {
-            router.push("/cases"); // Redirect to another screen
+            router.push("/dashboard"); // Redirect to another screen
         } else {
             console.error("User not valid or token invalid.");
         }
@@ -135,7 +135,7 @@
                     authStore.setAuthResponse(response.data);
                     isAuthenticated.value = authStore.isTokenValid();
                     errorMessage.value = "";
-                    router.push({ name: 'cases' });
+                    router.push({ name: 'dashboard' });
                 } else {
                     errorMessage.value = "Please check your credentials";
                     console.log("failed");
@@ -228,7 +228,7 @@
             console.log(authResponseTemp);
         }
         if (isAuthenticated.value) {
-            router.push("/cases");
+            router.push("/dashboard");
         } else {
             router.push("/login"); // Redirect to login if not authenticated
         }

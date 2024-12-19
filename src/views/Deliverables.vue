@@ -6,32 +6,30 @@
     <div class="spinner"></div>
   </div>
   <v-card>
-    <div class="pa-5">
-      <v-row>
+    <div>
+      <v-row class="pa-4">
         <v-col cols="4" sm="4">
           <v-select
             v-model="selectedBlock"
             :items="monthsArray"
-            label="Select Block"
+            label="Select Year"
             variant="outlined"
             @update:modelValue="fetchDataForBlock"
             @input="fetchDataForBlock"
             dense
           ></v-select>
         </v-col>
-      </v-row>
-      <v-row>
         <v-col cols="12" sm="12">
           <v-data-table
             :headers="headers"
-            :items="items"
+            :items="upcomingDeliverables"
             item-key="id"
             class="custom-data-table"
             :sort-by="[{ key: 'calories', order: 'asc' }]"
           >
             <template v-slot:top>
               <v-toolbar flat>
-                <v-toolbar-title>{{ heading }}</v-toolbar-title>
+                <v-toolbar-title>Upcoming Deliverables</v-toolbar-title>
                 <v-divider class="mx-8" inset vertical></v-divider>
                 <v-spacer></v-spacer>
                 <v-dialog v-model="dialog" max-width="800px">
@@ -83,6 +81,19 @@
       </v-row>
     </div>
   </v-card>
+  <v-card  class="mt-4">
+    <v-row>
+      <v-col cols="12" sm="12">
+        <v-data-table :headers="headers" :items="completedDeliverables" item-key="id" class="custom-data-table" :sort-by="[{ key: 'calories', order: 'asc' }]">
+          <template v-slot:top>
+            <v-toolbar flat>
+              <v-toolbar-title>Completed Deliverables</v-toolbar-title>
+            </v-toolbar>
+          </template>
+        </v-data-table>
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <script lang="ts" setup>
@@ -131,7 +142,8 @@ const generateRelativeMonthsArray = (past: number, future: number): string[] => 
 };
 
 // Generate array of past 12 months and next 12 months
-const monthsArray = ref<string[]>(generateRelativeMonthsArray(12, 12));
+// const monthsArray = ref<string[]>(generateRelativeMonthsArray(12, 12));
+const monthsArray = ref<string[]>(["2024", "2025"]);
 
 const selectedBlock = ref<string | null>(null);
 
@@ -157,6 +169,8 @@ const isDisabled = ref(false)
 const loading = ref(false);
 const error = ref('');
 const items = ref<Case[]>([]);
+const upcomingDeliverables = ref<Case[]>([]);
+const completedDeliverables = ref<Case[]>([]);
 const fetchDeliverables = async () => {
   loading.value = true;
     try {
@@ -166,6 +180,8 @@ const fetchDeliverables = async () => {
       console.log(response);
       error.value = '';
       items.value = response.data.data;
+      upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 != 'Completed');
+      completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed');
     } catch (err) {
       error.value = err.message;
     } finally {
@@ -183,6 +199,8 @@ const fetchDataForBlock = async () => {
     console.log(response);
     error.value = '';
     items.value = response.data.data;
+    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 != 'Completed');
+    completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed');
   } catch (err) {
     error.value = err.message;
     console.error("Error fetching data:", error);
