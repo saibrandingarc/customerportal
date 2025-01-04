@@ -203,7 +203,7 @@ const fetchCases = async () => {
       console.log(response);
       error.value = '';
       items.value = response.data.data;
-      openitems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'Open');
+      openitems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'New');
       closeditems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'Closed');
     } catch (err) {
       error.value = err.message;

@@ -4,45 +4,42 @@
         <div v-if="loading" class="spinner-overlay">
             <div class="spinner"></div>
         </div>
-      <v-row align="center" justify="center" style="height: 100vh;">
-        <v-col cols="12" sm="8" md="4">
-          <v-card>
-            <!-- Logo Section -->
-            <v-card-title class="d-flex justify-center">
-                <img src="@/assets/logo.png" alt="Logo" class="logo1" />
-            </v-card-title>
-            <v-card-title>
-              <h2 class="text-h5 text-center">Login</h2>
-            </v-card-title>
+        <v-row align="center" justify="center" style="height: 100vh;">
+            <v-col cols="12" sm="8" md="4">
+                <v-card>
+                    <!-- Logo Section -->
+                    <v-card-title class="d-flex justify-center">
+                        <img src="@/assets/logo.png" alt="Logo" class="logo1" />
+                    </v-card-title>
+                    <v-card-title>
+                        <h2 class="text-h5 text-center">Login</h2>
+                    </v-card-title>
   
-            <v-card-text>
-              <v-form ref="form" v-model="valid" lazy-validation>
-                <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
-                <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
-              </v-form>
-              <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-              <a href="/forgot_password" style="float: inline-end;">Forgot Password?</a><br>
-            </v-card-text>
-            <v-card-actions class="d-flex justify-center">
-                <v-btn
-                    class="text-none mb-4"
-                    color="indigo-darken-3"
-                    size="large"
-                    variant="flat"
-                    @click="submit">
-                    Login
-                </v-btn>
-            </v-card-actions>
-            <a href="/register" class="d-flex justify-center">Register</a><br>
-            <v-card-footer class="d-flex justify-center">
-                <button @click="loginWithGoogle">
-                    <img src="https://developers.google.com/identity/images/btn_google_signin_light_normal_web.png" alt="Sign in with Google">
-                </button>
-                <button @click="loginWithMicrosoft">Login with Microsoft</button>
-            </v-card-footer>
-          </v-card>
-        </v-col>
-      </v-row>
+                    <v-card-text>
+                        <v-form ref="form" v-model="valid" lazy-validation>
+                            <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
+                            <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
+                        </v-form>
+                        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+                        <a href="/forgot_password" style="float: inline-end;">Forgot Password?</a><br>
+                    </v-card-text>
+                    <v-card-actions class="d-flex justify-center">
+                        <v-btn class="text-none mb-4" color="indigo-darken-3" size="large" variant="flat" @click="submit">Login</v-btn>
+                    </v-card-actions>
+                    <a href="/register" class="d-flex justify-center">Register</a><br>
+                    <v-card-footer class="d-flex justify-center">
+                        <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithGoogle">Google Sign In</v-btn>
+                        <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithLinkedIn">LinkedIn Sign In</v-btn>
+                        <v-btn class="text-none mb-4" color="indigo-darken-3" size="default" variant="flat" @click="loginWithMicrosoft">Microsoft Sign In</v-btn>
+                        <v-btn class="text-none mb-4" color="indigo-darken-3" size="default" variant="flat" @click="loginWithAzure">Microsoft Azure Sign In</v-btn>
+                    </v-card-footer>
+                    <div v-if="isAuthenticated">
+                        <p>Welcome, {{ user?.name }}</p>
+                        <button @click="logoutUser">Logout</button>
+                    </div>
+                </v-card>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
   
@@ -90,6 +87,10 @@
         } catch (error) {
             console.log("Error validating token:", error);
         }
+    };
+
+    const logoutUser = () => {
+        logout({ returnTo: window.location.origin });
     };
 
     // Function to check user and redirect
@@ -154,14 +155,18 @@
 
     const loginWithGoogle = async () => {
         localStorage.setItem("loginType", "google");
-        loginWithRedirect({
+        await loginWithRedirect({
             connection: "google-oauth2",
-            state: JSON.stringify({ loginType: "google" })
+            state: JSON.stringify({ loginType: "google" }),
+            authorizationParams: {
+                scope: 'openid profile email',
+            },
         });
         await handleRedirectCallback();
         // Ensure the user is authenticated
         if (isAuthenticated.value) {
             authResponseTemp.value.access_token = await getAccessTokenSilently();
+
             email.value = user.value?.email ?? '';
             const zohoInfo = await verifyEmail();
             console.log(zohoInfo);
@@ -179,6 +184,33 @@
         loginWithRedirect({
             connection: "microsoft", // Specify Microsoft as the connection
         });
+    };
+
+    const loginWithAzure = () => {
+        loginWithRedirect({
+            connection: "CustomerPortal", // Specify Microsoft as the connection
+        });
+    };
+
+    const loginWithLinkedIn = async () => {
+        localStorage.setItem("loginType", "linkedin");
+        await loginWithRedirect({ connection: 'linkedin' });
+        await handleRedirectCallback();
+        // Ensure the user is authenticated
+        if (isAuthenticated.value) {
+            authResponseTemp.value.access_token = await getAccessTokenSilently();
+
+            email.value = user.value?.email ?? '';
+            const zohoInfo = await verifyEmail();
+            console.log(zohoInfo);
+            authResponseTemp.value.companyId = zohoInfo.CompanyId;
+            authResponseTemp.value.companyName = zohoInfo.CompanyName;
+            localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
+            console.log(authResponseTemp);
+            checkUserAndRedirect();
+        } else {
+            router.push("/login"); // Redirect to login if not authenticated
+        }
     };
 
     const verifyEmail = async () => {
@@ -201,6 +233,10 @@
         }
     };
 
+    const clientId = '86tqj0ugmm99kh'; // Replace with your LinkedIn App Client ID
+    const redirectUri = 'http://localhost:3000/callback'; // Replace with your app's Redirect URI
+    const scope = 'r_liteprofile r_emailaddress'; // Permissions you need
+
     watch(
         () => user.value,
         (newUser: unknown) => {
@@ -222,15 +258,20 @@
             email.value = user.value?.email ?? '';
             const zohoInfo = await verifyEmail();
             console.log(zohoInfo);
-            authResponseTemp.value.companyId = zohoInfo.CompanyId;
-            authResponseTemp.value.companyName = zohoInfo.CompanyName;
-            localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
-            console.log(authResponseTemp);
-        }
-        if (isAuthenticated.value) {
-            router.push("/dashboard");
-        } else {
-            router.push("/login"); // Redirect to login if not authenticated
+            if(zohoInfo != null) {
+                authResponseTemp.value.companyId = zohoInfo.CompanyId;
+                authResponseTemp.value.companyName = zohoInfo.CompanyName;
+                localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
+                console.log(authResponseTemp);
+                if (isAuthenticated.value) {
+                    router.push("/dashboard");
+                } else {
+                    errorMessage.value = "Email not exist please contact you admin";
+                    // router.push("/login"); // Redirect to login if not authenticated
+                }
+            } else {
+                errorMessage.value = "Email not exist please contact you admin";
+            }
         }
     });
 

@@ -48,9 +48,9 @@ const snackbar = ref<boolean>(false);
 // Register Chart.js
 Chart.register(...registerables);
 const toggleLegend = ref(true);
-const dataValues = ref([30, 40, 60, 70, 5]);
-const dataLabels = ref(["Paris", "Nîmes", "Toulon", "Perpignan", "Autre"]);
-const backgroundColor = ref(["#77CEFF", "#0079AF", "#123E6B", "#97B0C4", "#A5C8ED", "#A3C8ED", "#A5C81D", "#A5C8E1"]);
+const dataValues = ref([]);
+const dataLabels = ref([]);
+const backgroundColor = ref([]);
 const options = computed<ChartOptions<"doughnut">>(() => ({
   scales: {
     myScale: {
