@@ -44,6 +44,7 @@ import { Chart, ChartData, ChartOptions, registerables } from "chart.js";
 const router = useRouter();
 const authStore = useAuthStore();
 const snackbar = ref<boolean>(false);
+const loading = ref(false);
 
 // Register Chart.js
 Chart.register(...registerables);
@@ -137,6 +138,7 @@ const countsPerMonth = computed(() => {
 
 // Fetch cases
 const fetchCases = async () => {
+  loading.value = true;
   try {
     const companyId = authStore.getCompanyId();
     const response = await axios.get(
@@ -146,11 +148,14 @@ const fetchCases = async () => {
     cases.value = response.data.data;
   } catch (err) {
     console.error("Error fetching cases:", err);
+  } finally {
+      loading.value = false;
   }
 };
 
 // Fetch deliverables
 const fetchDeliverables = async () => {
+  loading.value = true;
   try {
     const companyId = authStore.getCompanyId();
     const response = await axios.get(
@@ -175,6 +180,8 @@ const fetchDeliverables = async () => {
     console.log(backgroundColor.value);
   } catch (err) {
     console.error("Error fetching deliverables:", err);
+  } finally {
+      loading.value = false;
   }
 };
 

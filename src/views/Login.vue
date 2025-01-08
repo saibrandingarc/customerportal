@@ -29,12 +29,14 @@
                     <a href="/register" class="d-flex justify-center">Register</a><br>
                     <v-card-footer class="d-flex justify-center">
                         <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithGoogle">Google Sign In</v-btn>
-                        <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithLinkedIn">LinkedIn Sign In</v-btn>
-                        <v-btn class="text-none mb-4" color="indigo-darken-3" size="default" variant="flat" @click="loginWithMicrosoft">Microsoft Sign In</v-btn>
+                        <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithLinkedIn">LinkedIn Sign In</v-btn><br/>
+                    </v-card-footer>
+                    <v-card-footer class="d-flex justify-center">
+                        <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithMicrosoft">Microsoft Sign In</v-btn>
                         <v-btn class="text-none mb-4" color="indigo-darken-3" size="default" variant="flat" @click="loginWithAzure">Microsoft Azure Sign In</v-btn>
                     </v-card-footer>
                     <div v-if="isAuthenticated">
-                        <p>Welcome, {{ user?.name }}</p>
+                        <p>Welcome, {{ user }}</p>
                         <button @click="logoutUser">Logout</button>
                     </div>
                 </v-card>
@@ -180,10 +182,28 @@
         }
     };
 
-    const loginWithMicrosoft = () => {
-        loginWithRedirect({
-            connection: "microsoft", // Specify Microsoft as the connection
-        });
+    const loginWithMicrosoft = async () => {
+        // loginWithRedirect({
+        //     connection: "microsoft", // Specify Microsoft as the connection
+        // });
+        localStorage.setItem("loginType", "microsoft");
+        await loginWithRedirect({ connection: 'microsoft' });
+        await handleRedirectCallback();
+        // Ensure the user is authenticated
+        if (isAuthenticated.value) {
+            authResponseTemp.value.access_token = await getAccessTokenSilently();
+            email.value = user.value?.email ?? '';
+
+            const zohoInfo = await verifyEmail();
+            console.log(zohoInfo);
+            authResponseTemp.value.companyId = zohoInfo.CompanyId;
+            authResponseTemp.value.companyName = zohoInfo.CompanyName;
+            localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
+            console.log(authResponseTemp);
+            checkUserAndRedirect();
+        } else {
+            router.push("/login"); // Redirect to login if not authenticated
+        }
     };
 
     const loginWithAzure = () => {
@@ -217,7 +237,9 @@
         loading.value = true;
         try {
             const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/checkEmail', {
-                email: email.value
+                email: email.value,
+                logintype: localStorage.getItem("loginType"),
+                user: JSON.stringify(user.value)
             });
             if(response.data.obj != ""){
                 const obj = JSON.parse(response.data.obj);
@@ -266,10 +288,12 @@
                 if (isAuthenticated.value) {
                     router.push("/dashboard");
                 } else {
+                    logout();
                     errorMessage.value = "Email not exist please contact you admin";
                     // router.push("/login"); // Redirect to login if not authenticated
                 }
             } else {
+                logout();
                 errorMessage.value = "Email not exist please contact you admin";
             }
         }

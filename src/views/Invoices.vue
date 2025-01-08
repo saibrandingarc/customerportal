@@ -17,12 +17,17 @@
           >
           <!-- Custom template for rows -->
             <template #item="{ item }">
-              <tr @click="handleRowClick(item)">
+              <tr>
                 <td>{{ item.Id }}</td>
                 <td>{{ item.InvoiceDate }}</td>
                 <td>{{ item.DueDate }}</td>
                 <td>{{ item.TotalAmount }}</td>
                 <td>{{ item.Status }}</td>
+                <td>
+                  <v-btn-group variant="outlined" divided>
+                    <v-btn color="primary" icon="mdi-download" @click="handleRowClick(item)"></v-btn>
+                  </v-btn-group>
+                </td>
               </tr>
             </template>
           </v-data-table>
@@ -56,15 +61,19 @@ const headers = [
   { title: 'Invoice Date', key: 'InvoiceDate' },
   { title: 'Due Date', key: 'DueDate' },
   { title: 'Total Amount', key: 'TotalAmount' },
-  { title: 'Status', key: 'Status' }
+  { title: 'Status', key: 'Status' },
+  { title: 'Actions', key: 'Actions' },
 ];
 
 // Fetch invoices using the access token
 const fetchInvoices = async () => {
   try {
     console.log(authStore);
+    const parsedData = JSON.parse(localStorage.getItem("user"));
+    const companyName = parsedData.companyName;
+    console.log(companyName);
     var companyId = authStore.getCompanyId();
-    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Intuit/invoices/9341453485740176');
+    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Intuit/invoices/9341453485740176/'+companyName);
     console.log(response);
     error.value = '';
     const invoices: Invoice[] = response.data.QueryResponse.Invoice.map((item: { Id: any; TxnDate: any; DueDate: any; TotalAmt: any; Balance: number; }) => ({
