@@ -7,6 +7,8 @@ import { useAuth0 } from '@auth0/auth0-vue';
 import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/stores/userStore';
 import { ref } from 'vue';
+import EndUserAgreementVue from '@/views/EndUserAgreement.vue';
+import PrivacyPolicyVue from '@/views/PrivacyPolicy.vue';
 
 const routes = [
   // { path: "/callback", name: 'Callback', component: Callback },
@@ -15,6 +17,16 @@ const routes = [
     name: 'Home',
     component: Login,
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/enduser',
+    name: 'EndUser',
+    component: EndUserAgreementVue,
+  },
+  {
+    path: '/privacypolicy',
+    name: 'PrivacyPolicy',
+    component: PrivacyPolicyVue,
   },
   {
     path: '/login',

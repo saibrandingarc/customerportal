@@ -39,13 +39,15 @@
                         <p>Welcome, {{ user }}</p>
                         <button @click="logoutUser">Logout</button>
                     </div>
-                    <v-card-footer class="d-flex justify-center">
-                        <a class="me-4" href="/enduser" target="_blank" rel="noopener noreferrer"> End-user license agreement</a>
-                        <a href="https://brandingarc.com/privacy-policy/" target="_blank" rel="noopener noreferrer"> Privacy Policy</a>
-                    </v-card-footer>
                 </v-card>
             </v-col>
         </v-row>
+        <p>
+            <a href="/enduser" target="_blank" rel="noopener noreferrer"> End-user license agreement</a>
+        </p>
+        <p>
+            <a href="/privacypolicy" target="_blank" rel="noopener noreferrer"> Privacy Policy</a>
+        </p>
     </v-container>
 </template>
   

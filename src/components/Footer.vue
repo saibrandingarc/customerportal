@@ -9,6 +9,9 @@
         Sample project provided by
         <a href="https://auth0.com" target="_blank" rel="noopener noreferrer"> Auth0</a>
       </p>
+      <p>
+        <a href="/userpolicy" target="_blank" rel="noopener noreferrer"> End User Policy</a>
+      </p>
     </v-container>
   </v-footer>
 </template>
