@@ -259,9 +259,9 @@
         }
     };
 
-    const clientId = '86tqj0ugmm99kh'; // Replace with your LinkedIn App Client ID
-    const redirectUri = 'http://localhost:3000/callback'; // Replace with your app's Redirect URI
-    const scope = 'r_liteprofile r_emailaddress'; // Permissions you need
+    // const clientId = '86tqj0ugmm99kh'; // Replace with your LinkedIn App Client ID
+    // const redirectUri = 'http://localhost:3000/callback'; // Replace with your app's Redirect URI
+    // const scope = 'r_liteprofile r_emailaddress'; // Permissions you need
 
     watch(
         () => user.value,

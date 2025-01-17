@@ -96,10 +96,6 @@ const deliverables = ref([]);
 onMounted(async () => {
   await fetchCases();
   await fetchDeliverables();
-  // const { doughnutChartProps, doughnutChartRef } = useDoughnutChart({
-  //   chartData: testData,
-  //   options,
-  // });
 });
 
 // Utility function to format date to 'YYYY-MM'
@@ -222,20 +218,14 @@ const { barChartProps, barChartRef } = useBarChart({
 
 
 function getRandomColor(count: any) {
-  // const letters = '0123456789ABCDEF';
-  // let color = '#';
-  // for (let i = 0; i < count; i++) {
-  //   color += letters[Math.floor(Math.random() * 16)];
-  // }
-  // return color;
   // Generate random RGB values
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
 
-    // Convert to hex
-    const color = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-    return color;
+  // Convert to hex
+  const color = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  return color;
 }
 </script>
 
