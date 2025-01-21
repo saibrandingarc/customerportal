@@ -73,7 +73,7 @@ const fetchInvoices = async () => {
     const companyName = parsedData.companyName;
     console.log(companyName);
     var companyId = authStore.getCompanyId();
-    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Intuit/invoices/9341453485740176/'+companyName);
+    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Intuit/invoices/'+companyName);
     console.log(response);
     error.value = '';
     const invoices: Invoice[] = response.data.QueryResponse.Invoice.map((item: { Id: any; TxnDate: any; DueDate: any; TotalAmt: any; Balance: number; }) => ({

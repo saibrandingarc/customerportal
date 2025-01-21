@@ -35,10 +35,6 @@
                         <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithMicrosoft">Microsoft Sign In</v-btn>
                         <v-btn class="text-none mb-4" color="indigo-darken-3" size="default" variant="flat" @click="loginWithAzure">Microsoft Azure Sign In</v-btn>
                     </v-card-footer>
-                    <div v-if="isAuthenticated">
-                        <p>Welcome, {{ user }}</p>
-                        <button @click="logoutUser">Logout</button>
-                    </div>
                     <v-card-footer class="d-flex justify-center">
                         <a class="me-4" href="/enduser" target="_blank" rel="noopener noreferrer"> End-user license agreement</a>
                         <a href="https://brandingarc.com/privacy-policy/" target="_blank" rel="noopener noreferrer"> Privacy Policy</a>
@@ -259,10 +255,6 @@
         }
     };
 
-    // const clientId = '86tqj0ugmm99kh'; // Replace with your LinkedIn App Client ID
-    // const redirectUri = 'http://localhost:3000/callback'; // Replace with your app's Redirect URI
-    // const scope = 'r_liteprofile r_emailaddress'; // Permissions you need
-
     watch(
         () => user.value,
         (newUser: unknown) => {
@@ -294,7 +286,6 @@
                 } else {
                     logout();
                     errorMessage.value = "Email not exist please contact you admin";
-                    // router.push("/login"); // Redirect to login if not authenticated
                 }
             } else {
                 logout();
