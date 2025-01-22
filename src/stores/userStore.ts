@@ -50,6 +50,7 @@ export const useAuthStore = defineStore('auth', {
             return this.authResponse?.role ?? ['User'];
         },
         getUsername(): string {
+            this.authResponse = JSON.parse(localStorage.getItem('user') || 'null');
             return this.authResponse?.email ?? 'Guest';
         },
         logout() {

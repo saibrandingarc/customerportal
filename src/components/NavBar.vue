@@ -40,11 +40,6 @@ const login = () => {
   loginWithRedirect();
 };
 
-// const logout = () => {
-//   authStore.logout();
-//   router.push('/');
-// };
-
 const logoutUser = () => {
   authStore.logout();
   logout();
