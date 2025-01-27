@@ -67,6 +67,7 @@ const headers = [
 
 // Fetch invoices using the access token
 const fetchInvoices = async () => {
+  loading.value = true;
   try {
     console.log(authStore);
     const parsedData = JSON.parse(localStorage.getItem("user"));
