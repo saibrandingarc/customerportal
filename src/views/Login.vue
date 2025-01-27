@@ -4,49 +4,65 @@
         <div v-if="loading" class="spinner-overlay">
             <div class="spinner"></div>
         </div>
-        <v-row align="center" justify="center" style="height: 100vh;">
-            <v-col cols="12" sm="8" md="4">
-                <v-card>
-                    <!-- Logo Section -->
-                    <v-card-title class="d-flex justify-center">
-                        <img src="@/assets/logo.png" alt="Logo" class="logo1" />
-                    </v-card-title>
-                    <v-card-title>
-                        <h2 class="text-h5 text-center">Login</h2>
-                    </v-card-title>
-  
-                    <v-card-text>
-                        <v-form ref="form" v-model="valid" lazy-validation>
-                            <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
-                            <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
-                        </v-form>
-                        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-                        <a href="/forgot_password" style="float: inline-end;">Forgot Password?</a><br>
-                    </v-card-text>
-                    <v-card-actions class="d-flex justify-center">
-                        <v-btn class="text-none mb-4" color="indigo-darken-3" size="large" variant="flat" @click="submit">Login</v-btn>
-                    </v-card-actions>
-                    <a href="/register" class="d-flex justify-center">Register</a><br>
-                    <v-card-footer class="d-flex justify-center">
-                        <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithGoogle">Google Sign In</v-btn>
-                        <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithLinkedIn">LinkedIn Sign In</v-btn><br/>
-                    </v-card-footer>
-                    <v-card-footer class="d-flex justify-center">
-                        <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithMicrosoft">Microsoft Sign In</v-btn>
-                        <v-btn class="text-none mb-4" color="indigo-darken-3" size="default" variant="flat" @click="loginWithAzure">Microsoft Azure Sign In</v-btn>
-                    </v-card-footer>
-                    <v-card-footer class="d-flex justify-center">
-                        <a class="me-4" href="/enduser" target="_blank" rel="noopener noreferrer"> End-user license agreement</a>
-                        <a href="https://brandingarc.com/privacy-policy/" target="_blank" rel="noopener noreferrer"> Privacy Policy</a>
-                    </v-card-footer>
-                </v-card>
-            </v-col>
-        </v-row>
+        <section class="h-100 gradient-form">
+            <div class="container py-5 h-100">
+                <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class="col-xl-8">
+                        <div class="card shadow rounded-3 text-black">
+                            <div class="row g-0">
+                                <div class="col-lg-6">
+                                    <div class="card-body p-md-5 mx-md-4">
+                                        <div class="text-center">
+                                            <img src="@/assets/logo.png" alt="Logo" class="logo1" />
+                                            <h4 class="mt-1 mb-5 pb-1">Please login to your account</h4>
+                                        </div>
+                                        <form>
+                                            <v-form ref="form" v-model="valid" lazy-validation>
+                                                <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
+                                                <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
+                                            </v-form>
+                                            <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+                                            <div class="text-center pt-1 mb-5 pb-1">
+                                                <v-btn class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3" color="#198fd9" size="large" variant="flat" @click="submit">Login</v-btn>
+                                                <a class="text-muted" href="/forgot_password">Forgot Password?</a><br>
+                                            </div>
+                                            <div class="d-flex align-items-center justify-content-center pb-4">
+                                                <p class="mb-0 me-2">Don't have an account?</p>
+                                                <a href="/register" class="d-flex justify-center btn btn-outline-danger">Register</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 d-flex align-items-center gradient-custom-2 justify-content-center">
+                                    <div class="text-dark px-3 py-4 p-md-5 mx-md-4">
+                                        <h4 class="d-flex justify-center mx-6">or login through</h4>
+                                        <div class="social-login d-flex justify-center">
+                                            <v-btn class="google ma-2" color="#ea4335" icon="mdi-google" @click="loginWithGoogle"></v-btn>
+                                            <v-btn class="ma-2" color="#0077B5" icon="mdi-linkedin" @click="loginWithLinkedIn"></v-btn>
+                                            <!-- <v-btn class="ma-2" color="#EEEEEE" icon="mdi-microsoft"></v-btn> -->
+                                        </div>
+                                        <!-- <v-card-footer class="d-flex justify-center">
+                                            <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithMicrosoft">Microsoft Sign In</v-btn>
+                                            <v-btn class="text-none mb-4" color="indigo-darken-3" size="default" variant="flat" @click="loginWithAzure">Microsoft Azure Sign In</v-btn>
+                                        </v-card-footer> -->
+                                        <v-card-footer class="d-flex text-dark justify-bottom my-5">
+                                            <a class="font-weight-bold me-4" href="/enduser" target="_blank" rel="noopener noreferrer"> End-user license agreement</a>
+                                            <a class="font-weight-bold me-4" href="https://brandingarc.com/privacy-policy/" target="_blank" rel="noopener noreferrer"> Privacy Policy</a>
+                                        </v-card-footer>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </v-container>
 </template>
   
 <script lang="ts" setup>
     import { ref, onMounted, Ref, computed, watch } from 'vue';
+    import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
     import axios from 'axios';
     import authConfig from "../../auth_config.json";
     import router from '@/router';
@@ -309,6 +325,41 @@
     .error {
         color: red;
         text-align: center;
+    }
+
+    .gradient-custom-2 {
+        /* fallback for old browsers */
+        background: #F8F8F8;
+        /* background: #fccb90; */
+
+        /* Chrome 10-25, Safari 5.1-6 */
+        /* background: -webkit-linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593); */
+
+        /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        /* background: linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593); */
+    }
+
+    @media (min-width: 768px) {
+        .gradient-form {
+            height: 100vh !important;
+        }
+    }
+    @media (min-width: 769px) {
+        .gradient-custom-2 {
+            border-top-right-radius: .3rem;
+            border-bottom-right-radius: .3rem;
+        }
+    }
+    .social-login a {
+        text-decoration: none;
+        position: relative;
+        text-align: center;
+        color: #fff;
+        margin-bottom: 10px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: inline-block;
     }
 </style>
   

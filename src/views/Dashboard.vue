@@ -8,21 +8,21 @@
   <v-row>
     <v-col cols="6" sm="6">
       <v-card class="mt-4">
-        <v-card-title>
+        <v-card-title style="border-bottom: 1px black solid">
           <span class="text-h5">Cases</span>
         </v-card-title>
-        <v-card-body>
+        <v-card-body class="mx-4">
           <BarChart v-bind="barChartProps" ref="barChartRef" />
         </v-card-body>
       </v-card>
     </v-col>
     <v-col cols="6" sm="6">
       <v-card class="mt-4">
-        <v-card-title>
+        <v-card-title style="border-bottom: 1px black solid">
           <span class="text-h5">Deliverables</span>
         </v-card-title>
-        <v-card-body>
-          <DoughnutChart v-bind="doughnutChartProps" />
+        <v-card-body class="mx-4">
+          <DoughnutChart v-bind="doughnutChartProps" style="margin: 30px 0px"/>
         </v-card-body>
       </v-card>
     </v-col>
@@ -65,7 +65,7 @@ const options = computed<ChartOptions<"doughnut">>(() => ({
     },
     title: {
       display: true,
-      text: "Chart.js Doughnut Chart",
+      text: "",
     },
   },
 }));
@@ -138,7 +138,7 @@ const fetchCases = async () => {
   try {
     const companyId = authStore.getCompanyId();
     const response = await axios.get(
-      `https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/cases/${companyId}`
+      `https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/cases/dashboard/${companyId}`
     );
     console.log("Cases Response:", response);
     cases.value = response.data.data;

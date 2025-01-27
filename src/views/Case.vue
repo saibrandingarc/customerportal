@@ -6,31 +6,33 @@
   <div v-if="loading" class="spinner-overlay">
     <div class="spinner"></div>
   </div>
-  <v-row>
-    <v-col cols="12" sm="4">
-      <v-card>
-        <template v-slot:title>
-          <span class="font-weight-black">Case Details</span>
-        </template>
-        <div class="ma-2 pa-2" style="border-top: 1px solid #000;">
-          <p><strong>ID:</strong> {{ Case_Number }}</p>
-          <p><strong>Name:</strong> {{ item?.Subject }}</p>
-          <p><strong>Description:</strong> {{ item?.Description }}</p>
-        </div>
-      </v-card>
-    </v-col>
-    <v-col cols="8">
-      <v-card>
-        <template v-slot:title>
-          <span class="font-weight-black">Time Lines</span>
-        </template>
-        <div class="ma-2 pa-2" style="border-top: 1px solid #000;">
-          <v-list>
-            <v-list-item
-              v-for="(comment, index) in item?.Email_Notes1.reverse()"
-              :key="index"
-              class="my-1"
-            >
+  <v-card>
+    <v-toolbar color="primary">
+      <v-tabs v-model="model" align-tabs="center">
+        <v-tab text="Case Details" value="tab-1"></v-tab>
+        <v-tab text="Time Lines" value="tab-2"></v-tab>
+        <!-- <v-tab text="Item 3" value="tab-3"></v-tab> -->
+      </v-tabs>
+    </v-toolbar>
+
+    <v-tabs-window v-model="model">
+      <v-tabs-window-item value="tab-1">
+        <v-card>
+          <v-card-text>
+            <div class="ma-2 pa-2">
+              <p><strong>ID:</strong> {{ Case_Number }}</p>
+              <p><strong>Name:</strong> {{ item?.Subject }}</p>
+              <p><strong>Description:</strong> {{ item?.Description }}</p>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-tabs-window-item>
+
+      <v-tabs-window-item value="tab-2">
+        <v-card>
+          <div class="ma-2 pa-2">
+          <v-list v-if="item?.Email_Notes1">
+            <v-list-item v-for="(comment, index) in item?.Email_Notes1?.reverse()" :key="index" class="my-1">
               <v-list-item-content>
                 <v-card>
                   <v-card-title>
@@ -43,12 +45,22 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
+          <v-list v-else>
+            <v-list-item-title>
+              No notes available
+            </v-list-item-title>
+          </v-list>
         </div>
       </v-card>
-      
-    </v-col>
-  </v-row>
-      
+      </v-tabs-window-item>
+
+      <v-tabs-window-item value="tab-3">
+        <v-card>
+          <v-card-text>{{ text }}</v-card-text>
+        </v-card>
+      </v-tabs-window-item>
+    </v-tabs-window>
+  </v-card>      
 </template>
 
 <script lang="ts" setup>
@@ -58,6 +70,8 @@ import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
+
+const model = ref('tab-1');
 
 const router = useRouter();
 const authStore = useAuthStore();

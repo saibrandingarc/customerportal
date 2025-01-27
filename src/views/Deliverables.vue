@@ -10,6 +10,7 @@
       <v-row class="pa-4">
         <v-col cols="4" sm="4">
           <v-select
+          style="width: 50%"
             v-model="selectedBlock"
             :items="monthsArray"
             label="Select Year"
@@ -143,7 +144,7 @@ const generateRelativeMonthsArray = (past: number, future: number): string[] => 
 
 // Generate array of past 12 months and next 12 months
 // const monthsArray = ref<string[]>(generateRelativeMonthsArray(12, 12));
-const monthsArray = ref<string[]>(["2024", "2025"]);
+const monthsArray = ref<string[]>(["2025", "2024"]);
 
 const selectedBlock = ref<string | null>(null);
 

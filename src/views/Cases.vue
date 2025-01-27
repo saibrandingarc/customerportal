@@ -16,7 +16,15 @@
               <v-spacer></v-spacer>
               <v-dialog v-model="dialog" max-width="800px">
                 <template v-slot:activator="{ props }">
-                  <v-btn class="mb-2" color="primary" dark v-bind="props">New Case</v-btn>
+                  <v-btn
+                    class="text-none"
+                    color="#198fd9"
+                    size="large"
+                    variant="flat"
+                    v-bind="props"
+                  >
+                  New Case
+                  </v-btn>
                 </template>
                 <v-card>
                   <v-card-title>
