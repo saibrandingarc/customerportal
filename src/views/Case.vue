@@ -7,8 +7,8 @@
     <div class="spinner"></div>
   </div>
   <v-card>
-    <v-toolbar color="primary">
-      <v-tabs v-model="model" align-tabs="center">
+    <v-toolbar>
+      <v-tabs v-model="model" align-tabs="center" active-class="selected-tab" color="deep-purple-accent-4">
         <v-tab text="Case Details" value="tab-1"></v-tab>
         <v-tab text="Time Lines" value="tab-2"></v-tab>
         <!-- <v-tab text="Item 3" value="tab-3"></v-tab> -->
@@ -159,3 +159,11 @@ const formatDate = (dateString: string): string => {
 };
 
 </script>
+<style scoped>
+/* Style for the selected tab */
+.selected-tab {
+  color: #ffffff !important;
+  background-color: #4caf50 !important; /* Example: green background */
+  border-radius: 4px;
+}
+</style>
