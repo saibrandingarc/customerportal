@@ -55,6 +55,13 @@
         "statusCode": 301
       }
     ],
+    "auth": {
+      "rolesSource": "identity",
+      "login": {
+        "route": "/login",
+        "exclude": ["/public", "/assets"]
+      }
+    },
     "navigationFallback": {
       "rewrite": "index.html",
       "exclude": ["/images/*.{png,jpg,gif}", "/css/*"]
@@ -79,12 +86,5 @@
     },
     "mimeTypes": {
       ".json": "text/json"
-    },
-    "auth": {
-      "rolesSource": "identity",
-      "login": {
-        "route": "/login",
-        "exclude": ["/public", "/assets"]
-      }
     }
   }
