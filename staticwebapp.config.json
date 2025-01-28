@@ -79,5 +79,12 @@
     },
     "mimeTypes": {
       ".json": "text/json"
+    },
+    "auth": {
+      "rolesSource": "identity",
+      "login": {
+        "route": "/login",
+        "exclude": ["/public", "/assets"]
+      }
     }
   }
