@@ -35,8 +35,9 @@
                                 </div>
                                 <div class="col-lg-6 d-flex align-items-center gradient-custom-2 justify-content-center">
                                     <div class="text-dark px-3 py-4 p-md-5 mx-md-4">
-                                        <h4 class="d-flex justify-center mx-6">or login through</h4>
+                                        <h4 class="d-flex justify-center mx-6">or login via</h4>
                                         <div class="social-login d-flex justify-center">
+                                            
                                             <v-btn class="google ma-2" color="#ea4335" icon="mdi-google" @click="loginWithGoogle"></v-btn>
                                             <v-btn class="ma-2" color="#0077B5" icon="mdi-linkedin" @click="loginWithLinkedIn"></v-btn>
                                             <!-- <v-btn class="ma-2" color="#EEEEEE" icon="mdi-microsoft"></v-btn> -->
@@ -174,10 +175,9 @@
     const loginWithGoogle = async () => {
         localStorage.setItem("loginType", "google");
         await loginWithRedirect({
-            connection: "google-oauth2",
-            state: JSON.stringify({ loginType: "google" }),
             authorizationParams: {
                 scope: 'openid profile email',
+                connection: "google-oauth2"
             },
         });
         await handleRedirectCallback();
@@ -230,7 +230,12 @@
 
     const loginWithLinkedIn = async () => {
         localStorage.setItem("loginType", "linkedin");
-        await loginWithRedirect({ connection: 'linkedin' });
+        await loginWithRedirect({
+            authorizationParams: {
+                scope: 'openid profile email',
+                connection: "linkedin"
+            },
+        });
         await handleRedirectCallback();
         // Ensure the user is authenticated
         if (isAuthenticated.value) {
@@ -337,6 +342,15 @@
 
         /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
         /* background: linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593); */
+    }
+
+    @media (max-width: 1280px) {
+        .h4, h4 {
+            font-size: 1rem;
+        }
+        .mr-md-4, .mx-md-4 {
+            margin-right: 1rem !important;
+        }
     }
 
     @media (min-width: 768px) {
