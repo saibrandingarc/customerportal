@@ -32,10 +32,16 @@
                                             </div>
                                         </form>
                                     </div>
+                                    <div class="card-footer" style="background-color: #FFF; border-top: none">
+                                        <div class="text-center">
+                                            <a class="me-4" href="/enduser" target="_blank" rel="noopener noreferrer"> End-user license agreement</a>
+                                            <a class="me-4" href="https://brandingarc.com/privacy-policy/" target="_blank" rel="noopener noreferrer"> Privacy Policy</a>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-lg-6 d-flex align-items-center gradient-custom-2 justify-content-center">
                                     <div class="text-dark px-3 py-4 p-md-5 mx-md-4">
-                                        <h4 class="d-flex justify-center mx-6">or login via</h4>
+                                        <h4 class="d-flex justify-center mx-6">login via</h4>
                                         <div class="social-login d-flex justify-center">
                                             
                                             <v-btn class="google ma-2" color="#ea4335" icon="mdi-google" @click="loginWithGoogle"></v-btn>
@@ -46,10 +52,6 @@
                                             <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithMicrosoft">Microsoft Sign In</v-btn>
                                             <v-btn class="text-none mb-4" color="indigo-darken-3" size="default" variant="flat" @click="loginWithAzure">Microsoft Azure Sign In</v-btn>
                                         </v-card-footer> -->
-                                        <v-card-footer class="d-flex text-dark justify-bottom my-5">
-                                            <a class="font-weight-bold me-4" href="/enduser" target="_blank" rel="noopener noreferrer"> End-user license agreement</a>
-                                            <a class="font-weight-bold me-4" href="https://brandingarc.com/privacy-policy/" target="_blank" rel="noopener noreferrer"> Privacy Policy</a>
-                                        </v-card-footer>
                                     </div>
                                 </div>
                             </div>
