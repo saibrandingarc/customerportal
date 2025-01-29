@@ -35,7 +35,7 @@
       },
       {
         "route": "/login",
-        "rewrite": "/.auth/login/github"
+        "rewrite": "/login"
       },
       {
         "route": "/.auth/login/x",
@@ -55,13 +55,6 @@
         "statusCode": 301
       }
     ],
-    "auth": {
-      "rolesSource": "identity",
-      "login": {
-        "route": "/login",
-        "exclude": ["/public", "/assets"]
-      }
-    },
     "navigationFallback": {
       "rewrite": "index.html",
       "exclude": ["/images/*.{png,jpg,gif}", "/css/*"]

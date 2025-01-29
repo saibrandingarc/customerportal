@@ -365,6 +365,18 @@
         }
     }
 
+    @media (min-width: 1680px) {
+        .h4, h4 {
+            font-size: 1rem;
+        }
+        .mr-md-4, .mx-md-4 {
+            margin-right: 1rem !important;
+        }
+        .p-md-5 {
+            padding: 3rem 1rem!important
+        }
+    }
+
     @media (min-width: 768px) {
         .gradient-form {
             height: 100vh !important;
