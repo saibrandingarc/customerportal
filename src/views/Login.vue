@@ -373,7 +373,7 @@
             margin-right: 1rem !important;
         }
         .p-md-5 {
-            padding: 3rem 1rem!important
+            padding: 3rem !important
         }
     }
 
