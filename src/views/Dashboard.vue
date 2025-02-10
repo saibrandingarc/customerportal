@@ -65,7 +65,7 @@ const options = computed<ChartOptions<"doughnut">>(() => ({
     },
     title: {
       display: true,
-      text: "",
+      text: "Deliverables by type",
     },
   },
 }));
