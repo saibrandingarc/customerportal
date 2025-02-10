@@ -6,18 +6,20 @@
   <div v-if="loading" class="spinner-overlay">
     <div class="spinner"></div>
   </div>
-  <div>
-  <b-card no-body>
-    <b-tabs card>
-      <b-tab title="Tab 1" active>
-        <b-card-text>Tab contents 1</b-card-text>
-      </b-tab>
-      <b-tab title="Tab 2">
-        <b-card-text>Tab contents 2</b-card-text>
-      </b-tab>
-    </b-tabs>
-  </b-card>
-</div>
+  <ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="#">Active</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">Link</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">Link</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+  </li>
+</ul>
   <v-card>
     <v-toolbar>
       <v-tabs v-model="model" align-tabs="center" active-class="selected-tab" color="deep-purple-accent-4">
