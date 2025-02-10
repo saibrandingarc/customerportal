@@ -60,7 +60,29 @@
         </v-card>
       </v-tabs-window-item>
     </v-tabs-window>
-  </v-card>      
+  </v-card>   
+  <v-card>
+    <div class="ma-2 pa-2">
+    <v-list v-if="item?.Email_Notes1">
+      <v-list-item v-for="(comment, index) in item?.Email_Notes1?.reverse()" :key="index" class="my-1">
+        <v-list-item-content>
+          <v-card>
+            <v-card-title>
+              <span class="text-h6">{{ comment.Comment_Type }} - <span class="v-card-subtitle" style="display: inline;">{{ formatDate(comment.Created_Time) }}</span></span>
+            </v-card-title>
+            <v-card-text>
+              {{ comment.Comments }}
+            </v-card-text>
+          </v-card>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
+    <v-list v-else>
+      <v-list-item-title>
+        No notes available
+      </v-list-item-title>
+    </v-list>
+  </div>   
 </template>
 
 <script lang="ts" setup>
