@@ -6,20 +6,34 @@
   <div v-if="loading" class="spinner-overlay">
     <div class="spinner"></div>
   </div>
-  <ul class="nav nav-tabs">
-  <li class="nav-item">
-    <a class="nav-link active" aria-current="page" href="#">Active</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="#">Link</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="#">Link</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-  </li>
-</ul>
+  <!-- Tabs Navigation -->
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Home</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Profile</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Contact</button>
+      </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content mt-3" id="myTabContent">
+      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <h3>Home</h3>
+        <p>Welcome to the Home tab. Here you can see the main content of the page.</p>
+      </div>
+      <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <h3>Profile</h3>
+        <p>This is the Profile tab. You can put user-related content here.</p>
+      </div>
+      <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+        <h3>Contact</h3>
+        <p>Get in touch with us through the Contact tab.</p>
+      </div>
+    </div>
   <v-card>
     <v-toolbar>
       <v-tabs v-model="model" align-tabs="center" active-class="selected-tab" color="deep-purple-accent-4">
