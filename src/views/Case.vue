@@ -6,41 +6,7 @@
   <div v-if="loading" class="spinner-overlay">
     <div class="spinner"></div>
   </div>
-  <v-row>
-    <v-col>
-      <div class="ma-2 pa-2">
-        <p><strong>ID:</strong> {{ Case_Number }}</p>
-        <p><strong>Name:</strong> {{ item?.Subject }}</p>
-        <p><strong>Description:</strong> {{ item?.Description }}</p>
-      </div>
-    </v-col>
-    <v-col>
-      <v-card>
-        <div class="ma-2 pa-2">
-          <v-list v-if="item?.Email_Notes1">
-            <v-list-item v-for="(comment, index) in item?.Email_Notes1?.reverse()" :key="index" class="my-1">
-              <v-list-item-content>
-                <v-card>
-                  <v-card-title>
-                    <span class="text-h6">{{ comment.Comment_Type }} - <span class="v-card-subtitle" style="display: inline;">{{ formatDate(comment.Created_Time) }}</span></span>
-                  </v-card-title>
-                  <v-card-text>
-                    {{ comment.Comments }}
-                  </v-card-text>
-                </v-card>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-          <v-list v-else>
-            <v-list-item-title>
-              No notes available
-            </v-list-item-title>
-          </v-list>
-        </div>   
-      </v-card>
-    </v-col>
-  </v-row>
-  <!-- <v-card>
+  <v-card>
     <v-toolbar>
       <v-tabs v-model="model" align-tabs="center" active-class="selected-tab" color="deep-purple-accent-4">
         <v-tab text="Case Details" value="tab-1"></v-tab>
@@ -93,7 +59,7 @@
         </v-card>
       </v-tabs-window-item>
     </v-tabs-window>
-  </v-card>    -->
+  </v-card>
 </template>
 
 <script lang="ts" setup>
