@@ -30,12 +30,31 @@
       <v-tabs-window-item value="tab-2">
         <v-card>
           <div class="ma-2 pa-2">
-          <v-list v-if="item?.Email_Notes1">
+          <!-- <v-list v-if="item?.Email_Notes1">
             <v-list-item v-for="(comment, index) in item?.Email_Notes1?.reverse()" :key="index" class="my-1">
               <v-list-item-content>
                 <v-card>
                   <v-card-title>
                     <span class="text-h6">{{ comment.Comment_Type }} - <span class="v-card-subtitle" style="display: inline;">{{ formatDate(comment.Created_Time) }}</span></span>
+                  </v-card-title>
+                  <v-card-text>
+                    {{ comment.Comments }}
+                  </v-card-text>
+                </v-card>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list> -->
+          <v-list v-if="emailNotes && emailNotes.length">
+            <v-list-item v-for="(comment, index) in emailNotes" :key="index" class="my-1">
+              <v-list-item-content>
+                <v-card>
+                  <v-card-title>
+                    <span class="text-h6">
+                      {{ comment.Comment_Type }} - 
+                      <span class="v-card-subtitle" style="display: inline;">
+                        {{ formatDate(comment.Created_Time) }}
+                      </span>
+                    </span>
                   </v-card-title>
                   <v-card-text>
                     {{ comment.Comments }}
@@ -94,6 +113,30 @@ interface Account {
   name: string | null;
 }
 
+interface ParentId {
+  name: string;
+  id: string;
+}
+
+interface LayoutId {
+  name: string;
+  id: string;
+}
+
+interface EmailNote {
+  Modified_Time: string;
+  Comment_Type: string;
+  $in_merge: boolean;
+  $field_states: any | null;
+  Created_Time: string;
+  Comments: string;
+  Parent_Id: ParentId;
+  id: string;
+  $layout_id: LayoutId;
+  $zia_visions: any | null;
+  Comment_Date: string;
+}
+
 interface Case {
   id: number | null;
   Case_Number: string | null;
@@ -111,8 +154,8 @@ interface Case {
   Phone: string | null;
 }
 
-const heading = ref("Cases")
-
+const heading = ref("Cases");
+const emailNotes = ref<EmailNote[]>([]);
 const isChecked = ref(false);
 const isDisabled = ref(false)
 const loading = ref(false);
@@ -127,6 +170,8 @@ const fetchCase = async (caseNumber: string) => {
       console.log(response);
       error.value = '';
       item.value = response.data.data[0];
+      emailNotes.value = response.data.data[0].Email_Notes1?.reverse() || [];
+      console.log(emailNotes.value);
     } catch (err) {
       error.value = err.message;
     } finally {
