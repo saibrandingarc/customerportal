@@ -211,7 +211,12 @@ const fetchCases = async () => {
       console.log(response);
       error.value = '';
       items.value = response.data.data;
-      openitems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'New');
+      openitems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'New')
+      .sort((a, b) => {
+        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+        return dateB - dateA; // Descending
+      });
       closeditems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'Closed');
     } catch (err) {
       error.value = err.message;

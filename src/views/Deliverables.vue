@@ -26,7 +26,7 @@
             :items="upcomingDeliverables"
             item-key="id"
             class="custom-data-table"
-            :sort-by="[{ key: 'calories', order: 'asc' }]"
+            :sort-by="[{ key: 'Due_Date', order: 'asc' }]"
           >
             <template v-slot:top>
               <v-toolbar flat>
@@ -85,7 +85,7 @@
   <v-card  class="mt-4">
     <v-row>
       <v-col cols="12" sm="12">
-        <v-data-table :headers="headers" :items="completedDeliverables" item-key="id" class="custom-data-table" :sort-by="[{ key: 'calories', order: 'asc' }]">
+        <v-data-table :headers="headers" :items="completedDeliverables" item-key="id" class="custom-data-table" :sort-by="[{ key: 'Due_Date', order: 'asc' }]">
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>Completed Deliverables</v-toolbar-title>
@@ -181,8 +181,16 @@ const fetchDeliverables = async () => {
       console.log(response);
       error.value = '';
       items.value = response.data.data;
-      upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 != 'Completed');
-      completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed');
+      upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 != 'Completed').sort((a, b) => {
+        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+        return dateB - dateA;
+      });
+      completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed').sort((a, b) => {
+        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+        return dateB - dateA;
+      });
     } catch (err) {
       error.value = err.message;
     } finally {
@@ -200,8 +208,17 @@ const fetchDataForBlock = async () => {
     console.log(response);
     error.value = '';
     items.value = response.data.data;
-    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 != 'Completed');
-    completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed');
+    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 != 'Completed').sort((a, b) => {
+        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+        return dateB - dateA;
+      });
+    completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed').sort((a, b) => {
+        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+        return dateB - dateA;
+      });
+      console.log(completedDeliverables.value);
   } catch (err) {
     error.value = err.message;
     console.error("Error fetching data:", error);
