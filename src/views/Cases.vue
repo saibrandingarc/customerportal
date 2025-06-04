@@ -184,8 +184,12 @@ const headers = [
   { title: 'Case Number', key: 'Case_Number' },
   // { title: 'Company Name', key: 'Account_Name.name' },
   { title: 'Subject', key: 'Subject' },
+  { title: 'Close Date', key: 'Case_Closed_Date' },
+  { title: 'Open Date', key: 'Case_Open_Date' },
+  { title: 'Type', key: 'Type' },
+  { title: 'Reason', key: 'Case_Reason' },
   { title: 'Status', key: 'Status' },
-  { title: 'Actions', key: 'actions', sortable: false }
+  { title: 'View Details', key: 'actions', sortable: false }
 ];
 
 const dialog = ref(false)

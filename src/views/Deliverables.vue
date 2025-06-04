@@ -85,7 +85,7 @@
   <v-card  class="mt-4">
     <v-row>
       <v-col cols="12" sm="12">
-        <v-data-table :headers="headers" :items="completedDeliverables" item-key="id" class="custom-data-table" :sort-by="[{ key: 'Due_Date', order: 'asc' }]">
+        <v-data-table :headers="completedheaders" :items="completedDeliverables" item-key="id" class="custom-data-table" :sort-by="[{ key: 'Due_Date', order: 'asc' }]">
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>Completed Deliverables</v-toolbar-title>
@@ -152,11 +152,26 @@ const heading = ref("Deliverables")
 const search = ref('');
 
 const headers = [
-  { title: 'Topic', key: 'Name', class: "topicWidth" },
+  { title: 'Block', key: 'Block' },
+  { title: 'Status', key: 'Main_Status1' },
   { title: 'Content Type', key: 'Main_Status' },
-  { title: 'Due Date', key: 'Due_Date' },
-  { title: 'Status', key: 'Main_Status1' }
+  { title: 'Topic', key: 'Name', class: "topicWidth" },
+  { title: 'Credit Cost', key: 'Credit_Cost' }
 ];
+
+const completedheaders = [
+  { title: 'Block', key: 'Block' },
+  { title: 'Date Published', key: 'Date_Published' },
+  { title: 'Content Type', key: 'Main_Status' },
+  { title: 'Topic', key: 'Name', class: "topicWidth" },
+  { title: 'Credit Cost', key: 'Credit_Cost' }
+];
+
+// Block
+// Status
+// Content Type
+// Topic
+// Credit Cost
 
 const dialog = ref(false)
 const dialogDelete = ref(false)

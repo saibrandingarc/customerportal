@@ -5,7 +5,7 @@
   <div v-if="loading" class="spinner-overlay">
     <div class="spinner"></div>
   </div>
-  <v-row>
+  <div class="d-flex">
     <v-col cols="6" sm="6">
       <v-card class="mt-4">
         <v-card-title style="border-bottom: 1px black solid">
@@ -26,7 +26,7 @@
         </v-card-body>
       </v-card>
     </v-col>
-  </v-row>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -65,7 +65,7 @@ const options = computed<ChartOptions<"doughnut">>(() => ({
     },
     title: {
       display: true,
-      text: "Deliverables by type",
+      text: "Deliverables by Type (Records)",
     },
   },
 }));
