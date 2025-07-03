@@ -161,7 +161,7 @@ interface Account {
 }
 
 interface Case {
-  id: number | null;
+  id: string | null;
   Case_Number: string | null;
   Account_Name: Account | null;
   Status: string | null;
