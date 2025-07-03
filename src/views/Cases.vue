@@ -76,7 +76,7 @@
     </v-row>
   </v-card>
   <v-spacer></v-spacer>
-  <v-card class="mt-4">
+  <v-card class="m-4">
     <v-row>
       <v-col cols="12" sm="12">
         <v-data-table :headers="headers" :items="closeditems" item-key="id" :sort-by="[{ key: 'Case_Number', order: 'asc' }]">
@@ -338,6 +338,7 @@ const save = async () => {
     items.value.push({ ...editedItem.value })
     snackbar.value = true;
     text.value = "Case added";
+    fetchCases();
     close()
   } catch (err) {
     error.value = err.message;

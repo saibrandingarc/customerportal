@@ -5,7 +5,7 @@
   <div v-if="loading" class="spinner-overlay">
     <div class="spinner"></div>
   </div>
-  <v-card>
+  <v-card class="m-4">
     <div>
       <v-row class="pa-4">
         <v-col cols="4" sm="4">
@@ -82,7 +82,7 @@
       </v-row>
     </div>
   </v-card>
-  <v-card  class="mt-4">
+  <v-card  class="m-4">
     <v-row>
       <v-col cols="12" sm="12">
         <v-data-table :headers="completedheaders" :items="completedDeliverables" item-key="id" class="custom-data-table" :sort-by="[{ key: 'Due_Date', order: 'asc' }]">
