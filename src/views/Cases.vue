@@ -231,7 +231,7 @@ const fetchCases = async () => {
 
 const editedIndex = ref(-1)
 const defaultItem: Case = {
-  id:0,
+  id:"0",
   Case_Number: "",
   Account_Name: { id: "", name: "" },
   Status: "",
