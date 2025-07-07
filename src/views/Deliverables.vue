@@ -153,6 +153,7 @@ const search = ref('');
 
 const headers = [
   { title: 'Block', key: 'Block' },
+  { title: 'Due Date', key: 'Due_Date' },
   { title: 'Status', key: 'Main_Status1' },
   { title: 'Content Type', key: 'Main_Status' },
   { title: 'Topic', key: 'Name', class: "topicWidth" },
