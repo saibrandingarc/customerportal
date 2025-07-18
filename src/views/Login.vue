@@ -1,67 +1,98 @@
 <template>
-    <v-container fluid fill-height>
-        <!-- Loading Spinner -->
-        <div v-if="loading" class="spinner-overlay">
-            <div class="spinner"></div>
-        </div>
-        <section class="h-100 gradient-form">
-            <div class="container py-5 h-100">
-                <div class="row d-flex justify-content-center align-items-center h-100">
-                    <div class="col-xl-8">
-                        <div class="card shadow rounded-3 text-black">
-                            <div class="row g-0">
-                                <div class="col-lg-6">
-                                    <div class="card-body p-md-5 mx-md-4">
-                                        <div class="text-center">
-                                            <img src="@/assets/logo.png" alt="Logo" class="logo1" />
-                                            <h4 class="mt-1 mb-5 pb-1">Please login to your account</h4>
-                                        </div>
-                                        <form>
-                                            <v-form ref="form" v-model="valid" lazy-validation>
-                                                <v-text-field v-model="email" label="Email" variant="outlined" :rules="[rules.required, rules.email]" required></v-text-field>
-                                                <v-text-field v-model="password" label="Password" variant="outlined" :rules="[rules.required]" type="password" required></v-text-field>
-                                            </v-form>
-                                            <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-                                            <div class="text-center pt-1 mb-5 pb-1">
-                                                <v-btn class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3" color="#198fd9" size="large" variant="flat" @click="submit">Login</v-btn>
-                                                <a class="text-muted" href="/forgot_password">Forgot Password?</a><br>
-                                            </div>
-                                            <div class="d-flex align-items-center justify-content-center pb-4">
-                                                <p class="mb-0 me-2">Don't have an account?</p>
-                                                <a href="/register" class="d-flex justify-center btn btn-outline-danger">Register</a>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div class="card-footer" style="background-color: #FFF; border-top: none">
-                                        <div class="text-center">
-                                            <a class="me-4" href="/enduser" target="_blank" rel="noopener noreferrer"> End-user license agreement</a>
-                                            <a class="me-4" href="https://brandingarc.com/privacy-policy/" target="_blank" rel="noopener noreferrer"> Privacy Policy</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 d-flex align-items-center gradient-custom-2 justify-content-center">
-                                    <div class="text-dark px-3 py-4 p-md-5 mx-md-4">
-                                        <h4 class="d-flex justify-center mx-6">login via</h4>
-                                        <div class="social-login d-flex justify-center">
-                                            
-                                            <v-btn class="google ma-2" color="#ea4335" icon="mdi-google" @click="loginWithGoogle"></v-btn>
-                                            <v-btn class="ma-2" color="#0077B5" icon="mdi-linkedin" @click="loginWithLinkedIn"></v-btn>
-                                            <!-- <v-btn class="ma-2" color="#EEEEEE" icon="mdi-microsoft"></v-btn> -->
-                                        </div>
-                                        <!-- <v-card-footer class="d-flex justify-center">
-                                            <v-btn class="text-none mb-4 mr-2" color="indigo-darken-3" size="default" variant="flat" @click="loginWithMicrosoft">Microsoft Sign In</v-btn>
-                                            <v-btn class="text-none mb-4" color="indigo-darken-3" size="default" variant="flat" @click="loginWithAzure">Microsoft Azure Sign In</v-btn>
-                                        </v-card-footer> -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+  <div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
+    <!-- Spinner Overlay -->
+    <div v-if="loading" class="spinner-overlay">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+
+    <section class="w-100">
+      <div class="container py-5">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-xl-8">
+            <div class="card shadow rounded-3">
+              <div class="row g-0">
+                <!-- Left Section -->
+                <div class="col-lg-6">
+                  <div class="card-body p-4 p-md-5">
+                    <div class="text-center">
+                      <img src="@/assets/logo.png" alt="Logo" class="mb-4" style="max-height: 80px;" />
+                      <h4 class="mb-4">Please login to your account</h4>
                     </div>
+
+                    <form @submit.prevent="submit" novalidate>
+                      <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input
+                          type="email"
+                          class="form-control"
+                          id="email"
+                          v-model="email"
+                          :class="{ 'is-invalid': errorMessage && !email }"
+                          required
+                        />
+                      </div>
+                      <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input
+                          type="password"
+                          class="form-control"
+                          id="password"
+                          v-model="password"
+                          :class="{ 'is-invalid': errorMessage && !password }"
+                          required
+                        />
+                      </div>
+
+                      <p v-if="errorMessage" class="text-danger small">{{ errorMessage }}</p>
+
+                      <div class="text-center mb-3">
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                        <div class="mt-2">
+                          <a href="/forgot_password" class="text-muted small">Forgot Password?</a>
+                        </div>
+                      </div>
+
+                      <div class="text-center mt-4">
+                        <p class="mb-2">Don't have an account?</p>
+                        <a href="/register" class="btn btn-outline-danger btn-sm">Register</a>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div class="card-footer bg-white border-top-0 text-center">
+                    <a class="me-4 small" href="/enduser" target="_blank">End-user license agreement</a>
+                    <a class="small" href="https://brandingarc.com/privacy-policy/" target="_blank">Privacy Policy</a>
+                  </div>
                 </div>
+
+                <!-- Right Section -->
+                <div class="col-lg-6 d-flex align-items-center bg-light justify-content-center">
+                  <div class="text-center px-3 py-4">
+                    <h5 class="mb-4">Login via</h5>
+                    <div class="d-flex justify-content-center">
+                      <button type="button" class="btn btn-danger me-2" @click="loginWithGoogle">
+                        <i class="mdi mdi-google"></i>
+                      </button>
+                      <button type="button" class="btn btn-primary" style="background-color: #0077B5;" @click="loginWithLinkedIn">
+                        <i class="mdi mdi-linkedin"></i>
+                      </button>
+                      <!-- Uncomment if needed
+                      <button type="button" class="btn btn-secondary ms-2">
+                        <i class="mdi mdi-microsoft"></i>
+                      </button> -->
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             </div>
-        </section>
-    </v-container>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>
+
   
 <script lang="ts" setup>
     import { ref, onMounted, Ref, computed, watch } from 'vue';

@@ -1,31 +1,67 @@
 <template>
-  <nav-bar />
+  <NavBar />
   <SidebarMenu />
   <!-- Loading Spinner -->
-  <div v-if="loading" class="spinner-overlay">
-    <div class="spinner"></div>
+  <div v-if="loading" class="spinner-overlay d-flex justify-content-center align-items-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
-  <div class="d-flex">
-    <v-col cols="6" sm="6">
-      <v-card class="mt-4">
-        <v-card-title style="border-bottom: 1px black solid">
-          <span class="text-h5">Cases</span>
-        </v-card-title>
-        <v-card-body class="mx-4">
-          <BarChart v-bind="barChartProps" ref="barChartRef" />
-        </v-card-body>
-      </v-card>
-    </v-col>
-    <v-col cols="6" sm="6">
-      <v-card class="mt-4">
-        <v-card-title style="border-bottom: 1px black solid">
-          <span class="text-h5">Deliverables</span>
-        </v-card-title>
-        <v-card-body class="mx-4">
-          <DoughnutChart v-bind="doughnutChartProps" style="margin: 30px 0px"/>
-        </v-card-body>
-      </v-card>
-    </v-col>
+  <div class="main-content">
+    <div class="page-content">
+      <div class="container-fluid">
+        <div class="row">
+          <!-- Left Column - Bar Chart -->
+          <div class="col-sm-6 mb-4">
+            <div class="card card-height-100">
+              <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Cases</h4>
+                <div class="flex-shrink-0">
+                  <!-- <div class="dropdown card-header-dropdown">
+                    <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="false">
+                      <span class="text-muted">Report<i class="mdi mdi-chevron-down ms-1"></i></span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                      <a class="dropdown-item" href="#">Download Report</a>
+                      <a class="dropdown-item" href="#">Export</a>
+                      <a class="dropdown-item" href="#">Import</a>
+                    </div>
+                  </div> -->
+                </div>
+              </div>
+              <div class="card-body">
+                <BarChart v-bind="barChartProps" ref="barChartRef" />
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 mb-4">
+            <div class="card card-height-100">
+              <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Deliverables</h4>
+                <div class="flex-shrink-0">
+                  <!-- <div class="dropdown card-header-dropdown">
+                    <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="false">
+                      <span class="text-muted">Report<i class="mdi mdi-chevron-down ms-1"></i></span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                      <a class="dropdown-item" href="#">Download Report</a>
+                      <a class="dropdown-item" href="#">Export</a>
+                      <a class="dropdown-item" href="#">Import</a>
+                    </div>
+                  </div> -->
+                </div>
+              </div>
+              <div class="card-body">
+                <DoughnutChart v-bind="doughnutChartProps" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer />
   </div>
 </template>
 
@@ -35,6 +71,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
 import SidebarMenu from '@/components/SidebarMenu.vue';
+import Footer from '@/components/Footer.vue';
 import { useAuthStore } from '@/stores/userStore';
 
 import { DoughnutChart, useDoughnutChart } from "vue-chart-3";
@@ -49,9 +86,9 @@ const loading = ref(false);
 // Register Chart.js
 Chart.register(...registerables);
 const toggleLegend = ref(true);
-const dataValues = ref([]);
-const dataLabels = ref([]);
-const backgroundColor = ref([]);
+const dataValues = ref<number[]>([]);
+const dataLabels = ref<string[]>([]);
+const backgroundColor = ref<string[]>([]);
 const options = computed<ChartOptions<"doughnut">>(() => ({
   scales: {
     myScale: {
@@ -145,7 +182,7 @@ const fetchCases = async () => {
   } catch (err) {
     console.error("Error fetching cases:", err);
   } finally {
-      loading.value = false;
+    loading.value = false;
   }
 };
 
@@ -177,7 +214,7 @@ const fetchDeliverables = async () => {
   } catch (err) {
     console.error("Error fetching deliverables:", err);
   } finally {
-      loading.value = false;
+    loading.value = false;
   }
 };
 

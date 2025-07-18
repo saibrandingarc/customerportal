@@ -1,100 +1,121 @@
 <template>
-  <nav-bar />
+  <NavBar />
   <SidebarMenu />
   <!-- Loading Spinner -->
-  <div v-if="loading" class="spinner-overlay">
-    <div class="spinner"></div>
-  </div>
-  <v-card class="m-4">
-    <div>
-      <v-row class="pa-4">
-        <v-col cols="4" sm="4">
-          <v-select
-          style="width: 50%"
-            v-model="selectedBlock"
-            :items="monthsArray"
-            label="Select Year"
-            variant="outlined"
-            @update:modelValue="fetchDataForBlock"
-            @input="fetchDataForBlock"
-            dense
-          ></v-select>
-        </v-col>
-        <v-col cols="12" sm="12">
-          <v-data-table
-            :headers="headers"
-            :items="upcomingDeliverables"
-            item-key="id"
-            class="custom-data-table"
-            :sort-by="[{ key: 'Due_Date', order: 'asc' }]"
-          >
-            <template v-slot:top>
-              <v-toolbar flat>
-                <v-toolbar-title>Upcoming Deliverables</v-toolbar-title>
-                <v-divider class="mx-8" inset vertical></v-divider>
-                <v-spacer></v-spacer>
-                <v-dialog v-model="dialog" max-width="800px">
-                  <v-card>
-                    <v-card-title>
-                      <span class="text-h5">{{ formTitle }}</span>
-                    </v-card-title>
-
-                    <v-card-text>
-                      <v-container>
-                        <v-row>
-                          <v-col cols="12" md="12" sm="12">
-                            <v-textarea v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-textarea>
-                          </v-col>
-                          <v-col cols="12" md="12" sm="12">
-                            <v-select
-                              label="Status"
-                              :items="['-None-', 'Email', 'Internal(Automated)', 'Internal(Manual)', 'Phone', 'Web']"
-                              variant="outlined"
-                              v-model="editedItem.Status"
-                            ></v-select>
-                          </v-col>
-                        </v-row>
-                      </v-container>
-                    </v-card-text>
-
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                      <v-btn color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-                      <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
-                <v-dialog v-model="dialogDelete" max-width="500px">
-                  <v-card>
-                    <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                      <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-                      <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-                      <v-spacer></v-spacer>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
-              </v-toolbar>
-            </template>
-          </v-data-table>
-        </v-col>
-      </v-row>
+  <div v-if="loading" class="spinner-overlay d-flex justify-content-center align-items-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
-  </v-card>
-  <v-card  class="m-4">
-    <v-row>
-      <v-col cols="12" sm="12">
-        <v-data-table :headers="completedheaders" :items="completedDeliverables" item-key="id" class="custom-data-table" :sort-by="[{ key: 'Due_Date', order: 'asc' }]">
-          <template v-slot:top>
-            <v-toolbar flat>
-              <v-toolbar-title>Completed Deliverables</v-toolbar-title>
-            </v-toolbar>
-          </template>
-        </v-data-table>
-      </v-col>
-    </v-row>
-  </v-card>
+  </div>
+  <div class="main-content">
+    <div class="page-content">
+      <div class="container-fluid">
+        <div class="card">
+          <div class="card-body">
+            <div class="row mb-3">
+              <!-- Select Year -->
+              <div class="col-sm-4">
+                <label for="yearSelect" class="form-label">Select Year</label>
+                <select id="yearSelect" class="form-select w-50" v-model="selectedBlock" @change="fetchDataForBlock">
+                  <option v-for="(month, index) in monthsArray" :key="index" :value="month">
+                    {{ month }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <!-- Upcoming Deliverables Table -->
+            <div class="table-responsive">
+              <div class="d-flex align-items-center mb-3">
+                <h5 class="me-3 mb-0">Upcoming Deliverables</h5>
+                <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
+                <button class="btn btn-primary" @click="dialog = true">Add New</button>
+              </div>
+              <EasyDataTable
+                :headers="headers"
+                :items="upcomingDeliverables"
+                :rows-per-page="5"
+                table-class="table-bordered"
+                show-index
+                :searchable="true"
+                buttons-pagination
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal for Editing Deliverable -->
+        <div class="modal fade" tabindex="-1" :class="{ show: dialog }" style="display: block;" v-if="dialog">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">{{ formTitle }}</h5>
+                <button type="button" class="btn-close" @click="close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Subject</label>
+                  <textarea class="form-control" v-model="editedItem.Subject" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Status</label>
+                  <select class="form-select" v-model="editedItem.Status">
+                    <option
+                      v-for="status in ['-None-', 'Email', 'Internal(Automated)', 'Internal(Manual)', 'Phone', 'Web']"
+                      :key="status" :value="status">
+                      {{ status }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="close">Cancel</button>
+                <button class="btn btn-primary" @click="save">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" tabindex="-1" :class="{ show: dialogDelete }" style="display: block;"
+          v-if="dialogDelete">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Are you sure you want to delete this item?</h5>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="closeDelete">Cancel</button>
+                <button class="btn btn-danger" @click="deleteItemConfirm">OK</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed Deliverables -->
+        <div class="card">
+          <div class="card-body">
+            <h5 class="mb-3">Completed Deliverables</h5>
+            <div class="table-responsive">
+              <EasyDataTable
+                :headers="completedheaders"
+                :items="completedDeliverables"
+                :rows-per-page="5"
+                table-class="table-bordered"
+                show-index
+                buttons-pagination
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -104,6 +125,8 @@ import NavBar from "../components/NavBar.vue";
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 import { Deliverable } from '@/interfaces/deliverables';
+import { Header } from 'vue3-easy-data-table';
+
 const authStore = useAuthStore();
 
 interface Case {
@@ -151,28 +174,22 @@ const selectedBlock = ref<string | null>(null);
 const heading = ref("Deliverables")
 const search = ref('');
 
-const headers = [
-  { title: 'Block', key: 'Block' },
-  { title: 'Due Date', key: 'Due_Date' },
-  { title: 'Status', key: 'Main_Status1' },
-  { title: 'Content Type', key: 'Main_Status' },
-  { title: 'Topic', key: 'Name', class: "topicWidth" },
-  { title: 'Credit Cost', key: 'Credit_Cost' }
-];
+const headers: Header[] = [
+      { text: "Block", value: "Block" },
+      { text: "Due Date", value: "Due_Date", sortable: true },
+      { text: "Status", value: "Main_Status1", sortable: true },
+      { text: "Content Type", value: "Main_Status", sortable: true },
+      { text: "Topic", value: "Name", sortable: true },
+      // { text: "Credit Cost", value: "Credit_Cost", sortable: true }
+    ];
 
 const completedheaders = [
-  { title: 'Block', key: 'Block' },
-  { title: 'Date Published', key: 'Date_Published' },
-  { title: 'Content Type', key: 'Main_Status' },
-  { title: 'Topic', key: 'Name', class: "topicWidth" },
-  { title: 'Credit Cost', key: 'Credit_Cost' }
+  { text: 'Block', value: 'Block' },
+  { text: 'Date Published', value: 'Date_Published' },
+  { text: 'Content Type', value: 'Main_Status' },
+  { text: 'Topic', value: 'Name', class: "topicWidth" },
+  // { text: 'Credit Cost', value: 'Credit_Cost' }
 ];
-
-// Block
-// Status
-// Content Type
-// Topic
-// Credit Cost
 
 const dialog = ref(false)
 const dialogDelete = ref(false)
@@ -190,28 +207,29 @@ const upcomingDeliverables = ref<Case[]>([]);
 const completedDeliverables = ref<Case[]>([]);
 const fetchDeliverables = async () => {
   loading.value = true;
-    try {
-      console.log(authStore);
-      var companyId = authStore.getCompanyId();
-      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/'+companyId);
-      console.log(response);
-      error.value = '';
-      items.value = response.data.data;
-      upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 != 'Completed').sort((a, b) => {
-        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-        return dateB - dateA;
-      });
-      completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed').sort((a, b) => {
-        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-        return dateB - dateA;
-      });
-    } catch (err) {
-      error.value = err.message;
-    } finally {
-      loading.value = false;
-    }
+  try {
+    console.log(authStore);
+    var companyId = authStore.getCompanyId();
+    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/' + companyId);
+    console.log(response);
+    error.value = '';
+    items.value = response.data.data;
+    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 !== 'Completed' && c.Main_Status1 !== 'Cancelled').sort((a, b) => {
+      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+      return dateB - dateA;
+    });
+    completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed').sort((a, b) => {
+      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+      return dateB - dateA;
+    });
+    console.log("test :"+completedDeliverables);
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loading.value = false;
+  }
 };
 
 // Function to call the API when a month is selected
@@ -220,21 +238,21 @@ const fetchDataForBlock = async () => {
 
   try {
     var companyId = authStore.getCompanyId();
-    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/'+companyId+'/'+selectedBlock.value);
+    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/' + companyId + '/' + selectedBlock.value);
     console.log(response);
     error.value = '';
     items.value = response.data.data;
     upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 != 'Completed').sort((a, b) => {
-        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-        return dateB - dateA;
-      });
+      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+      return dateB - dateA;
+    });
     completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed').sort((a, b) => {
-        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-        return dateB - dateA;
-      });
-      console.log(completedDeliverables.value);
+      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+      return dateB - dateA;
+    });
+    console.log(completedDeliverables.value);
   } catch (err) {
     error.value = err.message;
     console.error("Error fetching data:", error);
@@ -310,9 +328,11 @@ const save = () => {
 .v-btn {
   min-width: 80px;
 }
+
 .topicWidth {
   width: 150px;
 }
+
 .custom-data-table th:nth-child(0),
 .custom-data-table td:nth-child(0) {
   width: 150px;

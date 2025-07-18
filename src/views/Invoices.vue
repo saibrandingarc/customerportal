@@ -1,40 +1,37 @@
 <template>
   <nav-bar />
   <SidebarMenu />
-  <!-- Loading Spinner -->
-  <div v-if="loading" class="spinner-overlay">
-    <div class="spinner"></div>
-  </div>
-  <v-card class="m-4">
-    <div class="pa-5">
-      <v-row>
-        <v-col cols="12" sm="12">
-          <v-data-table
-            :headers="headers"
-            :items="items"
-            item-key="Id"
-            @click:row="handleRowClick"
-          >
-          <!-- Custom template for rows -->
-            <template #item="{ item }">
-              <tr>
-                <td>{{ item.Id }}</td>
-                <td>{{ item.InvoiceDate }}</td>
-                <td>{{ item.DueDate }}</td>
-                <td>{{ item.TotalAmount }}</td>
-                <td>{{ item.Status }}</td>
-                <td>
-                  <v-btn-group variant="outlined" divided>
-                    <v-btn color="primary" icon="mdi-download" @click="handleRowClick(item)"></v-btn>
-                  </v-btn-group>
-                </td>
-              </tr>
-            </template>
-          </v-data-table>
-        </v-col>
-      </v-row>
+  <div v-if="loading" class="spinner-overlay d-flex justify-content-center align-items-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
-  </v-card>
+  </div>
+  <div class="main-content">
+    <div class="page-content">
+      <div class="container-fluid">
+        <div class="card">
+          <div class="card-body p-5">
+            <div class="row">
+              <div class="col-12">
+                <EasyDataTable
+                  :headers="headers"
+                  :items="items"
+                  :rows-per-page="10"
+                  table-class="table-bordered"
+                  show-index
+                  :searchable="true"
+                >
+                  <template #item-Actions="{ Id }">
+                    <button class="btn btn-sm btn-primary" @click="handleRowClick(Id)">Download</button>
+                  </template>
+                </EasyDataTable>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -44,6 +41,7 @@ import NavBar from "../components/NavBar.vue";
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 import { Invoice } from "@/interfaces/Invoice";
+import { Header } from 'vue3-easy-data-table';
 const authStore = useAuthStore();
 
 // Ref to hold invoices data
@@ -56,13 +54,13 @@ const items = ref<Invoice[]>([]);
 const heading = ref("Invoices")
 const search = ref('');
 
-const headers = [
-  { title: 'ID', key: 'Id' },
-  { title: 'Invoice Date', key: 'InvoiceDate' },
-  { title: 'Due Date', key: 'DueDate' },
-  { title: 'Total Amount', key: 'TotalAmount' },
-  { title: 'Status', key: 'Status' },
-  { title: 'Actions', key: 'Actions' },
+const headers: Header[] = [
+  { text: 'ID', value: 'Id' },
+  { text: 'Invoice Date', value: 'InvoiceDate' },
+  { text: 'Due Date', value: 'DueDate' },
+  { text: 'Total Amount', value: 'TotalAmount' },
+  { text: 'Status', value: 'Status' },
+  { text: 'Actions', value: 'Actions' },
 ];
 
 // Fetch invoices using the access token
@@ -92,11 +90,11 @@ const fetchInvoices = async () => {
   }
 };
 
-const handleRowClick = async (row: any) => {
-  console.log('Row clicked:', row);
-  if (row?.Id) {
+const handleRowClick = async (id: string) => {
+  console.log(id);
+  if (id) {
     try {
-      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Intuit/invoice/pdf/'+row.Id, {
+      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Intuit/invoice/pdf/'+id, {
         responseType: 'blob', // Ensure response is treated as binary data
       });
       if (response.status === 200) {
@@ -135,9 +133,3 @@ onMounted(() => {
 });
 
 </script>
-
-<style scoped>
-.v-btn {
-  min-width: 80px;
-}
-</style>

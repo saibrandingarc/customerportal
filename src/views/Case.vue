@@ -2,11 +2,63 @@
 <template>
   <nav-bar />
   <SidebarMenu />
-  <!-- Loading Spinner -->
-  <div v-if="loading" class="spinner-overlay">
-    <div class="spinner"></div>
+  <div v-if="loading" class="spinner-overlay d-flex justify-content-center align-items-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
-  <v-card>
+  <div class="main-content">
+    <div class="page-content">
+      <div class="container-fluid">
+        <div class="card">
+          <div class="card-header">
+            <ul class="nav nav-tabs justify-content-start" id="caseTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" :class="{ active: model === 'tab-1' }" @click="model = 'tab-1'">
+                  Case Details
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" :class="{ active: model === 'tab-2' }" @click="model = 'tab-2'">
+                  Time Lines
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <div class="tab-content p-3">
+            <!-- Case Details -->
+            <div class="tab-pane fade" :class="{ show: model === 'tab-1', active: model === 'tab-1' }">
+              <div class="card-body">
+                <div class="mb-2"><strong>ID:</strong> {{ item?.Case_Number }}</div>
+                <div class="mb-2"><strong>Name:</strong> {{ item?.Subject }}</div>
+                <div class="mb-2"><strong>Description:</strong> {{ item?.Description }}</div>
+              </div>
+            </div>
+
+            <!-- Time Lines -->
+            <div class="tab-pane fade" :class="{ show: model === 'tab-2', active: model === 'tab-2' }">
+              <div v-if="emailNotes && emailNotes.length" class="list-group">
+                <div
+                  v-for="(comment, index) in emailNotes"
+                  :key="index"
+                  class="list-group-item"
+                >
+                  <div class="fw-bold">
+                    {{ comment.Comment_Type }} -
+                    <small class="text-muted">{{ formatDate(comment.Created_Time) }}</small>
+                  </div>
+                  <p class="mb-0">{{ comment.Comments }}</p>
+                </div>
+              </div>
+              <div v-else class="text-muted px-2">No notes available</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- <v-card>
     <v-toolbar>
       <v-tabs v-model="model" align-tabs="center" active-class="selected-tab" color="deep-purple-accent-4">
         <v-tab text="Case Details" value="tab-1"></v-tab>
@@ -63,7 +115,7 @@
         </v-card>
       </v-tabs-window-item>
     </v-tabs-window>
-  </v-card>
+  </v-card> -->
 </template>
 
 <script lang="ts" setup>

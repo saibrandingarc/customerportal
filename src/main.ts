@@ -9,23 +9,17 @@ import hljs from 'highlight.js/lib/core';
 import json from 'highlight.js/lib/languages/json';
 import hljsVuePlugin from "@highlightjs/vue-plugin";
 import "highlight.js/styles/github.css";
-// import vuetify from './plugins/vuetify';
-import { createVuetify } from 'vuetify';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+
+import Vue3EasyDataTable from 'vue3-easy-data-table';
+import 'vue3-easy-data-table/dist/style.css';
 
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import '@mdi/font/css/materialdesignicons.css';
 import { auth } from './plugins/auth';
 import { createPinia } from 'pinia';
-import 'vuetify/styles';
 import '@/assets/styles.css';
-import * as components from 'vuetify/components';
-import * as directives from 'vuetify/directives';
-import 'vuetify/styles';
-
-const vuetify = createVuetify({
-  components,
-  directives,
-});
 
 hljs.registerLanguage('json', json);
 
@@ -33,11 +27,10 @@ const app = createApp(App);
 const pinia = createPinia();
 
 library.add(faLink, faUser, faPowerOff);
-
+app.component('EasyDataTable', Vue3EasyDataTable);
 app
   .use(hljsVuePlugin)
   .use(router)
-  .use(vuetify)
   .use(auth)
   .use(pinia)
   .component("font-awesome-icon", FontAwesomeIcon)

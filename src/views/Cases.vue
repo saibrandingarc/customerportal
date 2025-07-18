@@ -1,146 +1,107 @@
 <template>
   <nav-bar />
   <SidebarMenu />
-  <!-- Loading Spinner -->
-  <div v-if="loading" class="spinner-overlay">
-    <div class="spinner"></div>
+  <div v-if="loading" class="spinner-overlay d-flex justify-content-center align-items-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
-  <v-card class="m-4">
-    <v-row>
-      <v-col cols="12" sm="12">
-        <v-data-table :headers="headers" :items="openitems" item-key="id" :sort-by="[{ key: 'Case_Number', order: 'asc' }]">
-          <template v-slot:top>
-            <v-toolbar flat>
-              <v-toolbar-title>Open Cases</v-toolbar-title>
-              <v-divider class="mx-8" inset vertical></v-divider>
-              <v-spacer></v-spacer>
-              <v-dialog v-model="dialog" max-width="800px">
-                <template v-slot:activator="{ props }">
-                  <v-btn
-                    class="text-none"
-                    color="#198fd9"
-                    size="large"
-                    variant="flat"
-                    v-bind="props"
-                  >
-                  New Case
-                  </v-btn>
-                </template>
-                <v-card>
-                  <v-card-title>
-                    <span class="text-h5">{{ formTitle }}</span>
-                  </v-card-title>
+  <div class="main-content">
+    <div class="page-content">
+      <div class="container-fluid">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Open Cases</h5>
+            <button class="btn btn-primary" @click="dialog = true">New Case</button>
+          </div>
+          <div class="card-body">
+            <input v-model="searchOpen" class="form-control mb-3" placeholder="Search..." />
+            <EasyDataTable
+                :headers="headers"
+                :items="openitems"
+                :rows-per-page="10"
+                table-class="table-bordered"
+                show-index
+                :searchable="true"
+              >
+              <template #item-Operation="{ id, Case_Number }">
+                <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
+                <button class="btn btn-sm btn-warning me-2" @click="editItem(id)">Edit</button>
+                <button class="btn btn-sm btn-danger" @click="deleteItem(id)">Delete</button>
+              </template>
+            </EasyDataTable>
+          </div>
+        </div>
 
-                  <v-card-text>
-                      <v-row>
-                        <v-col cols="12" md="12" sm="12">
-                          <v-text-field v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-text-field>
-                        </v-col>
-                        <v-col cols="12" md="12" sm="12">
-                          <v-textarea v-model="editedItem.Description" clearable label="Description" variant="outlined"></v-textarea>
-                        </v-col>
-                      </v-row>
-                  </v-card-text>
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Closed Cases</h5>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-success" v-if="snackbar">{{ text }}</div>
+            <input v-model="searchClosed" class="form-control mb-3" placeholder="Search..." />
+            <EasyDataTable
+                :headers="headers"
+                :items="closeditems"
+                :rows-per-page="10"
+                table-class="table-bordered"
+                show-index
+                :searchable="true"
+                buttons-pagination
+              >
+              <template #item-Operation="{ id, Case_Number }">
+                <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
+              </template>
+            </EasyDataTable>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div v-if="dialog" class="modal show d-block" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ formTitle }}</h5>
+          <button type="button" class="btn-close" @click="close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Subject</label>
+            <input type="text" class="form-control" v-model="editedItem.Subject" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" v-model="editedItem.Description"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="close">Cancel</button>
+          <button type="button" class="btn btn-primary" @click="save">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-                  <v-card-actions class="mr-4">
-                    <v-btn class="text-none mb-4" color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-                    <v-btn class="text-none mb-4" color="indigo-darken-3" size="large" variant="flat" @click="save">Save</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
-                <v-card>
-                  <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-                    <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-toolbar>
-          </template>
-          <template #item.Case_Number="{ item }">
-            {{ item.Case_Number ? item.Case_Number.slice(-8) : 'N/A' }}
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-btn-group variant="outlined" divided>
-              <v-btn icon="mdi-eye" @click="viewItem(item)"></v-btn>
-              <v-btn icon="mdi-pencil" @click="editItem(item)"></v-btn>
-              <v-btn icon="mdi-delete" @click="deleteItem(item)"></v-btn>
-            </v-btn-group>
-          </template>
-        </v-data-table>
-      </v-col>
-    </v-row>
-  </v-card>
-  <v-spacer></v-spacer>
-  <v-card class="m-4">
-    <v-row>
-      <v-col cols="12" sm="12">
-        <v-data-table :headers="headers" :items="closeditems" item-key="id" :sort-by="[{ key: 'Case_Number', order: 'asc' }]">
-          <template v-slot:top>
-            <v-toolbar flat>
-              <v-toolbar-title>Closed Cases</v-toolbar-title>
-              <v-divider class="mx-8" inset vertical></v-divider>
-              <v-spacer></v-spacer>
-              <v-dialog v-model="dialog" max-width="800px">
-                <v-card>
-                  <v-card-title>
-                    <span class="text-h5">{{ formTitle }}</span>
-                  </v-card-title>
-
-                  <v-card-text>
-                      <v-row>
-                        <v-col cols="12" md="12" sm="12">
-                          <v-text-field v-model="editedItem.Subject" clearable label="Subject" variant="outlined"></v-text-field>
-                        </v-col>
-                        <v-col cols="12" md="12" sm="12">
-                          <v-textarea v-model="editedItem.Description" clearable label="Description" variant="outlined"></v-textarea>
-                        </v-col>
-                      </v-row>
-                  </v-card-text>
-
-                  <v-card-actions class="mr-4">
-                    <v-btn class="text-none mb-4" color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-                    <v-btn class="text-none mb-4" color="indigo-darken-3" size="large" variant="flat" @click="save">Save</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
-                <v-card>
-                  <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-                    <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-toolbar>
-          </template>
-          <template #item.Case_Number="{ item }">
-            {{ item.Case_Number ? item.Case_Number.slice(-8) : 'N/A' }}
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-btn-group variant="outlined" divided>
-              <v-btn icon="mdi-eye" @click="viewItem(item)"></v-btn>
-              <!-- <v-btn icon="mdi-pencil" @click="editItem(item)"></v-btn>
-              <v-btn icon="mdi-delete" @click="deleteItem(item)"></v-btn> -->
-            </v-btn-group>
-            <!-- <v-icon class="me-2" color="red" size="large" @click="editItem(item)">mdi-pencil</v-icon>
-            <v-icon size="large" color="red" @click="deleteItem(item)">mdi-delete</v-icon> -->
-          </template>
-        </v-data-table>
-        <v-snackbar v-model="snackbar" :timeout="3000">
-          {{ text }}
-        </v-snackbar>
-      </v-col>
-    </v-row>
-  </v-card>
+  <!-- Delete Confirmation Modal -->
+  <div v-if="dialogDelete" class="modal show d-block" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Deletion</h5>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this item?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="closeDelete">Cancel</button>
+          <button type="button" class="btn btn-danger" @click="deleteItemConfirm">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
+
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue';
@@ -149,6 +110,7 @@ import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
+import { Header } from 'vue3-easy-data-table';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -180,16 +142,16 @@ interface Case {
 const heading = ref("Cases")
 const search = ref('');
 
-const headers = [
-  { title: 'Case Number', key: 'Case_Number' },
+const headers: Header[] = [
+  { text: 'Case Number', value: 'Case_Number' },
   // { title: 'Company Name', key: 'Account_Name.name' },
-  { title: 'Subject', key: 'Subject' },
-  { title: 'Close Date', key: 'Case_Closed_Date' },
-  { title: 'Open Date', key: 'Case_Open_Date' },
-  { title: 'Type', key: 'Type' },
-  { title: 'Reason', key: 'Case_Reason' },
-  { title: 'Status', key: 'Status' },
-  { title: 'View Details', key: 'actions', sortable: false }
+  { text: 'Subject', value: 'Subject' },
+  { text: 'Close Date', value: 'Case_Closed_Date' },
+  { text: 'Open Date', value: 'Case_Open_Date' },
+  { text: 'Type', value: 'Type' },
+  { text: 'Reason', value: 'Case_Reason' },
+  { text: 'Status', value: 'Status' },
+  { text: 'View Details', value: 'Operation', sortable: false }
 ];
 
 const dialog = ref(false)
@@ -221,7 +183,9 @@ const fetchCases = async () => {
         const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
         return dateB - dateA; // Descending
       });
+      console.log(openitems.value);
       closeditems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'Closed');
+      console.log(closeditems);
     } catch (err) {
       error.value = err.message;
     } finally {
@@ -247,8 +211,9 @@ const defaultItem: Case = {
   Phone: ""
 };
 const editedItem = ref<Case>({ ...defaultItem })
-const viewItem = (item: { id: string }) => {
-  router.push({ name: 'case', params: { Case_Number: item.id } });
+const viewItem = (id: string) => {
+  console.log(id);
+  router.push({ name: 'case', params: { Case_Number: id } });
 };
 const formTitle = computed(() => (editedIndex.value === -1 ? 'New Case' : 'Edit Case'))
 
@@ -261,16 +226,16 @@ watch(dialogDelete, (val) => {
 })
 
 // Method to edit an item
-const editItem = (item: Case) => {
-  editedIndex.value = items.value.indexOf(item)
-  editedItem.value = { ...item }
+const editItem = (id: string) => {
+  // editedIndex.value = items.value.indexOf(item)
+  // editedItem.value = { ...item }
   dialog.value = true
 }
 
 // Method to delete an item
-const deleteItem = (item: Case) => {
-  editedIndex.value = items.value.indexOf(item)
-  editedItem.value = { ...item }
+const deleteItem = (id: string) => {
+  // editedIndex.value = items.value.indexOf(item)
+  // editedItem.value = { ...item }
   dialogDelete.value = true
   console.log("deleted");
 }

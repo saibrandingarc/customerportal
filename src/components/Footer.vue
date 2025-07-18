@@ -1,19 +1,18 @@
 <template>
-  <v-footer app class="bg-light text-center">
-    <v-container class="pa-3">
-      <div class="logo">
-        <!-- Add your logo here, e.g., an image -->
-        <img src="path/to/your/logo.png" alt="Logo" />
+  <footer class="footer">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-6">
+            2025 © Branding Arc.
+          </div>
+          <div class="col-sm-6">
+            <div class="text-sm-end d-none d-sm-block">
+              Design &amp; Develop by Branding Arc
+            </div>
+          </div>
+        </div>
       </div>
-      <p>
-        Sample project provided by
-        <a href="https://auth0.com" target="_blank" rel="noopener noreferrer"> Auth0</a>
-      </p>
-      <p>
-        <a href="/userpolicy" target="_blank" rel="noopener noreferrer"> End User Policy</a>
-      </p>
-    </v-container>
-  </v-footer>
+    </footer>
 </template>
 
 <script lang="ts">

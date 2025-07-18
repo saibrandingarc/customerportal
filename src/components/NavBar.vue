@@ -1,20 +1,43 @@
 <template>
-  <v-app-bar app color="default" dark class="pa-2">
-    <!-- Left Logo -->
-    <v-toolbar-title class="d-flex align-center">
-      <img src="/logo.png" alt="Logo" class="app-logo" width="120" />
-    </v-toolbar-title>
+  <header id="page-topbar">
+    <div class="layout-width">
+      <div class="navbar-header">
+        <div class="d-flex">
+          <!-- LOGO -->
+          <div class="navbar-brand-box horizontal-logo">
+            
+          </div>
+        </div>
 
-    <!-- Spacer to push logout button to the right -->
-    <v-spacer />
-
-    <!-- Right Logout Button -->
-    {{username}}
-    <v-btn @click.prevent="logoutUser" color="secondary" outlined v-if="isAuthenticated">
-      <v-icon class="mr-2">mdi-power</v-icon> Logout
-    </v-btn>
-  </v-app-bar>
+        <div class="d-flex align-items-center">
+          <div class="dropdown ms-sm-3 header-item topbar-user">
+            <button v-if="isAuthenticated" type="button" class="btn material-shadow-none" id="page-header-user-dropdown"
+              data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span class="d-flex align-items-center">
+                <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg"
+                  alt="Header Avatar">
+                <span class="text-start ms-xl-2">
+                  <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ username }}</span>
+                </span>
+              </span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+              <!-- item-->
+              <h6 class="dropdown-header">Welcome {{ username }}!</h6>
+              <!-- <button class="btn btn-outline-secondary d-flex align-items-center">
+                          <i class="bi bi-power me-2"></i> Logout
+                        </button> -->
+              <a class="dropdown-item" @click.prevent="logoutUser"><i
+                  class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span class="align-middle"
+                  data-key="t-logout">Logout</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
 </template>
+
 
 <script lang="ts" setup>
 import { useAuthStore } from '@/stores/userStore';
@@ -30,7 +53,7 @@ const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently
 
 onMounted(() => {
   const logintype = localStorage.getItem("loginType");
-  if(logintype == "username-password") {
+  if (logintype == "username-password") {
     const authStore = useAuthStore();
     isAuthenticated.value = authStore.isTokenValid();
   }

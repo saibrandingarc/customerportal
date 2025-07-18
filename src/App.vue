@@ -1,9 +1,9 @@
 <template>
-  <v-app>
-    <v-main>
+  <div id="app" class="d-flex flex-column min-vh-100">
+    <main class="flex-grow-1">
       <router-view />
-    </v-main>
-  </v-app>
+    </main>
+  </div>
 </template>
 
 <script lang="ts">
