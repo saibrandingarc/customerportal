@@ -31,6 +31,36 @@
             <!-- Upcoming Deliverables Table -->
             <div class="table-responsive">
               <div class="d-flex align-items-center mb-3">
+                <h5 class="me-3 mb-0">Pending Approval Deliverables</h5>
+                <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
+              </div>
+              <EasyDataTable
+                :headers="pendingheaders"
+                :items="pendingDeliverables"
+                :rows-per-page="5"
+                table-class="table-bordered"
+                show-index
+                :searchable="true"
+                buttons-pagination
+              >
+                <template #item-actions="{ id }">
+                  <button class="btn btn-success btn-sm me-2" @click="approveDeliverable(id)">
+                    Approve
+                  </button>
+                  <button class="btn btn-danger btn-sm" @click="rejectDeliverable(id)">
+                    Reject
+                  </button>
+                </template>
+              </EasyDataTable>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <!-- Upcoming Deliverables Table -->
+            <div class="table-responsive">
+              <div class="d-flex align-items-center mb-3">
                 <h5 class="me-3 mb-0">Upcoming Deliverables</h5>
                 <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
                 <button class="btn btn-primary" @click="dialog = true">Add New</button>
@@ -175,18 +205,27 @@ const heading = ref("Deliverables")
 const search = ref('');
 
 const headers: Header[] = [
-      { text: "Block", value: "Block" },
+      // { text: "Block", value: "Block" },
       { text: "Due Date", value: "Due_Date", sortable: true },
-      { text: "Status", value: "Main_Status1", sortable: true },
-      { text: "Content Type", value: "Main_Status", sortable: true },
+      { text: "Status", value: "Status", sortable: true },
+      { text: "Content Type", value: "Main_Content_Type", sortable: true },
       { text: "Topic", value: "Name", sortable: true },
       // { text: "Credit Cost", value: "Credit_Cost", sortable: true }
     ];
 
+const pendingheaders: Header[] = [
+  { text: "Due Date", value: "Due_Date", sortable: true },
+  { text: "Status", value: "Status", sortable: true },
+  { text: "Content Type", value: "Main_Content_Type", sortable: true },
+  { text: "Topic", value: "Name", sortable: true },
+  { text: "Content Document", value: "Content_Doc", sortable: true },
+  { text: "Actions", value: "actions" }
+];
+
 const completedheaders = [
   { text: 'Block', value: 'Block' },
   { text: 'Date Published', value: 'Date_Published' },
-  { text: 'Content Type', value: 'Main_Status' },
+  { text: 'Content Type', value: 'Main_Content_Type' },
   { text: 'Topic', value: 'Name', class: "topicWidth" },
   // { text: 'Credit Cost', value: 'Credit_Cost' }
 ];
@@ -205,6 +244,7 @@ const error = ref('');
 const items = ref<Case[]>([]);
 const upcomingDeliverables = ref<Case[]>([]);
 const completedDeliverables = ref<Case[]>([]);
+const pendingDeliverables = ref<Case[]>([]);
 const fetchDeliverables = async () => {
   loading.value = true;
   try {
@@ -214,12 +254,17 @@ const fetchDeliverables = async () => {
     console.log(response);
     error.value = '';
     items.value = response.data.data;
-    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 !== 'Completed' && c.Main_Status1 !== 'Cancelled').sort((a, b) => {
+    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled').sort((a, b) => {
       const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
     });
-    completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed').sort((a, b) => {
+    completedDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status === 'Completed').sort((a, b) => {
+      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+      return dateB - dateA;
+    });
+    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status === 'Client Approval - Final').sort((a, b) => {
       const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
@@ -321,6 +366,24 @@ const save = () => {
   }
   close()
 }
+
+const approveDeliverable = async (id: number) => {
+  try {
+    await axios.post(`/api/deliverables/${id}/approve`);
+    pendingDeliverables.value = pendingDeliverables.value.filter(d => d.id !== id);
+  } catch (err) {
+    console.error("Approve failed", err);
+  }
+};
+
+const rejectDeliverable = async (id: number) => {
+  try {
+    await axios.post(`/api/deliverables/${id}/reject`);
+    pendingDeliverables.value = pendingDeliverables.value.filter(d => d.id !== id);
+  } catch (err) {
+    console.error("Reject failed", err);
+  }
+};
 
 </script>
 
