@@ -68,6 +68,7 @@ const logoutUser = () => {
   logout();
   router.push('/');
 };
+
 </script>
 
 <style>

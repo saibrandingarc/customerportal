@@ -1,6 +1,4 @@
 <template>
-  <NavBar />
-  <SidebarMenu />
   <!-- Loading Spinner -->
   <div v-if="loading" class="spinner-overlay d-flex justify-content-center align-items-center">
     <div class="spinner-border text-primary" role="status">
@@ -31,23 +29,24 @@
             <!-- Upcoming Deliverables Table -->
             <div class="table-responsive">
               <div class="d-flex align-items-center mb-3">
-                <h5 class="me-3 mb-0">Pending Approval Deliverables</h5>
+                <h5 class="me-3 mb-0">Waiting for Approval Deliverables</h5>
                 <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
               </div>
-              <EasyDataTable
-                :headers="pendingheaders"
-                :items="pendingDeliverables"
-                :rows-per-page="5"
-                table-class="table-bordered"
-                show-index
-                :searchable="true"
-                buttons-pagination
-              >
+              <EasyDataTable :headers="pendingheaders" :items="pendingDeliverables" :rows-per-page="5"
+                table-class="table-bordered" show-index :searchable="true" buttons-pagination>
+                <!-- Link column -->
+                <template #item-Content_Doc="{ Content_Doc }">
+                  <a v-if="Content_Doc" :href="Content_Doc" target="_blank" rel="noopener"
+                    class="text-primary fw-semibold">
+                    Open Doc
+                  </a>
+                  <span v-else class="text-muted">—</span>
+                </template>
                 <template #item-actions="{ id }">
-                  <button class="btn btn-success btn-sm me-2" @click="approveDeliverable(id)">
+                  <button class="btn btn-success btn-sm me-2" @click="openApproveModal(id)">
                     Approve
                   </button>
-                  <button class="btn btn-danger btn-sm" @click="rejectDeliverable(id)">
+                  <button class="btn btn-danger btn-sm" @click="openRejectModal(id)">
                     Reject
                   </button>
                 </template>
@@ -65,15 +64,8 @@
                 <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
                 <button class="btn btn-primary" @click="dialog = true">Add New</button>
               </div>
-              <EasyDataTable
-                :headers="headers"
-                :items="upcomingDeliverables"
-                :rows-per-page="5"
-                table-class="table-bordered"
-                show-index
-                :searchable="true"
-                buttons-pagination
-              />
+              <EasyDataTable :headers="headers" :items="upcomingDeliverables" :rows-per-page="5"
+                table-class="table-bordered" show-index :searchable="true" buttons-pagination />
             </div>
           </div>
         </div>
@@ -103,7 +95,7 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <button class="btn btn-secondary" @click="close">Cancel</button>
+                <!-- <button class="btn btn-secondary" @click="close">Cancel</button> -->
                 <button class="btn btn-primary" @click="save">Save</button>
               </div>
             </div>
@@ -131,30 +123,70 @@
           <div class="card-body">
             <h5 class="mb-3">Completed Deliverables</h5>
             <div class="table-responsive">
-              <EasyDataTable
-                :headers="completedheaders"
-                :items="completedDeliverables"
-                :rows-per-page="5"
-                table-class="table-bordered"
-                show-index
-                buttons-pagination
-              />
+              <EasyDataTable :headers="completedheaders" :items="completedDeliverables" :rows-per-page="5"
+                table-class="table-bordered" show-index buttons-pagination />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Reject Modal -->
+      <div class="modal fade" tabindex="-1" :class="{ show: showRejectModal }" style="display: block;"
+        v-if="showRejectModal">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+          <div class="modal-content shadow-lg">
+            <div class="modal-header">
+              <h5 class="modal-title">Reject Deliverable</h5>
+              <button type="button" class="btn-close" @click="closeRejectModal"></button>
+            </div>
+
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Reason for Rejection</label>
+                <textarea class="form-control" v-model="rejectReason" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button class="btn btn-danger" @click="submitRejection" :disabled="loading">
+                <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Approval Modal -->
+      <div class="modal fade" tabindex="-1" :class="{ show: approveDialog }" style="display: block;"
+        v-if="approveDialog">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+          <div class="modal-content shadow-lg">
+            <div class="modal-header">
+              <h5 class="modal-title">Approve Deliverable</h5>
+              <button type="button" class="btn-close" @click="closeApprove"></button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to approve this deliverable?</p>
+
+              <div class="mb-3">
+                <label class="form-label">Approval Note (optional)</label>
+                <textarea class="form-control" v-model="approvalNote" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <!-- <button class="btn btn-secondary" @click="closeApprove">Cancel</button> -->
+              <button class="btn btn-success" @click="confirmApprove">Approve</button>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <Footer />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
-import NavBar from "../components/NavBar.vue";
-import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
-import { Deliverable } from '@/interfaces/deliverables';
 import { Header } from 'vue3-easy-data-table';
 
 const authStore = useAuthStore();
@@ -205,17 +237,17 @@ const heading = ref("Deliverables")
 const search = ref('');
 
 const headers: Header[] = [
-      // { text: "Block", value: "Block" },
-      { text: "Due Date", value: "Due_Date", sortable: true },
-      { text: "Status", value: "Status", sortable: true },
-      { text: "Content Type", value: "Main_Content_Type", sortable: true },
-      { text: "Topic", value: "Name", sortable: true },
-      // { text: "Credit Cost", value: "Credit_Cost", sortable: true }
-    ];
+  // { text: "Block", value: "Block" },
+  // { text: "Due Date", value: "Due_Date", sortable: true },
+  { text: "Status", value: "Status", sortable: true },
+  { text: "Content Type", value: "Main_Content_Type", sortable: true },
+  { text: "Topic", value: "Name", sortable: true },
+  // { text: "Credit Cost", value: "Credit_Cost", sortable: true }
+];
 
 const pendingheaders: Header[] = [
-  { text: "Due Date", value: "Due_Date", sortable: true },
-  { text: "Status", value: "Status", sortable: true },
+  // { text: "Due Date", value: "Due_Date", sortable: true },
+  // { text: "Status", value: "Status", sortable: true },
   { text: "Content Type", value: "Main_Content_Type", sortable: true },
   { text: "Topic", value: "Name", sortable: true },
   { text: "Content Document", value: "Content_Doc", sortable: true },
@@ -269,7 +301,7 @@ const fetchDeliverables = async () => {
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
     });
-    console.log("test :"+completedDeliverables);
+    console.log("test :" + completedDeliverables);
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -367,21 +399,91 @@ const save = () => {
   close()
 }
 
-const approveDeliverable = async (id: number) => {
+const showRejectModal = ref(false);
+const rejectReason = ref("");
+const selectedDeliverableId = ref<number | null>(null);
+
+const approveDialog = ref(false);
+const approvalNote = ref("");
+
+// Called when user clicks Approve button
+function openApproveModal(id: number) {
+  selectedDeliverableId.value = id;
+  approvalNote.value = "";
+  approveDialog.value = true;
+}
+
+function closeApprove() {
+  approveDialog.value = false;
+}
+
+async function confirmApprove() {
+  if (!selectedDeliverableId.value) return;
+
   try {
-    await axios.post(`/api/deliverables/${id}/approve`);
-    pendingDeliverables.value = pendingDeliverables.value.filter(d => d.id !== id);
-  } catch (err) {
-    console.error("Approve failed", err);
+    // Example API call (replace with your real API)
+    // try {
+    //   await axios.post(`/api/deliverables/${id}/approve`);
+    //   pendingDeliverables.value = pendingDeliverables.value.filter(d => d.id !== id);
+    // } catch (err) {
+    //   console.error("Approve failed", err);
+    // }
+    await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/true`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: approvalNote.value }),
+    });
+
+    // On success, close modal
+    approveDialog.value = false;
+    alert("Deliverable approved successfully!");
+  } catch (error) {
+    console.error("Approval failed", error);
+    alert("Failed to approve deliverable.");
   }
+}
+
+const openRejectModal = (id: number) => {
+  selectedDeliverableId.value = id;
+  rejectReason.value = "";
+  showRejectModal.value = true;
 };
 
-const rejectDeliverable = async (id: number) => {
+const closeRejectModal = () => {
+  showRejectModal.value = false;
+  rejectReason.value = "";
+  selectedDeliverableId.value = null;
+};
+
+const submitRejection = async () => {
+  if (!rejectReason.value.trim()) {
+    alert("Please provide a reason for rejection.");
+    return;
+  }
+
+  loading.value = true;
   try {
-    await axios.post(`/api/deliverables/${id}/reject`);
-    pendingDeliverables.value = pendingDeliverables.value.filter(d => d.id !== id);
-  } catch (err) {
-    console.error("Reject failed", err);
+    // Example API call (replace with your real API)
+    // try {
+    //   await axios.post(`/api/deliverables/${id}/approve`);
+    //   pendingDeliverables.value = pendingDeliverables.value.filter(d => d.id !== id);
+    // } catch (err) {
+    //   console.error("Approve failed", err);
+    // }
+    await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/false`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: rejectReason.value }),
+    });
+
+    // On success, close modal
+    approveDialog.value = false;
+    alert("Deliverable rejection updated!");
+  } catch (error) {
+    console.error("Approval failed", error);
+    alert("Failed to approve deliverable.");
+  } finally {
+    loading.value = false;
   }
 };
 

@@ -1,6 +1,4 @@
 <template>
-  <nav-bar />
-  <SidebarMenu />
   <div v-if="loading" class="spinner-overlay d-flex justify-content-center align-items-center">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
@@ -10,7 +8,7 @@
     <div class="page-content">
       <div class="container-fluid">
         <div class="card">
-          <div class="card-body p-5">
+          <div class="card-body">
             <div class="row">
               <div class="col-12">
                 <EasyDataTable

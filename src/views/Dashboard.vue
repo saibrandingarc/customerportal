@@ -1,6 +1,4 @@
 <template>
-  <NavBar />
-  <SidebarMenu />
   <!-- Loading Spinner -->
   <div v-if="loading" class="spinner-overlay d-flex justify-content-center align-items-center">
     <div class="spinner-border text-primary" role="status">
@@ -61,7 +59,7 @@
         </div>
       </div>
     </div>
-    <Footer />
+
   </div>
 </template>
 

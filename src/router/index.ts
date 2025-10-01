@@ -1,33 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import ForgotPassword from '../views/ForgotPassword.vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { jwtDecode } from 'jwt-decode';
-import { useAuthStore } from '@/stores/userStore';
-import { ref } from 'vue';
 import EndUserAgreementVue from '@/views/EndUserAgreement.vue';
 import PrivacyPolicyVue from '@/views/PrivacyPolicy.vue';
+import DefaultLayout from '../layouts/DefaultLayout.vue';
 
 const routes = [
-  // { path: "/callback", name: 'Callback', component: Callback },
-  {
-    path: '/',
-    name: 'Home',
-    component: Login,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/enduser',
-    name: 'EndUser',
-    component: EndUserAgreementVue,
-  },
-  {
-    path: '/privacypolicy',
-    name: 'PrivacyPolicy',
-    component: PrivacyPolicyVue,
-  },
+  // Auth pages (separated from main layout)
   {
     path: '/login',
     name: 'Login',
@@ -43,47 +25,70 @@ const routes = [
     name: 'ForgotPassword',
     component: ForgotPassword,
   },
+
+  // Public pages (no auth required, can be inside or outside layout)
   {
-    path: '/profile',
-    name: 'Profile',
-    component: () => import('../views/Profile.vue'),
-    meta: { requiresAuth: true },
+    path: '/enduser',
+    name: 'EndUser',
+    component: EndUserAgreementVue,
   },
   {
-    path: '/dashboard',
-    name: 'dashboard',
-    component: () => import('../views/Dashboard.vue'),
-    meta: { requiresAuth: true },
+    path: '/privacypolicy',
+    name: 'PrivacyPolicy',
+    component: PrivacyPolicyVue,
   },
+
+  // Main app (requires layout + auth)
   {
-    path: '/cases',
-    name: 'cases',
-    component: () => import('../views/Cases.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/deliverables',
-    name: 'deliverables',
-    component: () => import('../views/Deliverables.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/invoices',
-    name: 'invoices',
-    component: () => import('../views/Invoices.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/admin/users',
-    name: 'users',
-    component: () => import('../views/admin/Users.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/case/:Case_Number',
-    name: 'case',
-    component: () => import('@/views/Case.vue'),
-    props: true, // Pass route params as props
+    path: '/',
+    name: 'Home',
+    component: DefaultLayout,
+    redirect: '/dashboard',
+    children: [
+      {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: () => import('../views/Dashboard.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/cases',
+        name: 'Cases',
+        component: () => import('../views/Cases.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/deliverables',
+        name: 'Deliverables',
+        component: () => import('../views/Deliverables.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/invoices',
+        name: 'Invoices',
+        component: () => import('../views/Invoices.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/admin/users',
+        name: 'Users',
+        component: () => import('../views/admin/Users.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/case/:Case_Number',
+        name: 'Case',
+        component: () => import('@/views/Case.vue'),
+        props: true,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/profile',
+        name: 'Profile',
+        component: () => import('../views/Profile.vue'),
+        meta: { requiresAuth: true },
+      },
+    ],
   },
 ];
 
