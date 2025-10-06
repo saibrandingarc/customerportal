@@ -498,7 +498,7 @@ const submitRejection = async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
-        message: approvalNote.value, 
+        message: rejectReason.value, 
         name: deliverable?.Name,
         company: deliverable?.Account.name
       }),
