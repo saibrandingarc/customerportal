@@ -188,6 +188,8 @@ import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/userStore';
 import { Header } from 'vue3-easy-data-table';
+import Toastify from 'toastify-js'
+import 'toastify-js/src/toastify.css'
 
 const authStore = useAuthStore();
 
@@ -274,9 +276,9 @@ const isDisabled = ref(false)
 const loading = ref(false);
 const error = ref('');
 const items = ref<Case[]>([]);
-const upcomingDeliverables = ref<Case[]>([]);
-const completedDeliverables = ref<Case[]>([]);
-const pendingDeliverables = ref<Case[]>([]);
+const upcomingDeliverables = ref<any[]>([]);
+const completedDeliverables = ref<any[]>([]);
+const pendingDeliverables = ref<any[]>([]);
 const fetchDeliverables = async () => {
   loading.value = true;
   try {
@@ -296,7 +298,8 @@ const fetchDeliverables = async () => {
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
     });
-    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status === 'Client Approval - Final').sort((a, b) => {
+    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approved: boolean}) => c.Main_Status === 'Client Approval - Final' &&
+    c.Client_Approved === false).sort((a, b) => {
       const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
@@ -312,7 +315,7 @@ const fetchDeliverables = async () => {
 // Function to call the API when a month is selected
 const fetchDataForBlock = async () => {
   if (!selectedBlock.value) return;
-
+  loading.value = true;
   try {
     var companyId = authStore.getCompanyId();
     const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/' + companyId + '/' + selectedBlock.value);
@@ -333,6 +336,8 @@ const fetchDataForBlock = async () => {
   } catch (err) {
     error.value = err.message;
     console.error("Error fetching data:", error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -419,27 +424,43 @@ function closeApprove() {
 
 async function confirmApprove() {
   if (!selectedDeliverableId.value) return;
-
+  loading.value = true;
   try {
-    // Example API call (replace with your real API)
-    // try {
-    //   await axios.post(`/api/deliverables/${id}/approve`);
-    //   pendingDeliverables.value = pendingDeliverables.value.filter(d => d.id !== id);
-    // } catch (err) {
-    //   console.error("Approve failed", err);
-    // }
+    var deliverable = pendingDeliverables.value.find(d => d.id === selectedDeliverableId.value?.toString());
     await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/true`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: approvalNote.value }),
+      body: JSON.stringify({ 
+        message: approvalNote.value, 
+        name: deliverable?.Name,
+        company: deliverable?.Account.name
+      }),
     });
-
     // On success, close modal
     approveDialog.value = false;
-    alert("Deliverable approved successfully!");
+    await fetchDeliverables();
+    Toastify({
+      text: "Deliverable approved successfully!",
+      duration: 3000, // 3 seconds
+      gravity: "top", // "top" or "bottom"
+      position: "right", // "left", "center", or "right"
+      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+      close: true,
+      stopOnFocus: true,
+    }).showToast()
   } catch (error) {
     console.error("Approval failed", error);
-    alert("Failed to approve deliverable.");
+    Toastify({
+      text: "Failed to approve deliverable.",
+      duration: 3000, // 3 seconds
+      gravity: "top", // "top" or "bottom"
+      position: "right", // "left", "center", or "right"
+      backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+      close: true,
+      stopOnFocus: true,
+    }).showToast()
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -457,31 +478,54 @@ const closeRejectModal = () => {
 
 const submitRejection = async () => {
   if (!rejectReason.value.trim()) {
-    alert("Please provide a reason for rejection.");
+    Toastify({
+      text: "Please provide a reason for rejection.",
+      duration: 3000, // 3 seconds
+      gravity: "top", // "top" or "bottom"
+      position: "right", // "left", "center", or "right"
+      backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+      close: true,
+      stopOnFocus: true,
+    }).showToast()
     return;
   }
 
+  if (!selectedDeliverableId.value) return;
   loading.value = true;
   try {
-    // Example API call (replace with your real API)
-    // try {
-    //   await axios.post(`/api/deliverables/${id}/approve`);
-    //   pendingDeliverables.value = pendingDeliverables.value.filter(d => d.id !== id);
-    // } catch (err) {
-    //   console.error("Approve failed", err);
-    // }
+    var deliverable = pendingDeliverables.value.find(d => d.id === selectedDeliverableId.value?.toString());
     await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/false`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: rejectReason.value }),
+      body: JSON.stringify({ 
+        message: approvalNote.value, 
+        name: deliverable?.Name,
+        company: deliverable?.Account.name
+      }),
     });
-
     // On success, close modal
     approveDialog.value = false;
-    alert("Deliverable rejection updated!");
+    await fetchDeliverables();
+    Toastify({
+      text: "Deliverable rejection updated successfully!",
+      duration: 3000, // 3 seconds
+      gravity: "top", // "top" or "bottom"
+      position: "right", // "left", "center", or "right"
+      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+      close: true,
+      stopOnFocus: true,
+    }).showToast()
   } catch (error) {
     console.error("Approval failed", error);
-    alert("Failed to approve deliverable.");
+    Toastify({
+      text: "Failed to update the deliverable rejection.",
+      duration: 3000, // 3 seconds
+      gravity: "top", // "top" or "bottom"
+      position: "right", // "left", "center", or "right"
+      backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+      close: true,
+      stopOnFocus: true,
+    }).showToast()
   } finally {
     loading.value = false;
   }
