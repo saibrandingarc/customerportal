@@ -176,7 +176,7 @@
     
     const submit = async () => {
         loading.value = true;
-        if (valid.value && password.value) {
+        if (email.value && password.value) {
             try {
                 const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/login', {
                     email: email.value,
@@ -188,7 +188,7 @@
                     authStore.setAuthResponse(response.data);
                     isAuthenticated.value = authStore.isTokenValid();
                     errorMessage.value = "";
-                    router.push({ name: 'dashboard' });
+                    router.push("/dashboard");
                 } else {
                     errorMessage.value = "Please check your credentials";
                     console.log("failed");
