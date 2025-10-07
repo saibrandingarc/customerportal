@@ -258,7 +258,7 @@ const pendingheaders: Header[] = [
 
 const completedheaders = [
   { text: 'Block', value: 'Block' },
-  { text: 'Date Published', value: 'Date_Published' },
+  { text: 'Date Published', value: 'Publish_Date' },
   { text: 'Content Type', value: 'Main_Content_Type' },
   { text: 'Topic', value: 'Name', class: "topicWidth" },
   // { text: 'Credit Cost', value: 'Credit_Cost' }
