@@ -322,12 +322,18 @@ const fetchDataForBlock = async () => {
     console.log(response);
     error.value = '';
     items.value = response.data.data;
-    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 != 'Completed').sort((a, b) => {
+    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled').sort((a, b) => {
       const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
     });
-    completedDeliverables.value = response.data.data.filter((c: { Main_Status1: string; }) => c.Main_Status1 === 'Completed').sort((a, b) => {
+    completedDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status === 'Completed').sort((a, b) => {
+      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+      return dateB - dateA;
+    });
+    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approved: boolean}) => c.Main_Status === 'Client Approval - Final' &&
+    c.Client_Approved === false).sort((a, b) => {
       const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
