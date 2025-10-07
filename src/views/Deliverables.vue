@@ -231,9 +231,9 @@ const generateRelativeMonthsArray = (past: number, future: number): string[] => 
 
 // Generate array of past 12 months and next 12 months
 // const monthsArray = ref<string[]>(generateRelativeMonthsArray(12, 12));
-const monthsArray = ref<string[]>(["2025", "2024"]);
+const monthsArray = ref<string[]>(["2026", "2025", "2024"]);
 
-const selectedBlock = ref<string | null>(null);
+const selectedBlock = ref<string>("2025");
 
 const heading = ref("Deliverables")
 const search = ref('');
