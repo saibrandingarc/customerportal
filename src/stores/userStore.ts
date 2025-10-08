@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', {
         },
         getUsername(): string {
             this.authResponse = JSON.parse(localStorage.getItem('user') || 'null');
-            return this.authResponse?.email ?? 'Guest';
+            return this.authResponse?.username ?? 'Guest';
         },
         logout() {
             // Clear the state and localStorage
