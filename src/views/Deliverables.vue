@@ -62,7 +62,7 @@
               <div class="d-flex align-items-center mb-3">
                 <h5 class="me-3 mb-0">Upcoming Deliverables</h5>
                 <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
-                <button class="btn btn-primary" @click="dialog = true">Add New</button>
+                <!-- <button class="btn btn-primary" @click="dialog = true">Add New</button> -->
               </div>
               <EasyDataTable :headers="headers" :items="upcomingDeliverables" :rows-per-page="5"
                 table-class="table-bordered" show-index :searchable="true" buttons-pagination />
