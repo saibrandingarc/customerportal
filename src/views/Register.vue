@@ -33,7 +33,6 @@
           </div>
   
           <!-- OTP Field -->
-           {{ emailVerified }} - {{ otpVerified }}
           <div v-if="emailVerified && !otpVerified" class="mb-3">
             <label for="otp" class="form-label">OTP</label>
             <input
