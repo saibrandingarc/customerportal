@@ -510,7 +510,7 @@ const submitRejection = async () => {
       }),
     });
     // On success, close modal
-    approveDialog.value = false;
+    showRejectModal.value = false;
     await fetchDeliverables();
     Toastify({
       text: "Deliverable rejection updated successfully!",
