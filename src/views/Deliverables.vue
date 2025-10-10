@@ -298,8 +298,8 @@ const fetchDeliverables = async () => {
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
     });
-    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approved: boolean}) => c.Main_Status === 'Client Approval - Final' &&
-    c.Client_Approved === false).sort((a, b) => {
+    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approval_Status: string}) => c.Main_Status === 'Client Approval - Final' &&
+    (c.Client_Approval_Status === null)).sort((a, b) => {
       const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
@@ -332,8 +332,8 @@ const fetchDataForBlock = async () => {
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
     });
-    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approved: boolean}) => c.Main_Status === 'Client Approval - Final' &&
-    c.Client_Approved === false).sort((a, b) => {
+    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approval_Status: string}) => c.Main_Status === 'Client Approval - Final' &&
+    (c.Client_Approval_Status === 'none' || c.Client_Approval_Status === null)).sort((a, b) => {
       const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
       const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       return dateB - dateA;
@@ -433,7 +433,7 @@ async function confirmApprove() {
   loading.value = true;
   try {
     var deliverable = pendingDeliverables.value.find(d => d.id === selectedDeliverableId.value?.toString());
-    await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/true`, {
+    await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/Approved`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
@@ -500,7 +500,7 @@ const submitRejection = async () => {
   loading.value = true;
   try {
     var deliverable = pendingDeliverables.value.find(d => d.id === selectedDeliverableId.value?.toString());
-    await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/false`, {
+    await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/Rejected`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
