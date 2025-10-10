@@ -450,7 +450,7 @@ async function confirmApprove() {
       duration: 3000, // 3 seconds
       gravity: "top", // "top" or "bottom"
       position: "right", // "left", "center", or "right"
-      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+      backgroundColor: "#13c56b",
       close: true,
       stopOnFocus: true,
     }).showToast()
@@ -461,7 +461,7 @@ async function confirmApprove() {
       duration: 3000, // 3 seconds
       gravity: "top", // "top" or "bottom"
       position: "right", // "left", "center", or "right"
-      backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+      backgroundColor: "#ed5e5e",
       close: true,
       stopOnFocus: true,
     }).showToast()
@@ -489,7 +489,7 @@ const submitRejection = async () => {
       duration: 3000, // 3 seconds
       gravity: "top", // "top" or "bottom"
       position: "right", // "left", "center", or "right"
-      backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+      backgroundColor: "#ed5e5e",
       close: true,
       stopOnFocus: true,
     }).showToast()
@@ -513,11 +513,11 @@ const submitRejection = async () => {
     showRejectModal.value = false;
     await fetchDeliverables();
     Toastify({
-      text: "Deliverable rejection updated successfully!",
+      text: "Deliverable status updated successfully!",
       duration: 3000, // 3 seconds
       gravity: "top", // "top" or "bottom"
       position: "right", // "left", "center", or "right"
-      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+      backgroundColor: "#13c56b",
       close: true,
       stopOnFocus: true,
     }).showToast()
@@ -528,7 +528,7 @@ const submitRejection = async () => {
       duration: 3000, // 3 seconds
       gravity: "top", // "top" or "bottom"
       position: "right", // "left", "center", or "right"
-      backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+      backgroundColor: "#ed5e5e",
       close: true,
       stopOnFocus: true,
     }).showToast()
