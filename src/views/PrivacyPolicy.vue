@@ -60,6 +60,7 @@
     import { checkPasswordComplexity } from '@/plugins/passwordUtils';
     import { useAuth0, User } from "@auth0/auth0-vue";
     import { AnyAuthResponse } from '@/interfaces/AnyAuthResponse';
+    import { API_BASE_URL } from '@/api/config';
     
     const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently, handleRedirectCallback } = useAuth0();
     const userData = ref<any>(null);
@@ -134,7 +135,7 @@
         loading.value = true;
         if (valid.value && password.value) {
             try {
-                const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/login', {
+                const response = await axios.post(API_BASE_URL+'/Zoho/zoho/login', {
                     email: email.value,
                     password: password.value
                 });
@@ -242,7 +243,7 @@
     const verifyEmail = async () => {
         loading.value = true;
         try {
-            const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/checkEmail', {
+            const response = await axios.post(API_BASE_URL+'/Zoho/zoho/checkEmail', {
                 email: email.value,
                 logintype: localStorage.getItem("loginType"),
                 user: JSON.stringify(user.value)

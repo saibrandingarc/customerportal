@@ -71,6 +71,7 @@ import NavBar from "../components/NavBar.vue";
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import Footer from '@/components/Footer.vue';
 import { useAuthStore } from '@/stores/userStore';
+import { API_BASE_URL } from '@/api/config';
 
 import { DoughnutChart, useDoughnutChart } from "vue-chart-3";
 import { BarChart, useBarChart } from 'vue-chart-3';
@@ -173,7 +174,7 @@ const fetchCases = async () => {
   try {
     const companyId = authStore.getCompanyId();
     const response = await axios.get(
-      `https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/cases/dashboard/${companyId}`
+      `${API_BASE_URL}/Zoho/zoho/cases/dashboard/${companyId}`
     );
     console.log("Cases Response:", response);
     cases.value = response.data.data;
@@ -190,7 +191,7 @@ const fetchDeliverables = async () => {
   try {
     const companyId = authStore.getCompanyId();
     const response = await axios.get(
-      `https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${companyId}`
+      `${API_BASE_URL}/Zoho/zoho/deliverables/${companyId}`
     );
     console.log("Deliverables Response:", response);
     deliverables.value = response.data.data;

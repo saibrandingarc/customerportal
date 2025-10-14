@@ -29,7 +29,7 @@
             <!-- Upcoming Deliverables Table -->
             <div class="table-responsive">
               <div class="d-flex align-items-center mb-3">
-                <h5 class="me-3 mb-0">Waiting for Approval Deliverables</h5>
+                <h5 class="me-3 mb-0">Deliverables - Pending Approvals </h5>
                 <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
               </div>
               <EasyDataTable :headers="pendingheaders" :items="pendingDeliverables" :rows-per-page="5"
@@ -190,6 +190,7 @@ import { useAuthStore } from '@/stores/userStore';
 import { Header } from 'vue3-easy-data-table';
 import Toastify from 'toastify-js'
 import 'toastify-js/src/toastify.css'
+import { API_BASE_URL } from '@/api/config';
 
 const authStore = useAuthStore();
 
@@ -284,7 +285,7 @@ const fetchDeliverables = async () => {
   try {
     console.log(authStore);
     var companyId = authStore.getCompanyId();
-    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/' + companyId);
+    const response = await axios.get(API_BASE_URL+'/Zoho/zoho/deliverables/' + companyId);
     console.log(response);
     error.value = '';
     items.value = response.data.data;
@@ -318,7 +319,7 @@ const fetchDataForBlock = async () => {
   loading.value = true;
   try {
     var companyId = authStore.getCompanyId();
-    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/' + companyId + '/' + selectedBlock.value);
+    const response = await axios.get(API_BASE_URL+'/Zoho/zoho/deliverables/' + companyId + '/' + selectedBlock.value);
     console.log(response);
     error.value = '';
     items.value = response.data.data;
@@ -433,7 +434,7 @@ async function confirmApprove() {
   loading.value = true;
   try {
     var deliverable = pendingDeliverables.value.find(d => d.id === selectedDeliverableId.value?.toString());
-    await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/Approved`, {
+    await fetch(API_BASE_URL+`/Zoho/zoho/deliverables/${selectedDeliverableId.value}/Approved`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
@@ -500,7 +501,7 @@ const submitRejection = async () => {
   loading.value = true;
   try {
     var deliverable = pendingDeliverables.value.find(d => d.id === selectedDeliverableId.value?.toString());
-    await fetch(`https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deliverables/${selectedDeliverableId.value}/Rejected`, {
+    await fetch(API_BASE_URL+`/Zoho/zoho/deliverables/${selectedDeliverableId.value}/Rejected`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 

@@ -102,6 +102,7 @@
   import { ref } from 'vue';
   import axios from 'axios';
   import router from '@/router';
+  import { API_BASE_URL } from '@/api/config';
   
   const email = ref('');
   const password = ref('');
@@ -124,7 +125,7 @@
     if (email.value && rules.email(email.value) === true) {
       loading.value = true;
       try {
-        const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/checkEmailForgotPassword', {
+        const response = await axios.post(API_BASE_URL+'/Zoho/zoho/checkEmailForgotPassword', {
           email: email.value,
         });
         console.log(response);
@@ -146,7 +147,7 @@
     if (otp.value) {
       loading.value = true;
       try {
-        const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/verifyOTPUpdatePassword', {
+        const response = await axios.post(API_BASE_URL+'/Zoho/zoho/verifyOTPUpdatePassword', {
           email: email.value,
           otp: otp.value,
           password: password.value,

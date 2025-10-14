@@ -104,6 +104,7 @@
     import { checkPasswordComplexity } from '@/plugins/passwordUtils';
     import { useAuth0, User } from "@auth0/auth0-vue";
     import { AnyAuthResponse } from '@/interfaces/AnyAuthResponse';
+    import { API_BASE_URL } from '@/api/config';
     
     const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently, handleRedirectCallback } = useAuth0();
     const userData = ref<any>(null);
@@ -178,7 +179,7 @@
         loading.value = true;
         if (email.value && password.value) {
             try {
-                const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/login', {
+                const response = await axios.post(API_BASE_URL+'/Zoho/zoho/login', {
                     email: email.value,
                     password: password.value
                 });
@@ -290,7 +291,7 @@
     const verifyEmail = async () => {
         loading.value = true;
         try {
-            const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/checkEmail', {
+            const response = await axios.post(API_BASE_URL+'/Zoho/zoho/checkEmail', {
                 email: email.value,
                 logintype: localStorage.getItem("loginType"),
                 user: JSON.stringify(user.value)
@@ -322,6 +323,7 @@
 
     onMounted(async () => {
         const logintype = localStorage.getItem("loginType");
+        console.log(import.meta.env.VITE_API_URL);
         if(logintype == "username-password") {
             const authStore = useAuthStore();
             isAuthenticated.value = authStore.isTokenValid();
@@ -366,15 +368,7 @@
     }
 
     .gradient-custom-2 {
-        /* fallback for old browsers */
         background: #F8F8F8;
-        /* background: #fccb90; */
-
-        /* Chrome 10-25, Safari 5.1-6 */
-        /* background: -webkit-linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593); */
-
-        /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-        /* background: linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593); */
     }
 
     @media (max-width: 1280px) {

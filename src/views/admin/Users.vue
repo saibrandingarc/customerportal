@@ -106,6 +106,7 @@ import { useAuthStore } from '@/stores/userStore';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import type { User } from './interfaces/User';
 import type { Companies } from './interfaces/Companies';
+import { API_BASE_URL } from '@/api/config';
 
 const authStore = useAuthStore();
 
@@ -139,7 +140,7 @@ const fetchUsers = async () => {
     try {
       console.log(authStore);
       var companyId = authStore.getCompanyId();
-      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/auth0/users');
+      const response = await axios.get(API_BASE_URL+'/auth0/users');
       console.log(response);
       error.value = '';
       items.value = response.data.value;
@@ -156,7 +157,7 @@ const fetchCompanies = async () => {
     try {
       console.log(authStore);
       var companyId = authStore.getCompanyId();
-      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/companies');
+      const response = await axios.get(API_BASE_URL+'/Zoho/zoho/companies');
       console.log(response);
       error.value = '';
       companies.value = response.data.data;
@@ -199,7 +200,7 @@ const deleteItem = (item: User) => {
 const deleteItemConfirm = async () => {
   // items.value.splice(editedIndex.value, 1);
   try {
-    const response = await axios.delete('https://zohodeliverablesapi.azurewebsites.net/auth0/deleteUser', {
+    const response = await axios.delete(API_BASE_URL+'/auth0/deleteUser', {
       data: editedItem.value });
     console.log(response);
     // responseMessage.value = `User with ID ${userId} deleted successfully`;
@@ -246,7 +247,7 @@ const save = async () => {
   loading.value = true;
   try {
     // const data = { key1: 'value1', key2: 'value2' };
-    const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/create-auth0-user', user);
+    const response = await axios.post(API_BASE_URL+'/create-auth0-user', user);
     console.log('Form submitted:', response.data);
     error.value = '';
     editedItem.value.companyName = editedItem.value.selectedAccount.Account_Name;

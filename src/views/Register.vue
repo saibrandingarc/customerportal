@@ -122,6 +122,7 @@
   import axios from "axios";
   import router from "@/router";
   import { checkPasswordComplexity, checkPasswordsMatch } from "@/plugins/passwordUtils";
+  import { API_BASE_URL } from '@/api/config';
   
   const email = ref("");
   const password = ref("");
@@ -144,7 +145,7 @@
     if (rules.email(email.value)) {
       try {
         const response = await axios.post(
-          "https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/checkEmail",
+          API_BASE_URL+"/Zoho/zoho/checkEmail",
           { email: email.value }
         );
         if (response.data.obj != "") {
@@ -177,7 +178,7 @@
     if (otp.value) {
       try {
         const response = await axios.post(
-          "https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/verifyOTP",
+          API_BASE_URL+"/Zoho/zoho/verifyOTP",
           {
             email: email.value,
             otp: otp.value,
@@ -203,7 +204,7 @@
     if (password.value && confirmpassword.value) {
       try {
         const response = await axios.post(
-          "https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/register",
+          API_BASE_URL+"/Zoho/zoho/register",
           { email: email.value, password: password.value }
         );
         errorMessage.value = response.data.message;

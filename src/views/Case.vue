@@ -125,6 +125,7 @@ import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
+import { API_BASE_URL } from '@/api/config';
 
 const model = ref('tab-1');
 
@@ -142,6 +143,7 @@ const Case_Number = route.params.Case_Number as string;
 const item = ref<{ name: string; description: string } | null>(null);
 
 onMounted(() => {
+  console.log("API Base URL : "+API_BASE_URL);
   fetchCase(Case_Number);
 });
 
@@ -203,7 +205,7 @@ const fetchCase = async (caseNumber: string) => {
     try {
       console.log(authStore);
       var companyId = authStore.getCompanyId();
-      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/case/'+companyId+'/'+caseNumber);
+      const response = await axios.get(API_BASE_URL+'/Zoho/zoho/case/'+companyId+'/'+caseNumber);
       console.log(response);
       error.value = '';
       item.value = response.data.data[0];

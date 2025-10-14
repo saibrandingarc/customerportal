@@ -8,7 +8,7 @@
       </div>
       <div class="col-sm-6">
         <div class="text-sm-end">
-          Design &amp; Develop by Branding Arc
+          Design &amp; Developed by Branding Arc
         </div>
       </div>
     </div>

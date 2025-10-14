@@ -109,6 +109,7 @@ import NavBar from "../components/NavBar.vue";
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 import { Header } from 'vue3-easy-data-table';
+import { API_BASE_URL } from '@/api/config';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -156,6 +157,7 @@ const dialog = ref(false)
 const dialogDelete = ref(false)
 
 onMounted(() => {
+  console.log("API Base URL : "+API_BASE_URL);
   fetchCases();
 });
 
@@ -171,7 +173,7 @@ const fetchCases = async () => {
     try {
       console.log(authStore);
       var companyId = authStore.getCompanyId();
-      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/cases/'+companyId);
+      const response = await axios.get(API_BASE_URL+'/Zoho/zoho/cases/'+companyId);
       console.log(response);
       error.value = '';
       items.value = response.data.data;
@@ -248,7 +250,7 @@ const deleteItemConfirm = async () => {
   const id = editedItem.value?.id;
   try {
     // const data = { key1: 'value1', key2: 'value2' };
-    const response = await axios.delete('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/deleteCase/'+id);
+    const response = await axios.delete(API_BASE_URL+'/Zoho/zoho/deleteCase/'+id);
     console.log('Form submitted:', response.data);
     items.value.splice(editedIndex.value, 1)
     close()
@@ -292,7 +294,7 @@ const save = async () => {
   loading.value = true;
   try {
     // const data = { key1: 'value1', key2: 'value2' };
-    const response = await axios.post('https://zohodeliverablesapi.azurewebsites.net/Zoho/zoho/newcase', editedItem.value);
+    const response = await axios.post(API_BASE_URL+'/Zoho/zoho/newcase', editedItem.value);
     console.log('Form submitted:', response.data);
     editedItem.value.Account_Name.name = authStore.getCompanyName();
     editedItem.value.Case_Number = response.data.data[0].details.id;

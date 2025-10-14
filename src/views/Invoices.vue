@@ -40,6 +40,7 @@ import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 import { Invoice } from "@/interfaces/Invoice";
 import { Header } from 'vue3-easy-data-table';
+import { API_BASE_URL } from '@/api/config';
 const authStore = useAuthStore();
 
 // Ref to hold invoices data
@@ -70,7 +71,7 @@ const fetchInvoices = async () => {
     const companyName = parsedData.companyName;
     console.log(companyName);
     var companyId = authStore.getCompanyId();
-    const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Intuit/invoices/'+companyName);
+    const response = await axios.get(API_BASE_URL+'/Intuit/invoices/'+companyName);
     console.log(response);
     error.value = '';
     const invoices: Invoice[] = response.data.QueryResponse.Invoice.map((item: { Id: any; TxnDate: any; DueDate: any; TotalAmt: any; Balance: number; }) => ({
@@ -92,7 +93,7 @@ const handleRowClick = async (id: string) => {
   console.log(id);
   if (id) {
     try {
-      const response = await axios.get('https://zohodeliverablesapi.azurewebsites.net/Intuit/invoice/pdf/'+id, {
+      const response = await axios.get(API_BASE_URL+'/Intuit/invoice/pdf/'+id, {
         responseType: 'blob', // Ensure response is treated as binary data
       });
       if (response.status === 200) {
