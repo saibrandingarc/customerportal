@@ -48,28 +48,36 @@
               <div v-if="!otpVerified" class="mb-3">
                 <label for="password" class="form-label fw-semibold">New Password</label>
                 <input
-                  type="password"
-                  v-model="password"
-                  class="form-control"
-                  id="password"
-                  placeholder="Enter new password"
-                  required
-                />
+                type="password"
+                v-model="password"
+                class="form-control"
+                id="password"
+                placeholder="Enter new password"
+                required
+                pattern="passwordPattern"
+                title="Password must be at least 8 characters long, include uppercase, lowercase, a number, and a special character."
+              />
               </div>
               <div v-if="!otpVerified" class="mb-3">
                 <label for="password" class="form-label fw-semibold">Confirm New Password</label>
                 <input
                   type="password"
-                  v-model="password"
+                  v-model="confirmpassword"
                   class="form-control"
-                  id="password"
-                  placeholder="Enter new password"
+                  id="confirmPassword"
+                  placeholder="Confirm new password"
                   required
+                  :pattern="passwordPattern"
+                  :title="passwordTitle"
                 />
               </div>
   
               <!-- Error Message -->
+              <div v-if="confirmpassword && confirmpassword !== password" class="text-danger mt-1">
+                Passwords do not match
+              </div>
               <p v-if="errorMessage" class="text-danger text-center">{{ errorMessage }}</p>
+              <p v-if="successMessage" class="text-success text-center">{{ successMessage }}</p>
   
               <!-- Buttons -->
               <div class="d-flex justify-content-center mt-4">
@@ -106,13 +114,17 @@
   
   const email = ref('');
   const password = ref('');
+  const confirmpassword = ref('');
   const otp = ref('');
   const valid = ref(false);
   const emailVerified = ref(false);
   const otpVerified = ref(true);
   const loading = ref(false);
   const errorMessage = ref<string | null>(null);
-  
+  const successMessage = ref<string | null>(null);
+  const passwordPattern = '^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-={}\\[\\]:;\"\'<>,.?/]).{8,}$'
+  const passwordTitle = 'Password must be at least 8 characters long, include uppercase, lowercase, a number, and a special character.'
+
   const rules = {
     required: (value: string) => !!value || 'Required.',
     email: (value: string) => {
@@ -131,7 +143,7 @@
         console.log(response);
         emailVerified.value = response.data.emailVerified;
         otpVerified.value = response.data.otpVerified;
-        errorMessage.value = response.data.message;
+        successMessage.value = response.data.message;
       } catch (err) {
         console.error(err);
         errorMessage.value = 'Email verification failed.';
@@ -147,19 +159,23 @@
     if (otp.value) {
       loading.value = true;
       try {
-        const response = await axios.post(API_BASE_URL+'/Zoho/zoho/verifyOTPUpdatePassword', {
-          email: email.value,
-          otp: otp.value,
-          password: password.value,
-        });
-        console.log(response);
-        otpVerified.value = true;
-        emailVerified.value = true;
-        errorMessage.value = response.data.message;
-        // Redirect after success
-        setTimeout(() => {
-          router.push({ name: 'Login' });
-        }, 1500);
+        if(password == confirmpassword) {
+          const response = await axios.post(API_BASE_URL+'/Zoho/zoho/verifyOTPUpdatePassword', {
+            email: email.value,
+            otp: otp.value,
+            password: password.value,
+          });
+          console.log(response);
+          otpVerified.value = true;
+          emailVerified.value = true;
+          successMessage.value = response.data.message;
+          // Redirect after success
+          setTimeout(() => {
+            router.push({ name: 'Login' });
+          }, 1500);
+        } else {
+          errorMessage.value = "Password mismatch"
+        }
       } catch (err) {
         console.error(err);
         errorMessage.value = 'OTP verification failed.';
@@ -167,7 +183,7 @@
         loading.value = false;
       }
     } else {
-      alert('Please enter the OTP.');
+      errorMessage.value = 'Please enter the OTP.';
     }
   };
   </script>

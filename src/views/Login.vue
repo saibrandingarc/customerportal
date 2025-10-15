@@ -341,11 +341,11 @@
                     router.push("/dashboard");
                 } else {
                     logout();
-                    errorMessage.value = "Email not exist please contact you admin";
+                    errorMessage.value = "Email not exist, please contact support@brandingarc.com";
                 }
             } else {
                 logout();
-                errorMessage.value = "Email not exist please contact you admin";
+                errorMessage.value = "Email not exist, please contact support@brandingarc.com";
             }
         }
     });
