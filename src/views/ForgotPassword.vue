@@ -172,7 +172,7 @@
           // Redirect after success
           setTimeout(() => {
             router.push({ name: 'Login' });
-          }, 1500);
+          }, 5000);
         } else {
           errorMessage.value = "Password mismatch"
         }
