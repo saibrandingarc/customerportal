@@ -56,6 +56,18 @@ onMounted(() => {
   if (logintype == "username-password") {
     const authStore = useAuthStore();
     isAuthenticated.value = authStore.isTokenValid();
+  } else {
+    console.log("Login Type : " + logintype);
+    if (logintype === "google") {
+      const userString = localStorage.getItem("user");
+      if (userString) {
+        const userdata = JSON.parse(userString);
+        username.value = userdata.nickname;
+        // use userdata if necessary
+      } else {
+        console.warn("No user data found in localStorage for google login.");
+      }
+    }
   }
 });
 
