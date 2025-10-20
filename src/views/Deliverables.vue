@@ -322,24 +322,37 @@ const fetchDataForBlock = async () => {
     const response = await axios.get(API_BASE_URL+'/Zoho/zoho/deliverables/' + companyId + '/' + selectedBlock.value);
     console.log(response);
     error.value = '';
-    items.value = response.data.data;
-    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled').sort((a, b) => {
-      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-      return dateB - dateA;
-    });
-    completedDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status === 'Completed').sort((a, b) => {
-      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-      return dateB - dateA;
-    });
-    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approval_Status: string}) => c.Main_Status === 'Client Approval - Final' &&
-    (c.Client_Approval_Status === 'none' || c.Client_Approval_Status === null)).sort((a, b) => {
-      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-      return dateB - dateA;
-    });
-    console.log(completedDeliverables.value);
+    if(response.data !== "") {
+      items.value = response.data.data;
+      upcomingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled').sort((a, b) => {
+        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+        return dateB - dateA;
+      });
+      completedDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status === 'Completed').sort((a, b) => {
+        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+        return dateB - dateA;
+      });
+      pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approval_Status: string}) => c.Main_Status === 'Client Approval - Final' &&
+      (c.Client_Approval_Status === 'none' || c.Client_Approval_Status === null)).sort((a, b) => {
+        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+        return dateB - dateA;
+      });
+      console.log(completedDeliverables.value);
+    } else {
+      upcomingDeliverables.value = [];
+      completedDeliverables.value = [];
+      pendingDeliverables.value = [];
+      Toastify({
+        text: "No deliverables found for this block.",
+        duration: 3000, // 3 seconds
+        gravity: "top", // "top" or "bottom"
+        position: "right", // "left", "center", or "right"
+        backgroundColor: "#ed5e5e",
+      }).showToast()
+    }
   } catch (err) {
     error.value = err.message;
     console.error("Error fetching data:", error);
