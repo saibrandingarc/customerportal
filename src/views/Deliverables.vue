@@ -285,7 +285,7 @@ const fetchDeliverables = async () => {
   try {
     console.log(authStore);
     var companyId = authStore.getCompanyId();
-    const response = await axios.get(API_BASE_URL+'/Zoho/zoho/deliverables/' + companyId);
+    const response = await axios.get(API_BASE_URL+'/Zoho/zoho/deliverables/' + companyId + '/' + selectedBlock.value);
     console.log(response);
     error.value = '';
     items.value = response.data.data;
