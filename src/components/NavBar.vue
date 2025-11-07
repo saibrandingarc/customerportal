@@ -13,15 +13,16 @@
           <div class="dropdown ms-sm-3 header-item topbar-user">
             <button v-if="isAuthenticated" type="button" class="btn material-shadow-none" id="page-header-user-dropdown"
               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <span class="d-flex align-items-center">
+              <span class="d-flex align-items-left">
                 <!-- Show this icon only on mobile -->
                 <i class="mdi mdi-menu d-xl-none fs-24"></i>
                 <!-- <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg"
                   alt="Header Avatar"> -->
-                <span class="text-start ms-xl-2">
-                  <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">Hi {{ username }} !</span>
+                <span class="">
+                  <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">Hi <strong>{{ username }} </strong>!</span>
                 </span>
               </span>
+              <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ companyname }}</span>
             </button>
             <div class="dropdown-menu dropdown-menu-end">
               <!-- item-->
@@ -50,7 +51,9 @@ import router from '@/router';
 const accessToken = localStorage.getItem('auth_token');
 const authStore = useAuthStore();
 const username = ref("");
+const companyname = ref("");
 username.value = authStore.getUsername();
+companyname.value = authStore.getCompanyName();
 const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently } = useAuth0();
 
 onMounted(() => {
@@ -65,6 +68,7 @@ onMounted(() => {
       if (userString) {
         const userdata = JSON.parse(userString);
         username.value = userdata.nickname;
+        companyname.value = userdata.companyName;
         // use userdata if necessary
       } else {
         console.warn("No user data found in localStorage for google login.");
