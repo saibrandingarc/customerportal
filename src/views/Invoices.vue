@@ -9,6 +9,10 @@
       <div class="container-fluid">
         <div class="card">
           <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+                <h5 class="me-3 mb-0">Invoices</h5>
+                <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
+              </div>
             <div class="row">
               <div class="col-12">
                 <EasyDataTable
