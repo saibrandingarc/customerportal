@@ -7,22 +7,37 @@
   <div class="main-content">
     <div class="page-content">
       <div class="container-fluid">
+        <div class="row">
+          <div class="col-6">
+            <div class="card">
+              <div class="card-body">
+                <h4>Outstanding Balance</h4>
+                <h2>{{ formattedOutstandingBalance }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card">
+              <div class="card-body">
+                <h4>Past Due</h4>
+                <h2>{{ formattedPastDue }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="card">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
-                <h5 class="me-3 mb-0">Invoices</h5>
-                <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
-              </div>
+              <h5 class="me-3 mb-0">Invoices</h5>
+              <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
+            </div>
             <div class="row">
               <div class="col-12">
-                <EasyDataTable
-                  :headers="headers"
-                  :items="items"
-                  :rows-per-page="10"
-                  table-class="table-bordered"
-                  show-index
-                  :searchable="true"
-                >
+                <EasyDataTable :headers="headers" :items="items" :rows-per-page="10" table-class="table-bordered"
+                  show-index :searchable="true">
+                  <template #item-TotalAmount="{ TotalAmount }">
+                    {{ Number(TotalAmount).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+                  </template>
                   <template #item-Actions="{ Id }">
                     <button class="btn btn-sm btn-primary" @click="handleRowClick(Id)">Download</button>
                   </template>
@@ -47,8 +62,9 @@ import { Header } from 'vue3-easy-data-table';
 import { API_BASE_URL } from '@/api/config';
 const authStore = useAuthStore();
 
-// Ref to hold invoices data
-const invoices = ref<string | null>(null);
+// Totals
+const outstandingBalance = ref(0);
+const pastDue = ref(0);
 const isChecked = ref(false);
 const isDisabled = ref(false)
 const loading = ref(false);
@@ -59,12 +75,26 @@ const search = ref('');
 
 const headers: Header[] = [
   { text: 'ID', value: 'Id' },
+  { text: 'Status', value: 'Status' },
   { text: 'Invoice Date', value: 'InvoiceDate' },
   { text: 'Due Date', value: 'DueDate' },
   { text: 'Total Amount', value: 'TotalAmount' },
-  { text: 'Status', value: 'Status' },
   { text: 'Actions', value: 'Actions' },
 ];
+
+const formattedOutstandingBalance = computed(() =>
+  outstandingBalance.value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  })
+);
+
+const formattedPastDue = computed(() =>
+  pastDue.value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  })
+);
 
 // Fetch invoices using the access token
 const fetchInvoices = async () => {
@@ -75,16 +105,43 @@ const fetchInvoices = async () => {
     const companyName = parsedData.companyName;
     console.log(companyName);
     var companyId = authStore.getCompanyId();
-    const response = await axios.get(API_BASE_URL+'/Intuit/invoices/'+companyName);
+    const response = await axios.get(API_BASE_URL + '/Intuit/invoices/' + companyName);
     console.log(response);
     error.value = '';
-    const invoices: Invoice[] = response.data.QueryResponse.Invoice.map((item: { Id: any; TxnDate: any; DueDate: any; TotalAmt: any; Balance: number; }) => ({
-      Id: item.Id,
-      InvoiceDate: item.TxnDate,
-      DueDate: item.DueDate,
-      TotalAmount: item.TotalAmt,
-      Status: item.Balance === 0 ? "Paid" : "Pending"
-    }));
+    const invoices: Invoice[] = response.data.QueryResponse.Invoice.map(
+      (item: { Id: any; TxnDate: any; DueDate: any; TotalAmt: any; Balance: number; }) => ({
+        Id: item.Id,
+        InvoiceDate: item.TxnDate,
+        DueDate: item.DueDate,
+        TotalAmount: item.TotalAmt,
+        Status: item.Balance === 0 ? "Paid" : "Pending"
+      })
+    );
+
+    // Calculate outstanding balance and past due totals
+    const today = new Date();
+    let outstandingTotal = 0;
+    let pastDueTotal = 0;
+
+    response.data.QueryResponse.Invoice.forEach(
+      (item: { DueDate: string; Balance: number; }) => {
+        const balance = Number(item.Balance || 0);
+        if (balance > 0) {
+          outstandingTotal += balance;
+
+          if (item.DueDate) {
+            const dueDate = new Date(item.DueDate);
+            if (dueDate < today) {
+              pastDueTotal += balance;
+            }
+          }
+        }
+      }
+    );
+
+    outstandingBalance.value = outstandingTotal;
+    pastDue.value = pastDueTotal;
+
     items.value = invoices;
   } catch (err) {
     error.value = err.message;
@@ -97,7 +154,7 @@ const handleRowClick = async (id: string) => {
   console.log(id);
   if (id) {
     try {
-      const response = await axios.get(API_BASE_URL+'/Intuit/invoice/pdf/'+id, {
+      const response = await axios.get(API_BASE_URL + '/Intuit/invoice/pdf/' + id, {
         responseType: 'blob', // Ensure response is treated as binary data
       });
       if (response.status === 200) {

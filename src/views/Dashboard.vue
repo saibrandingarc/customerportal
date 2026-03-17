@@ -52,7 +52,7 @@
                 </div>
               </div>
               <div class="card-body">
-                <DoughnutChart v-bind="doughnutChartProps" />
+                <BarChart v-bind="deliverablesBarChartProps" ref="deliverablesBarChartRef" />
               </div>
             </div>
           </div>
@@ -87,36 +87,37 @@ Chart.register(...registerables);
 const toggleLegend = ref(true);
 const dataValues = ref<number[]>([]);
 const dataLabels = ref<string[]>([]);
-const backgroundColor = ref<string[]>([]);
-const options = computed<ChartOptions<"doughnut">>(() => ({
-  scales: {
-    myScale: {
-      type: "logarithmic",
-      position: toggleLegend.value ? "left" : "right",
+const deliverablesBarColor = "#42A5F5";
+const deliverablesBarBorderColor = "#1E88E5";
+
+// Deliverables Bar Chart configuration
+const deliverablesChartData = computed<ChartData<"bar">>(() => ({
+  labels: dataLabels.value,
+  datasets: [
+    {
+      label: "Deliverables by Status",
+      data: dataValues.value,
+      backgroundColor: deliverablesBarColor,
+      borderColor: deliverablesBarBorderColor,
+      borderWidth: 1,
     },
-  },
+  ],
+}));
+
+const deliverablesChartOptions = computed<ChartOptions<"bar">>(() => ({
+  responsive: true,
   plugins: {
-    legend: {
-      position: toggleLegend.value ? "top" : "bottom",
-    },
+    legend: { display: true },
     title: {
       display: true,
       text: "Deliverables by Type (Records)",
     },
   },
 }));
-const testData = computed<ChartData<"doughnut">>(() => ({
-  labels: dataLabels.value,
-  datasets: [
-    {
-      data: dataValues.value,
-      backgroundColor: backgroundColor.value,
-    },
-  ],
-}));
-const { doughnutChartProps, doughnutChartRef } = useDoughnutChart({
-  chartData: testData,
-  options,
+
+const { barChartProps: deliverablesBarChartProps, barChartRef: deliverablesBarChartRef } = useBarChart({
+  chartData: deliverablesChartData,
+  options: deliverablesChartOptions,
 });
 
 interface Case {
@@ -198,18 +199,24 @@ const fetchDeliverables = async () => {
 
     // Process the response data to extract necessary chart data
     const statusCount: { [key: string]: number } = {};
+    const excludedStatuses = new Set([
+      "Approval Idea",
+      "Completed",
+      "Canceled",
+      "Cancelled",
+      "Completed - Unapproved",
+      "Completed - No Info",
+    ]);
 
     response.data.data.forEach((item: any) => {
-      const status = item.Main_Status; // Replace with your actual data field
-      if (status) {
+      const status = (item.Main_Status ?? "").toString().trim(); // Replace with your actual data field
+      if (status && !excludedStatuses.has(status)) {
         statusCount[status] = (statusCount[status] || 0) + 1;
       }
     });
     console.log(statusCount);
     dataLabels.value = Object.keys(statusCount);
     dataValues.value = Object.values(statusCount);
-    backgroundColor.value = Object.keys(statusCount).map(() => getRandomColor(dataValues.value.length));
-    console.log(backgroundColor.value);
   } catch (err) {
     console.error("Error fetching deliverables:", err);
   } finally {

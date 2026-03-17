@@ -10,62 +10,114 @@
       <div class="container-fluid">
         <div class="card">
           <div class="card-body">
-            <div class="row mb-3">
-              <!-- Select Year -->
-              <div class="col-sm-4">
-                <label for="yearSelect" class="form-label">Select Year</label>
-                <select id="yearSelect" class="form-select w-50" v-model="selectedBlock" @change="fetchDataForBlock">
-                  <option v-for="(month, index) in monthsArray" :key="index" :value="month">
-                    {{ month }}
-                  </option>
-                </select>
-              </div>
+            <div class="d-flex align-items-center mb-3">
+              <h5 class="me-3 mb-0">Deliverables</h5>
+              <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
             </div>
-          </div>
-        </div>
 
-        <div class="card">
-          <div class="card-body">
-            <!-- Upcoming Deliverables Table -->
-            <div class="table-responsive">
-              <div class="d-flex align-items-center mb-3">
-                <h5 class="me-3 mb-0">Deliverables - Pending Approvals </h5>
-                <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
-              </div>
-              <EasyDataTable :headers="pendingheaders" :items="pendingDeliverables" :rows-per-page="5"
-                table-class="table-bordered" show-index :searchable="true" buttons-pagination>
-                <!-- Link column -->
-                <template #item-Content_Doc="{ Content_Doc }">
-                  <a v-if="Content_Doc" :href="Content_Doc" target="_blank" rel="noopener"
-                    class="text-primary fw-semibold">
-                    Open Doc
-                  </a>
-                  <span v-else class="text-muted">—</span>
-                </template>
-                <template #item-actions="{ id }">
-                  <button class="btn btn-success btn-sm me-2" @click="openApproveModal(id)">
-                    Approve
-                  </button>
-                  <button class="btn btn-danger btn-sm" @click="openRejectModal(id)">
-                    Reject
-                  </button>
-                </template>
-              </EasyDataTable>
-            </div>
-          </div>
-        </div>
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  :class="{ active: activeDeliverablesTab === 'upcoming' }"
+                  type="button"
+                  @click="activeDeliverablesTab = 'upcoming'"
+                >
+                  Upcoming
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  :class="{ active: activeDeliverablesTab === 'pending' }"
+                  type="button"
+                  @click="activeDeliverablesTab = 'pending'"
+                >
+                  Pending Approvals
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  :class="{ active: activeDeliverablesTab === 'completed' }"
+                  type="button"
+                  @click="activeDeliverablesTab = 'completed'"
+                >
+                  Completed
+                </button>
+              </li>
+            </ul>
 
-        <div class="card">
-          <div class="card-body">
-            <!-- Upcoming Deliverables Table -->
-            <div class="table-responsive">
-              <div class="d-flex align-items-center mb-3">
-                <h5 class="me-3 mb-0">Upcoming Deliverables</h5>
-                <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
-                <!-- <button class="btn btn-primary" @click="dialog = true">Add New</button> -->
+            <div class="tab-content">
+              <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'upcoming' }">
+                <div class="table-responsive">
+                  <EasyDataTable
+                    :headers="headers"
+                    :items="upcomingDeliverables"
+                    :rows-per-page="10"
+                    table-class="table-bordered"
+                    show-index
+                    :searchable="true"
+                    buttons-pagination
+                  />
+                </div>
               </div>
-              <EasyDataTable :headers="headers" :items="upcomingDeliverables" :rows-per-page="5"
-                table-class="table-bordered" show-index :searchable="true" buttons-pagination />
+
+              <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'pending' }">
+                <div class="table-responsive">
+                  <EasyDataTable
+                    :headers="pendingheaders"
+                    :items="pendingDeliverables"
+                    :rows-per-page="10"
+                    table-class="table-bordered"
+                    show-index
+                    :searchable="true"
+                    buttons-pagination
+                  >
+                    <template #item-Content_Doc="{ Content_Doc }">
+                      <a
+                        v-if="Content_Doc"
+                        :href="Content_Doc"
+                        target="_blank"
+                        rel="noopener"
+                        class="text-primary fw-semibold"
+                      >
+                        Open Doc
+                      </a>
+                      <span v-else class="text-muted">—</span>
+                    </template>
+                    <template #item-actions="{ id }">
+                      <button class="btn btn-success btn-sm me-2" @click="openApproveModal(id)">
+                        Approve
+                      </button>
+                      <button class="btn btn-danger btn-sm" @click="openRejectModal(id)">
+                        Reject
+                      </button>
+                    </template>
+                  </EasyDataTable>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'completed' }">
+                <div class="col-sm-4">
+                  <label for="yearSelect" class="form-label">Select Year</label>
+                  <select id="yearSelect" class="form-select w-50" v-model="selectedBlock" @change="fetchDataForBlock">
+                    <option v-for="(month, index) in monthsArray" :key="index" :value="month">
+                      {{ month }}
+                    </option>
+                  </select>
+                </div>
+                <div class="table-responsive">
+                  <EasyDataTable
+                    :headers="completedheaders"
+                    :items="completedDeliverables"
+                    :rows-per-page="10"
+                    table-class="table-bordered"
+                    show-index
+                    buttons-pagination
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -118,16 +170,6 @@
           </div>
         </div>
 
-        <!-- Completed Deliverables -->
-        <div class="card">
-          <div class="card-body">
-            <h5 class="mb-3">Completed Deliverables</h5>
-            <div class="table-responsive">
-              <EasyDataTable :headers="completedheaders" :items="completedDeliverables" :rows-per-page="5"
-                table-class="table-bordered" show-index buttons-pagination />
-            </div>
-          </div>
-        </div>
       </div>
       <!-- Reject Modal -->
       <div class="modal fade" tabindex="-1" :class="{ show: showRejectModal }" style="display: block;"
@@ -193,6 +235,7 @@ import 'toastify-js/src/toastify.css'
 import { API_BASE_URL } from '@/api/config';
 
 const authStore = useAuthStore();
+const activeDeliverablesTab = ref<'upcoming' | 'pending' | 'completed'>('upcoming');
 
 interface Case {
   Case_Number: string;
@@ -240,7 +283,7 @@ const heading = ref("Deliverables")
 const search = ref('');
 
 const headers: Header[] = [
-  // { text: "Block", value: "Block" },
+  { text: "Block", value: "Block" },
   // { text: "Due Date", value: "Due_Date", sortable: true },
   { text: "Status", value: "Status", sortable: true },
   { text: "Content Type", value: "Main_Content_Type", sortable: true },
@@ -262,7 +305,7 @@ const completedheaders = [
   { text: 'Date Published', value: 'Publish_Date' },
   { text: 'Content Type', value: 'Main_Content_Type' },
   { text: 'Topic', value: 'Name', class: "topicWidth" },
-  // { text: 'Credit Cost', value: 'Credit_Cost' }
+  { text: 'Link', value: 'Final_Publication' }
 ];
 
 const dialog = ref(false)
@@ -324,22 +367,22 @@ const fetchDataForBlock = async () => {
     error.value = '';
     if(response.data !== "") {
       items.value = response.data.data;
-      upcomingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled').sort((a, b) => {
-        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-        return dateB - dateA;
-      });
+      // upcomingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled').sort((a, b) => {
+      //   const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+      //   const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+      //   return dateB - dateA;
+      // });
       completedDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status === 'Completed').sort((a, b) => {
         const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
         const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
         return dateB - dateA;
       });
-      pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approval_Status: string}) => c.Main_Status === 'Client Approval - Final' &&
-      (c.Client_Approval_Status === 'none' || c.Client_Approval_Status === null)).sort((a, b) => {
-        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-        return dateB - dateA;
-      });
+      // pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approval_Status: string}) => c.Main_Status === 'Client Approval - Final' &&
+      // (c.Client_Approval_Status === 'none' || c.Client_Approval_Status === null)).sort((a, b) => {
+      //   const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
+      //   const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+      //   return dateB - dateA;
+      // });
       console.log(completedDeliverables.value);
     } else {
       upcomingDeliverables.value = [];

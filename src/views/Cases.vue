@@ -9,48 +9,70 @@
       <div class="container-fluid">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Open Cases</h5>
+            <h5 class="mb-0">Cases</h5>
             <button class="btn btn-primary" @click="dialog = true">New Case</button>
           </div>
           <div class="card-body">
-            <input v-model="searchOpen" class="form-control mb-3" placeholder="Search..." />
-            <EasyDataTable
-                :headers="headers"
-                :items="openitems"
-                :rows-per-page="10"
-                table-class="table-bordered"
-                show-index
-                :searchable="true"
-              >
-              <template #item-Operation="{ id, Case_Number }">
-                <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
-                <button class="btn btn-sm btn-warning me-2" @click="editItem(id)">Edit</button>
-                <button class="btn btn-sm btn-danger" @click="deleteItem(id)">Delete</button>
-              </template>
-            </EasyDataTable>
-          </div>
-        </div>
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  :class="{ active: activeCasesTab === 'open' }"
+                  type="button"
+                  @click="activeCasesTab = 'open'"
+                >
+                  Open
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  :class="{ active: activeCasesTab === 'closed' }"
+                  type="button"
+                  @click="activeCasesTab = 'closed'"
+                >
+                  Closed
+                </button>
+              </li>
+            </ul>
 
-        <div class="card">
-          <div class="card-header">
-            <h5 class="mb-0">Closed Cases</h5>
-          </div>
-          <div class="card-body">
-            <div class="alert alert-success" v-if="snackbar">{{ text }}</div>
-            <input v-model="searchClosed" class="form-control mb-3" placeholder="Search..." />
-            <EasyDataTable
-                :headers="headers"
-                :items="closeditems"
-                :rows-per-page="10"
-                table-class="table-bordered"
-                show-index
-                :searchable="true"
-                buttons-pagination
-              >
-              <template #item-Operation="{ id, Case_Number }">
-                <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
-              </template>
-            </EasyDataTable>
+            <div class="tab-content">
+              <div class="tab-pane fade" :class="{ 'show active': activeCasesTab === 'open' }">
+                <input v-model="searchOpen" class="form-control mb-3" placeholder="Search..." />
+                <EasyDataTable
+                  :headers="headers"
+                  :items="openitems"
+                  :rows-per-page="10"
+                  table-class="table-bordered"
+                  show-index
+                  :searchable="true"
+                >
+                  <template #item-Operation="{ id, Case_Number }">
+                    <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
+                    <button class="btn btn-sm btn-warning me-2" @click="editItem(id)">Edit</button>
+                    <button class="btn btn-sm btn-danger" @click="deleteItem(id)">Delete</button>
+                  </template>
+                </EasyDataTable>
+              </div>
+
+              <div class="tab-pane fade" :class="{ 'show active': activeCasesTab === 'closed' }">
+                <div class="alert alert-success" v-if="snackbar">{{ text }}</div>
+                <input v-model="searchClosed" class="form-control mb-3" placeholder="Search..." />
+                <EasyDataTable
+                  :headers="closedheaders"
+                  :items="closeditems"
+                  :rows-per-page="10"
+                  table-class="table-bordered"
+                  show-index
+                  :searchable="true"
+                  buttons-pagination
+                >
+                  <template #item-Operation="{ id, Case_Number }">
+                    <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
+                  </template>
+                </EasyDataTable>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -115,6 +137,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const text = ref("Hello, I'm a snackbar");
 const snackbar = ref<boolean>(false);
+const activeCasesTab = ref<'open' | 'closed'>('open');
 
 interface Account {
   id: string;
@@ -145,12 +168,26 @@ const headers: Header[] = [
   { text: 'Case Number', value: 'Case_Number' },
   // { title: 'Company Name', key: 'Account_Name.name' },
   { text: 'Subject', value: 'Subject' },
-  { text: 'Close Date', value: 'Case_Closed_Date' },
+  { text: 'Status', value: 'Status' },
+  // { text: 'Close Date', value: 'Case_Closed_Date' },
   { text: 'Open Date', value: 'Case_Open_Date' },
   { text: 'Type', value: 'Type' },
   { text: 'Reason', value: 'Case_Reason' },
-  { text: 'Status', value: 'Status' },
-  { text: 'View Details', value: 'Operation', sortable: false }
+  
+  // { text: 'View Details', value: 'Operation', sortable: false }
+];
+
+const closedheaders: Header[] = [
+  { text: 'Case Number', value: 'Case_Number' },
+  // { title: 'Company Name', key: 'Account_Name.name' },
+  { text: 'Subject', value: 'Subject' },
+  // { text: 'Status', value: 'Status' },
+  { text: 'Open Date', value: 'Case_Open_Date' },
+  { text: 'Close Date', value: 'Case_Closed_Date' },
+  { text: 'Type', value: 'Type' },
+  { text: 'Reason', value: 'Case_Reason' },
+  
+  // { text: 'View Details', value: 'Operation', sortable: false }
 ];
 
 const dialog = ref(false)
