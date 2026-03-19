@@ -38,8 +38,10 @@
                   <template #item-TotalAmount="{ TotalAmount }">
                     {{ Number(TotalAmount).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
                   </template>
-                  <template #item-Actions="{ Id }">
+                  <template #item-Actions="{ Id, InvoiceLink }">
                     <button class="btn btn-sm btn-primary" @click="handleRowClick(Id)">Download</button>
+                    <a v-if="InvoiceLink" :href="InvoiceLink" target="_blank" rel="noopener noreferrer"
+                      class="btn btn-sm btn-primary mx-2">Pay Now</a>
                   </template>
                 </EasyDataTable>
               </div>
@@ -109,12 +111,20 @@ const fetchInvoices = async () => {
     console.log(response);
     error.value = '';
     const invoices: Invoice[] = response.data.QueryResponse.Invoice.map(
-      (item: { Id: any; TxnDate: any; DueDate: any; TotalAmt: any; Balance: number; }) => ({
+      (item: {
+        Id: any;
+        TxnDate: any;
+        DueDate: any;
+        TotalAmt: any;
+        Balance: number;
+        InvoiceLink?: string;
+      }) => ({
         Id: item.Id,
         InvoiceDate: item.TxnDate,
         DueDate: item.DueDate,
         TotalAmount: item.TotalAmt,
-        Status: item.Balance === 0 ? "Paid" : "Pending"
+        Status: item.Balance === 0 ? "Paid" : "Pending",
+        InvoiceLink: item.InvoiceLink,
       })
     );
 

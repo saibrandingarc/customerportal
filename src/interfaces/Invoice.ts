@@ -4,4 +4,5 @@ export interface Invoice {
     DueDate: string;
     TotalAmount: number;
     Status: "Paid" | "Pending";
+    InvoiceLink?: string;
 }
