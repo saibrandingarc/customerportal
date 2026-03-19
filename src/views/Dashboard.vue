@@ -9,6 +9,24 @@
     <div class="page-content">
       <div class="container-fluid">
         <div class="row">
+          <div class="col-6">
+            <div class="card">
+              <div class="card-body">
+                <h4>Outstanding Balance</h4>
+                <h2>{{ formattedOutstandingBalance }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card">
+              <div class="card-body">
+                <h4>Past Due</h4>
+                <h2>{{ formattedPastDue }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
           <!-- Left Column - Bar Chart -->
           <div class="col-sm-6 mb-4">
             <div class="card card-height-100">
@@ -67,9 +85,6 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import NavBar from "../components/NavBar.vue";
-import SidebarMenu from '@/components/SidebarMenu.vue';
-import Footer from '@/components/Footer.vue';
 import { useAuthStore } from '@/stores/userStore';
 import { API_BASE_URL } from '@/api/config';
 
@@ -81,6 +96,8 @@ const router = useRouter();
 const authStore = useAuthStore();
 const snackbar = ref<boolean>(false);
 const loading = ref(false);
+const outstandingBalance = ref(0);
+const pastDue = ref(0);
 
 // Register Chart.js
 Chart.register(...registerables);
@@ -89,6 +106,20 @@ const dataValues = ref<number[]>([]);
 const dataLabels = ref<string[]>([]);
 const deliverablesBarColor = "#42A5F5";
 const deliverablesBarBorderColor = "#1E88E5";
+
+const formattedOutstandingBalance = computed(() =>
+  outstandingBalance.value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  })
+);
+
+const formattedPastDue = computed(() =>
+  pastDue.value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  })
+);
 
 // Deliverables Bar Chart configuration
 const deliverablesChartData = computed<ChartData<"bar">>(() => ({
@@ -133,6 +164,7 @@ const deliverables = ref([]);
 onMounted(async () => {
   await fetchCases();
   await fetchDeliverables();
+  await fetchInvoices();
 });
 
 // Utility function to format date to 'YYYY-MM'
@@ -219,6 +251,51 @@ const fetchDeliverables = async () => {
     dataValues.value = Object.values(statusCount);
   } catch (err) {
     console.error("Error fetching deliverables:", err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Fetch invoices and calculate outstanding/past due totals
+const fetchInvoices = async () => {
+  loading.value = true;
+  try {
+    const parsedData = JSON.parse(localStorage.getItem("user") || "{}");
+    const companyName = parsedData.companyName;
+
+    if (!companyName) {
+      outstandingBalance.value = 0;
+      pastDue.value = 0;
+      return;
+    }
+
+    const response = await axios.get(`${API_BASE_URL}/Intuit/invoices/${companyName}`);
+    const invoices = response?.data?.QueryResponse?.Invoice ?? [];
+
+    const today = new Date();
+    let outstandingTotal = 0;
+    let pastDueTotal = 0;
+
+    invoices.forEach((item: { DueDate?: string; Balance?: number }) => {
+      const balance = Number(item.Balance || 0);
+      if (balance > 0) {
+        outstandingTotal += balance;
+
+        if (item.DueDate) {
+          const dueDate = new Date(item.DueDate);
+          if (dueDate < today) {
+            pastDueTotal += balance;
+          }
+        }
+      }
+    });
+
+    outstandingBalance.value = outstandingTotal;
+    pastDue.value = pastDueTotal;
+  } catch (err) {
+    console.error("Error fetching invoices:", err);
+    outstandingBalance.value = 0;
+    pastDue.value = 0;
   } finally {
     loading.value = false;
   }
