@@ -49,20 +49,6 @@
             </ul>
 
             <div class="tab-content">
-              <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'upcoming' }">
-                <div class="table-responsive">
-                  <EasyDataTable
-                    :headers="headers"
-                    :items="upcomingDeliverables"
-                    :rows-per-page="10"
-                    table-class="table-bordered"
-                    show-index
-                    :searchable="true"
-                    buttons-pagination
-                  />
-                </div>
-              </div>
-
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'pending' }">
                 <div class="table-responsive">
                   <EasyDataTable
@@ -95,6 +81,20 @@
                       </button>
                     </template>
                   </EasyDataTable>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'upcoming' }">
+                <div class="table-responsive">
+                  <EasyDataTable
+                    :headers="headers"
+                    :items="upcomingDeliverables"
+                    :rows-per-page="10"
+                    table-class="table-bordered"
+                    show-index
+                    :searchable="true"
+                    buttons-pagination
+                  />
                 </div>
               </div>
 
