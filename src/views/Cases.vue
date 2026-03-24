@@ -355,4 +355,14 @@ const save = async () => {
 .v-btn {
   min-width: 80px;
 }
+
+.nav-tabs .nav-link.active {
+  background-color: #198fd9;
+  border-color: #198fd9;
+  color: #ffffff;
+}
+
+.nav-tabs .nav-link {
+  color: #198fd9;
+}
 </style>

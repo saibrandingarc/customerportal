@@ -107,6 +107,35 @@ const dataLabels = ref<string[]>([]);
 const deliverablesBarColor = "#42A5F5";
 const deliverablesBarBorderColor = "#1E88E5";
 
+/** Fixed x-axis order for Deliverables by Main_Status (dashboard bar chart). */
+const DELIVERABLES_STATUS_AXIS_ORDER: readonly string[] = [
+  "Research",
+  "Ready To Schedule Planning",
+  "Ready To Schedule",
+  "Ready to Record",
+  "Webinar Outline",
+  "In Progress - Video Voice",
+  "In Progress - Video",
+  "In Progress - Content",
+  "In Progress - Graphic",
+  "In Progress - Executive",
+  "In Progress - Consulting",
+  "In Progress - SEO",
+  "In Progress - Web",
+  "Manager Review",
+  "Quality Review - Initial",
+  "Client Approval - Initial",
+  "Publish Proposal",
+  "Manager Review - Final",
+  "Quality Review - Final",
+  "Client Approval - Final",
+  "Ready To Publish",
+  "Publish Content",
+  "Publishing Scheduled",
+  "Submission Outstanding",
+  "On Hold",
+];
+
 const formattedOutstandingBalance = computed(() =>
   outstandingBalance.value.toLocaleString('en-US', {
     style: 'currency',
@@ -247,8 +276,10 @@ const fetchDeliverables = async () => {
       }
     });
     console.log(statusCount);
-    dataLabels.value = Object.keys(statusCount);
-    dataValues.value = Object.values(statusCount);
+    dataLabels.value = [...DELIVERABLES_STATUS_AXIS_ORDER];
+    dataValues.value = DELIVERABLES_STATUS_AXIS_ORDER.map(
+      (status) => statusCount[status] ?? 0
+    );
   } catch (err) {
     console.error("Error fetching deliverables:", err);
   } finally {

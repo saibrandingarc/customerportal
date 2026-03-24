@@ -19,21 +19,21 @@
               <li class="nav-item">
                 <button
                   class="nav-link"
-                  :class="{ active: activeDeliverablesTab === 'upcoming' }"
-                  type="button"
-                  @click="activeDeliverablesTab = 'upcoming'"
-                >
-                  Upcoming
-                </button>
-              </li>
-              <li class="nav-item">
-                <button
-                  class="nav-link"
                   :class="{ active: activeDeliverablesTab === 'pending' }"
                   type="button"
                   @click="activeDeliverablesTab = 'pending'"
                 >
                   Pending Approvals
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  :class="{ active: activeDeliverablesTab === 'upcoming' }"
+                  type="button"
+                  @click="activeDeliverablesTab = 'upcoming'"
+                >
+                  Upcoming
                 </button>
               </li>
               <li class="nav-item">
@@ -613,12 +613,12 @@ const submitRejection = async () => {
 }
 
 .nav-tabs .nav-link.active {
-  background-color: #13c56b;
-  border-color: #13c56b;
+  background-color: #198fd9;
+  border-color: #198fd9;
   color: #ffffff;
 }
 
 .nav-tabs .nav-link {
-  color: #13c56b;
+  color: #198fd9;
 }
 </style>
