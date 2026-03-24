@@ -276,10 +276,11 @@ const fetchDeliverables = async () => {
       }
     });
     console.log(statusCount);
-    dataLabels.value = [...DELIVERABLES_STATUS_AXIS_ORDER];
-    dataValues.value = DELIVERABLES_STATUS_AXIS_ORDER.map(
-      (status) => statusCount[status] ?? 0
+    const orderedPresent = DELIVERABLES_STATUS_AXIS_ORDER.filter(
+      (status) => (statusCount[status] ?? 0) > 0
     );
+    dataLabels.value = orderedPresent;
+    dataValues.value = orderedPresent.map((status) => statusCount[status] ?? 0);
   } catch (err) {
     console.error("Error fetching deliverables:", err);
   } finally {
