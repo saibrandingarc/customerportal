@@ -611,4 +611,14 @@ const submitRejection = async () => {
   text-align: center;
   white-space: nowrap;
 }
+
+.nav-tabs .nav-link.active {
+  background-color: #13c56b;
+  border-color: #13c56b;
+  color: #ffffff;
+}
+
+.nav-tabs .nav-link {
+  color: #13c56b;
+}
 </style>
