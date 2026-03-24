@@ -235,7 +235,7 @@ import 'toastify-js/src/toastify.css'
 import { API_BASE_URL } from '@/api/config';
 
 const authStore = useAuthStore();
-const activeDeliverablesTab = ref<'upcoming' | 'pending' | 'completed'>('upcoming');
+const activeDeliverablesTab = ref<'upcoming' | 'pending' | 'completed'>('pending');
 
 interface Case {
   Case_Number: string;
