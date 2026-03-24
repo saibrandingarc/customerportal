@@ -101,7 +101,7 @@
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'completed' }">
                 <div class="col-sm-4">
                   <label for="yearSelect" class="form-label">Select Year</label>
-                  <select id="yearSelect" class="form-select w-50" v-model="selectedBlock" @change="fetchDataForBlock">
+                  <select id="yearSelect" class="form-select w-50 mb-3" v-model="selectedBlock" @change="fetchDataForBlock">
                     <option v-for="(month, index) in monthsArray" :key="index" :value="month">
                       {{ month }}
                     </option>
