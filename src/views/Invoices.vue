@@ -40,7 +40,7 @@
                   </template>
                   <template #item-Actions="{ Id, InvoiceLink, Status }">
                     <button class="btn btn-sm btn-primary" @click="handleRowClick(Id)">Download</button>
-                    <a v-if="InvoiceLink && Status !== 'Paid'" :href="InvoiceLink" target="_blank" rel="noopener noreferrer"
+                    <a v-if="Status !== 'Paid'" :href="InvoiceLink" target="_blank" rel="noopener noreferrer"
                       class="btn btn-sm btn-primary mx-2">Pay Now</a>
                   </template>
                 </EasyDataTable>
