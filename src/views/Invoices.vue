@@ -76,7 +76,7 @@ const heading = ref("Invoices")
 const search = ref('');
 
 const headers: Header[] = [
-  { text: 'ID', value: 'Id' },
+  { text: 'Invoice ID', value: 'Id' },
   { text: 'Status', value: 'Status' },
   { text: 'Invoice Date', value: 'InvoiceDate' },
   { text: 'Due Date', value: 'DueDate' },

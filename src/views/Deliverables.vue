@@ -115,7 +115,20 @@
                     table-class="table-bordered"
                     show-index
                     buttons-pagination
-                  />
+                  >
+                    <template #item-Final_Publication="{ Final_Publication }">
+                      <a
+                        v-if="Final_Publication"
+                        :href="Final_Publication"
+                        target="_blank"
+                        rel="noopener"
+                        class="text-primary text-truncate d-inline-block"
+                      >
+                        {{ Final_Publication }}
+                      </a>
+                      <span v-else class="text-muted">—</span>
+                    </template>
+                  </EasyDataTable>
                 </div>
               </div>
             </div>
@@ -283,7 +296,7 @@ const heading = ref("Deliverables")
 const search = ref('');
 
 const headers: Header[] = [
-  { text: "Block", value: "Block" },
+  { text: "Block", value: "Block", sortable: true },
   // { text: "Due Date", value: "Due_Date", sortable: true },
   { text: "Status", value: "Status", sortable: true },
   { text: "Content Type", value: "Main_Content_Type", sortable: true },
@@ -292,8 +305,7 @@ const headers: Header[] = [
 ];
 
 const pendingheaders: Header[] = [
-  // { text: "Due Date", value: "Due_Date", sortable: true },
-  // { text: "Status", value: "Status", sortable: true },
+  { text: "Block", value: "Block", sortable: true },
   { text: "Content Type", value: "Main_Content_Type", sortable: true },
   { text: "Topic", value: "Name", sortable: true },
   { text: "Content Document", value: "Content_Doc", sortable: true },
@@ -301,7 +313,7 @@ const pendingheaders: Header[] = [
 ];
 
 const completedheaders = [
-  { text: 'Block', value: 'Block' },
+  { text: 'Block', value: 'Block', class: 'blockWidth' },
   { text: 'Date Published', value: 'Publish_Date' },
   { text: 'Content Type', value: 'Main_Content_Type' },
   { text: 'Topic', value: 'Name', class: "topicWidth" },
@@ -332,22 +344,29 @@ const fetchDeliverables = async () => {
     console.log(response);
     error.value = '';
     items.value = response.data.data;
-    upcomingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled').sort((a, b) => {
-      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-      return dateB - dateA;
-    });
-    completedDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status === 'Completed').sort((a, b) => {
-      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-      return dateB - dateA;
-    });
-    pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approval_Status: string}) => c.Main_Status === 'Client Approval - Final' &&
-    (c.Client_Approval_Status === null)).sort((a, b) => {
-      const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-      const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-      return dateB - dateA;
-    });
+    upcomingDeliverables.value = response.data.data
+      .filter((c: { Main_Status: string }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled')
+      .sort((a, b) => {
+        const blockA = (a.Block || '').toString();
+        const blockB = (b.Block || '').toString();
+        return blockA.localeCompare(blockB);
+      });
+    completedDeliverables.value = response.data.data
+      .filter((c: { Main_Status: string }) => c.Main_Status === 'Completed')
+      .sort((a, b) => {
+        const dateA = a.Publish_Date ? new Date(a.Publish_Date).getTime() : 0;
+        const dateB = b.Publish_Date ? new Date(b.Publish_Date).getTime() : 0;
+        return dateB - dateA;
+      });
+    pendingDeliverables.value = response.data.data
+      .filter((c: { Main_Status: string; Client_Approval_Status: string }) =>
+        c.Main_Status === 'Client Approval - Final' && c.Client_Approval_Status === null
+      )
+      .sort((a, b) => {
+        const blockA = (a.Block || '').toString();
+        const blockB = (b.Block || '').toString();
+        return blockA.localeCompare(blockB);
+      });
     console.log("test :" + completedDeliverables);
   } catch (err) {
     error.value = err.message;
@@ -372,11 +391,13 @@ const fetchDataForBlock = async () => {
       //   const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
       //   return dateB - dateA;
       // });
-      completedDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status === 'Completed').sort((a, b) => {
-        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-        return dateB - dateA;
-      });
+      completedDeliverables.value = response.data.data
+        .filter((c: { Main_Status: string }) => c.Main_Status === 'Completed')
+        .sort((a, b) => {
+          const dateA = a.Publish_Date ? new Date(a.Publish_Date).getTime() : 0;
+          const dateB = b.Publish_Date ? new Date(b.Publish_Date).getTime() : 0;
+          return dateB - dateA;
+        });
       // pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approval_Status: string}) => c.Main_Status === 'Client Approval - Final' &&
       // (c.Client_Approval_Status === 'none' || c.Client_Approval_Status === null)).sort((a, b) => {
       //   const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
@@ -603,6 +624,10 @@ const submitRejection = async () => {
 
 .topicWidth {
   width: 150px;
+}
+
+.blockWidth {
+  white-space: nowrap;
 }
 
 .custom-data-table th:nth-child(0),
