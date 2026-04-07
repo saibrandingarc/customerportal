@@ -10,7 +10,7 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-6">
-            <div class="card">
+            <div class="card summary-card" @click="goToInvoices">
               <div class="card-body">
                 <h4>Outstanding Balance</h4>
                 <h2>{{ formattedOutstandingBalance }}</h2>
@@ -18,7 +18,7 @@
             </div>
           </div>
           <div class="col-6">
-            <div class="card">
+            <div class="card summary-card" @click="goToInvoices">
               <div class="card-body">
                 <h4>Past Due</h4>
                 <h2>{{ formattedPastDue }}</h2>
@@ -27,30 +27,6 @@
           </div>
         </div>
         <div class="row">
-          <!-- Left Column - Bar Chart -->
-          <div class="col-sm-6 mb-4">
-            <div class="card card-height-100">
-              <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Cases</h4>
-                <div class="flex-shrink-0">
-                  <!-- <div class="dropdown card-header-dropdown">
-                    <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true"
-                      aria-expanded="false">
-                      <span class="text-muted">Report<i class="mdi mdi-chevron-down ms-1"></i></span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end">
-                      <a class="dropdown-item" href="#">Download Report</a>
-                      <a class="dropdown-item" href="#">Export</a>
-                      <a class="dropdown-item" href="#">Import</a>
-                    </div>
-                  </div> -->
-                </div>
-              </div>
-              <div class="card-body">
-                <BarChart v-bind="barChartProps" ref="barChartRef" />
-              </div>
-            </div>
-          </div>
           <div class="col-sm-6 mb-4">
             <div class="card card-height-100">
               <div class="card-header align-items-center d-flex">
@@ -71,6 +47,29 @@
               </div>
               <div class="card-body">
                 <BarChart v-bind="deliverablesBarChartProps" ref="deliverablesBarChartRef" />
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 mb-4">
+            <div class="card card-height-100">
+              <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Cases</h4>
+                <div class="flex-shrink-0">
+                  <!-- <div class="dropdown card-header-dropdown">
+                    <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="false">
+                      <span class="text-muted">Report<i class="mdi mdi-chevron-down ms-1"></i></span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                      <a class="dropdown-item" href="#">Download Report</a>
+                      <a class="dropdown-item" href="#">Export</a>
+                      <a class="dropdown-item" href="#">Import</a>
+                    </div>
+                  </div> -->
+                </div>
+              </div>
+              <div class="card-body">
+                <BarChart v-bind="barChartProps" ref="barChartRef" />
               </div>
             </div>
           </div>
@@ -149,6 +148,10 @@ const formattedPastDue = computed(() =>
     currency: 'USD',
   })
 );
+
+const goToInvoices = () => {
+  router.push({ name: 'Invoices' });
+};
 
 // Deliverables Bar Chart configuration
 const deliverablesChartData = computed<ChartData<"bar">>(() => ({
@@ -384,5 +387,9 @@ function getRandomColor(count: any) {
 <style scoped>
 .v-btn {
   min-width: 80px;
+}
+
+.summary-card {
+  cursor: pointer;
 }
 </style>
