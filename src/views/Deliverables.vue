@@ -111,6 +111,8 @@
                   <EasyDataTable
                     :headers="completedheaders"
                     :items="completedDeliverables"
+                    sort-by="Publish_Date"
+                    sort-type="desc"
                     :rows-per-page="10"
                     table-class="table-bordered"
                     show-index
