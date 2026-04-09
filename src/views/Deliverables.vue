@@ -58,6 +58,8 @@
                     table-class="table-bordered"
                     show-index
                     :searchable="true"
+                    sort-by="Block"
+                    sort-type="desc"
                     buttons-pagination
                   >
                     <template #item-Content_Doc="{ Content_Doc }">
