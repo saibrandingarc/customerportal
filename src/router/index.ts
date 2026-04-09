@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import ForgotPassword from '../views/ForgotPassword.vue';
-import { useAuth0 } from '@auth0/auth0-vue';
 import { jwtDecode } from 'jwt-decode';
 import EndUserAgreementVue from '@/views/EndUserAgreement.vue';
 import PrivacyPolicyVue from '@/views/PrivacyPolicy.vue';
@@ -135,27 +134,32 @@ function hasValidUsernamePasswordSession(): boolean {
   }
 }
 
-async function waitForAuth0Ready(): Promise<void> {
-  const { isLoading } = useAuth0();
-  let attempts = 0;
-  while (isLoading.value && attempts < 30) {
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    attempts += 1;
+function hasValidSocialSession(): boolean {
+  const loginType = localStorage.getItem('loginType');
+  if (!loginType || loginType === 'username-password') return false;
+
+  const rawUser = localStorage.getItem('user');
+  if (!rawUser) return false;
+
+  try {
+    const user = JSON.parse(rawUser) as { access_token?: string };
+    if (!user?.access_token) return false;
+    return !isTokenExpired(user.access_token);
+  } catch (error) {
+    console.error('Invalid social session:', error);
+    return false;
   }
 }
 
-router.beforeEach(async (to) => {
+router.beforeEach((to) => {
   if (!to.matched.some((record) => record.meta.requiresAuth)) {
     return true;
   }
 
-  await waitForAuth0Ready();
+  const localSessionValid =
+    hasValidUsernamePasswordSession() || hasValidSocialSession();
 
-  const { isAuthenticated } = useAuth0();
-  const auth0SessionValid = isAuthenticated.value;
-  const localSessionValid = hasValidUsernamePasswordSession();
-
-  if (auth0SessionValid || localSessionValid) {
+  if (localSessionValid) {
     return true;
   }
 
