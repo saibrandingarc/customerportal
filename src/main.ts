@@ -1,7 +1,6 @@
 import App from "./App.vue";
 import { createApp } from "vue";
 import router from "./router";
-import { createAuth0 } from "@auth0/auth0-vue";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faLink, faUser, faPowerOff } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -30,8 +29,8 @@ library.add(faLink, faUser, faPowerOff);
 app.component('EasyDataTable', Vue3EasyDataTable);
 app
   .use(hljsVuePlugin)
-  .use(router)
   .use(auth)
+  .use(router)
   .use(pinia)
   .component("font-awesome-icon", FontAwesomeIcon)
   .mount("#app");
