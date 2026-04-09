@@ -10,7 +10,16 @@
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Cases</h5>
-            <button class="btn btn-primary" @click="dialog = true">New Case</button>
+            <div class="d-flex gap-2">
+              <button
+                class="btn btn-outline-secondary"
+                @click="fetchCases"
+                :disabled="loading"
+              >
+                {{ loading ? 'Refreshing...' : 'Refresh' }}
+              </button>
+              <button class="btn btn-primary" @click="dialog = true">New Case</button>
+            </div>
           </div>
           <div class="card-body">
             <ul class="nav nav-tabs mb-3">
