@@ -75,6 +75,8 @@
                   show-index
                   :searchable="true"
                   buttons-pagination
+                  sort-by="Case_Closed_Date"
+                  sort-type="desc"
                 >
                   <template #item-Operation="{ id, Case_Number }">
                     <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
@@ -227,8 +229,8 @@ const fetchCases = async () => {
       items.value = response.data.data;
       openitems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'New')
       .sort((a, b) => {
-        const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-        const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
+        const dateA = a.Created_Time ? new Date(a.Created_Time).getTime() : 0;
+        const dateB = b.Created_Time ? new Date(b.Created_Time).getTime() : 0;
         return dateB - dateA; // Descending
       });
       console.log(openitems.value);
