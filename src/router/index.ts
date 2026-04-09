@@ -114,27 +114,52 @@ function isTokenExpired(token: string): boolean {
   }
 }
 
-router.beforeEach((to, from, next) => {
-  // const logintype = localStorage.getItem("loginType");
-  // const isAuthenticated = ref(false);
-  // if(logintype == "username-password") {
-  //   const authStore = useAuthStore();
-  //   isAuthenticated.value = authStore.isTokenValid();
-  // }
-  
-  // const isAuthenticated = authStore.isTokenValid();
-  const { isAuthenticated } = useAuth0();
+function hasValidUsernamePasswordSession(): boolean {
+  const loginType = localStorage.getItem('loginType');
+  if (loginType !== 'username-password') return false;
 
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!isAuthenticated.value) {
-      // No token found, redirect to login page
-      next({ name: 'Login' });
-    } else {
-        next();
-    }
-  } else {
-    next(); // Always allow navigation if no authentication required
+  const rawUser = localStorage.getItem('user');
+  if (!rawUser) return false;
+
+  try {
+    const user = JSON.parse(rawUser) as { expiresIn?: string };
+    if (!user?.expiresIn) return false;
+
+    const expiration = new Date(user.expiresIn).getTime();
+    if (Number.isNaN(expiration)) return false;
+
+    return Date.now() < expiration;
+  } catch (error) {
+    console.error('Invalid local user session:', error);
+    return false;
   }
+}
+
+async function waitForAuth0Ready(): Promise<void> {
+  const { isLoading } = useAuth0();
+  let attempts = 0;
+  while (isLoading.value && attempts < 30) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    attempts += 1;
+  }
+}
+
+router.beforeEach(async (to) => {
+  if (!to.matched.some((record) => record.meta.requiresAuth)) {
+    return true;
+  }
+
+  await waitForAuth0Ready();
+
+  const { isAuthenticated } = useAuth0();
+  const auth0SessionValid = isAuthenticated.value;
+  const localSessionValid = hasValidUsernamePasswordSession();
+
+  if (auth0SessionValid || localSessionValid) {
+    return true;
+  }
+
+  return { name: 'Login' };
 });
 
 export default router;
