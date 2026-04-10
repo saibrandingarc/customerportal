@@ -265,6 +265,14 @@ interface Case {
   Account_Name: string;
 }
 
+/** API row shape for Zoho deliverables lists (filter/sort callbacks). */
+interface DeliverableRow {
+  Block?: string | number | null;
+  Main_Status: string;
+  Client_Approval_Status?: string | null;
+  Publish_Date?: string;
+}
+
 // Function to generate months relative to the current date
 const generateRelativeMonthsArray = (past: number, future: number): string[] => {
   const today = new Date();
@@ -357,26 +365,28 @@ const fetchDeliverables = async (tab: DeliverablesTab = activeDeliverablesTab.va
     console.log(response);
     error.value = '';
     items.value = response.data.data;
+    const rows = response.data.data as DeliverableRow[];
     if (tab === 'upcoming') {
-      upcomingDeliverables.value = response.data.data
-        .filter((c: { Main_Status: string }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled')
+      upcomingDeliverables.value = rows
+        .filter((c) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled')
         .sort((a, b) => {
           const blockA = (a.Block || '').toString();
           const blockB = (b.Block || '').toString();
           return blockA.localeCompare(blockB);
         });
     } else if (tab === 'completed') {
-      completedDeliverables.value = response.data.data
-        .filter((c: { Main_Status: string }) => c.Main_Status === 'Completed')
+      completedDeliverables.value = rows
+        .filter((c) => c.Main_Status === 'Completed')
         .sort((a, b) => {
           const dateA = a.Publish_Date ? new Date(a.Publish_Date).getTime() : 0;
           const dateB = b.Publish_Date ? new Date(b.Publish_Date).getTime() : 0;
           return dateB - dateA;
         });
     } else {
-      pendingDeliverables.value = response.data.data
-        .filter((c: { Main_Status: string; Client_Approval_Status: string }) =>
-          c.Main_Status === 'Client Approval - Final' && c.Client_Approval_Status === null
+      pendingDeliverables.value = rows
+        .filter(
+          (c) =>
+            c.Main_Status === 'Client Approval - Final' && c.Client_Approval_Status === null
         )
         .sort((a, b) => {
           const blockA = (a.Block || '').toString();
@@ -386,7 +396,7 @@ const fetchDeliverables = async (tab: DeliverablesTab = activeDeliverablesTab.va
     }
     console.log("test :" + completedDeliverables);
   } catch (err) {
-    error.value = err.message;
+    error.value = err instanceof Error ? err.message : String(err);
   } finally {
     loading.value = false;
   }
