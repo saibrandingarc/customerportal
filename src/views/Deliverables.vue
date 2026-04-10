@@ -353,7 +353,7 @@ const fetchDeliverables = async (tab: DeliverablesTab = activeDeliverablesTab.va
   try {
     console.log(authStore);
     var companyId = authStore.getCompanyId();
-    const response = await axios.get(API_BASE_URL+'/Zoho/zoho/deliverables/' + companyId + '/' + selectedBlock.value);
+    const response = await axios.get(API_BASE_URL+'/Zoho/zoho/deliverables/' + companyId + '/' + selectedBlock.value+'/'+tab);
     console.log(response);
     error.value = '';
     items.value = response.data.data;
