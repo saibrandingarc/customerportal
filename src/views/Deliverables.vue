@@ -20,8 +20,9 @@
                 <button
                   class="nav-link"
                   :class="{ active: activeDeliverablesTab === 'pending' }"
+                  data-value="pending"
                   type="button"
-                  @click="activeDeliverablesTab = 'pending'"
+                  @click="changeDeliverablesTab('pending')"
                 >
                   Pending Approvals
                 </button>
@@ -30,8 +31,9 @@
                 <button
                   class="nav-link"
                   :class="{ active: activeDeliverablesTab === 'upcoming' }"
+                  data-value="upcoming"
                   type="button"
-                  @click="activeDeliverablesTab = 'upcoming'"
+                  @click="changeDeliverablesTab('upcoming')"
                 >
                   Upcoming
                 </button>
@@ -40,8 +42,9 @@
                 <button
                   class="nav-link"
                   :class="{ active: activeDeliverablesTab === 'completed' }"
+                  data-value="completed"
                   type="button"
-                  @click="activeDeliverablesTab = 'completed'"
+                  @click="changeDeliverablesTab('completed')"
                 >
                   Completed
                 </button>
@@ -252,7 +255,8 @@ import 'toastify-js/src/toastify.css'
 import { API_BASE_URL } from '@/api/config';
 
 const authStore = useAuthStore();
-const activeDeliverablesTab = ref<'upcoming' | 'pending' | 'completed'>('pending');
+type DeliverablesTab = 'upcoming' | 'pending' | 'completed';
+const activeDeliverablesTab = ref<DeliverablesTab>('pending');
 
 interface Case {
   Case_Number: string;
@@ -339,7 +343,12 @@ const items = ref<Case[]>([]);
 const upcomingDeliverables = ref<any[]>([]);
 const completedDeliverables = ref<any[]>([]);
 const pendingDeliverables = ref<any[]>([]);
-const fetchDeliverables = async () => {
+const changeDeliverablesTab = async (tab: DeliverablesTab) => {
+  activeDeliverablesTab.value = tab;
+  await fetchDeliverables(tab);
+};
+
+const fetchDeliverables = async (tab: DeliverablesTab = activeDeliverablesTab.value) => {
   loading.value = true;
   try {
     console.log(authStore);
@@ -348,29 +357,33 @@ const fetchDeliverables = async () => {
     console.log(response);
     error.value = '';
     items.value = response.data.data;
-    upcomingDeliverables.value = response.data.data
-      .filter((c: { Main_Status: string }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled')
-      .sort((a, b) => {
-        const blockA = (a.Block || '').toString();
-        const blockB = (b.Block || '').toString();
-        return blockA.localeCompare(blockB);
-      });
-    completedDeliverables.value = response.data.data
-      .filter((c: { Main_Status: string }) => c.Main_Status === 'Completed')
-      .sort((a, b) => {
-        const dateA = a.Publish_Date ? new Date(a.Publish_Date).getTime() : 0;
-        const dateB = b.Publish_Date ? new Date(b.Publish_Date).getTime() : 0;
-        return dateB - dateA;
-      });
-    pendingDeliverables.value = response.data.data
-      .filter((c: { Main_Status: string; Client_Approval_Status: string }) =>
-        c.Main_Status === 'Client Approval - Final' && c.Client_Approval_Status === null
-      )
-      .sort((a, b) => {
-        const blockA = (a.Block || '').toString();
-        const blockB = (b.Block || '').toString();
-        return blockA.localeCompare(blockB);
-      });
+    if (tab === 'upcoming') {
+      upcomingDeliverables.value = response.data.data
+        .filter((c: { Main_Status: string }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled')
+        .sort((a, b) => {
+          const blockA = (a.Block || '').toString();
+          const blockB = (b.Block || '').toString();
+          return blockA.localeCompare(blockB);
+        });
+    } else if (tab === 'completed') {
+      completedDeliverables.value = response.data.data
+        .filter((c: { Main_Status: string }) => c.Main_Status === 'Completed')
+        .sort((a, b) => {
+          const dateA = a.Publish_Date ? new Date(a.Publish_Date).getTime() : 0;
+          const dateB = b.Publish_Date ? new Date(b.Publish_Date).getTime() : 0;
+          return dateB - dateA;
+        });
+    } else {
+      pendingDeliverables.value = response.data.data
+        .filter((c: { Main_Status: string; Client_Approval_Status: string }) =>
+          c.Main_Status === 'Client Approval - Final' && c.Client_Approval_Status === null
+        )
+        .sort((a, b) => {
+          const blockA = (a.Block || '').toString();
+          const blockB = (b.Block || '').toString();
+          return blockA.localeCompare(blockB);
+        });
+    }
     console.log("test :" + completedDeliverables);
   } catch (err) {
     error.value = err.message;
@@ -382,51 +395,7 @@ const fetchDeliverables = async () => {
 // Function to call the API when a month is selected
 const fetchDataForBlock = async () => {
   if (!selectedBlock.value) return;
-  loading.value = true;
-  try {
-    var companyId = authStore.getCompanyId();
-    const response = await axios.get(API_BASE_URL+'/Zoho/zoho/deliverables/' + companyId + '/' + selectedBlock.value);
-    console.log(response);
-    error.value = '';
-    if(response.data !== "") {
-      items.value = response.data.data;
-      // upcomingDeliverables.value = response.data.data.filter((c: { Main_Status: string; }) => c.Main_Status !== 'Completed' && c.Main_Status !== 'Cancelled').sort((a, b) => {
-      //   const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-      //   const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-      //   return dateB - dateA;
-      // });
-      completedDeliverables.value = response.data.data
-        .filter((c: { Main_Status: string }) => c.Main_Status === 'Completed')
-        .sort((a, b) => {
-          const dateA = a.Publish_Date ? new Date(a.Publish_Date).getTime() : 0;
-          const dateB = b.Publish_Date ? new Date(b.Publish_Date).getTime() : 0;
-          return dateB - dateA;
-        });
-      // pendingDeliverables.value = response.data.data.filter((c: { Main_Status: string; Client_Approval_Status: string}) => c.Main_Status === 'Client Approval - Final' &&
-      // (c.Client_Approval_Status === 'none' || c.Client_Approval_Status === null)).sort((a, b) => {
-      //   const dateA = a.Due_Date ? new Date(a.Due_Date).getTime() : 0;
-      //   const dateB = b.Due_Date ? new Date(b.Due_Date).getTime() : 0;
-      //   return dateB - dateA;
-      // });
-      console.log(completedDeliverables.value);
-    } else {
-      upcomingDeliverables.value = [];
-      completedDeliverables.value = [];
-      pendingDeliverables.value = [];
-      Toastify({
-        text: "No deliverables found for this block.",
-        duration: 3000, // 3 seconds
-        gravity: "top", // "top" or "bottom"
-        position: "right", // "left", "center", or "right"
-        backgroundColor: "#ed5e5e",
-      }).showToast()
-    }
-  } catch (err) {
-    error.value = err.message;
-    console.error("Error fetching data:", error);
-  } finally {
-    loading.value = false;
-  }
+  await fetchDeliverables(activeDeliverablesTab.value);
 };
 
 const editedIndex = ref(-1)
