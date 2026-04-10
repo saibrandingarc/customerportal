@@ -159,7 +159,7 @@
     if (otp.value) {
       loading.value = true;
       try {
-        if(password == confirmpassword) {
+        if(password.value == confirmpassword.value) {
           const response = await axios.post(API_BASE_URL+'/Zoho/zoho/verifyOTPUpdatePassword', {
             email: email.value,
             otp: otp.value,
