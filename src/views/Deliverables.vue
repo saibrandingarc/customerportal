@@ -128,7 +128,7 @@
                         rel="noopener"
                         class="text-primary text-truncate d-inline-block"
                       >
-                        Content Doc
+                        Final Publication
                       </a>
                       <span v-else class="text-muted">—</span>
                     </template>
