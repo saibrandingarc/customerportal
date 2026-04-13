@@ -269,7 +269,7 @@ interface Case {
 interface DeliverableRow {
   Block?: string | number | null;
   Main_Status: string;
-  Client_Approval_Status?: string | null;
+  Client_Approved?: boolean | null;
   Publish_Date?: string;
 }
 
@@ -387,7 +387,7 @@ function applyDeliverablesResponse(tab: DeliverablesTab, rows: DeliverableRow[])
     pendingDeliverables.value = rows
       .filter(
         (c) =>
-          c.Main_Status === 'Client Approval - Final' && c.Client_Approval_Status === null
+          (c.Main_Status || '').includes('Client Approval') && c.Client_Approved === false
       )
       .sort((a, b) => {
         const blockA = (a.Block || '').toString();
