@@ -1,7 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import NavBar from '../components/NavBar.vue';
 import Footer from '../components/Footer.vue';
+import { useSessionIdleTimeout } from '@/composables/useSessionIdleTimeout';
+
+useSessionIdleTimeout();
 </script>
 
 <template>
