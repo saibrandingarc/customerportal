@@ -3,12 +3,13 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/userStore';
 import { useAuth0 } from '@auth0/auth0-vue';
 
+// set time for logout
 function resolveIdleMs(): number {
   const fromMs = Number(import.meta.env.VITE_SESSION_IDLE_MS);
   if (!Number.isNaN(fromMs) && fromMs > 0) return fromMs;
   const fromMinutes = Number(import.meta.env.VITE_SESSION_IDLE_MINUTES);
   if (!Number.isNaN(fromMinutes) && fromMinutes > 0) return fromMinutes * 60 * 1000;
-  return 30 * 60 * 1000;
+  return 60 * 60 * 1000;
 }
 
 const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'] as const;
