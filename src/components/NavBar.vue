@@ -47,6 +47,8 @@ import { useAuthStore } from '@/stores/userStore';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { ref, computed, watch, onMounted } from 'vue';
 import router from '@/router';
+import axios from 'axios';
+import { API_BASE_URL } from '@/api/config';
 
 const accessToken = localStorage.getItem('auth_token');
 const authStore = useAuthStore();
@@ -81,10 +83,23 @@ const login = () => {
   loginWithRedirect();
 };
 
-const logoutUser = () => {
-  authStore.logout();
-  logout();
-  router.push('/');
+const logoutUser = async () => {
+  try {
+    const userData = JSON.parse(localStorage.getItem('user') || 'null');
+    const email = userData?.email;
+
+    if (email) {
+      await axios.post(`${API_BASE_URL}/Zoho/zoho/logout`, {
+        email
+      });
+    }
+  } catch (error) {
+    console.error('Failed to record logout activity:', error);
+  } finally {
+    authStore.logout();
+    logout();
+    router.push('/');
+  }
 };
 
 </script>
