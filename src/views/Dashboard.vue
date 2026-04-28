@@ -114,7 +114,7 @@ const snackbar = ref<boolean>(false);
 const loading = ref(false);
 const outstandingBalance = ref(0);
 const pastDue = ref(0);
-const ZOHO_API_URL = "https://localhost:7083/Zoho/zoho/3293516000043629616";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 const ZOHO_API_STORAGE_KEY = "dashboardZohoData";
 const zohoApiData = ref<Record<string, unknown> | null>(null);
 const zohoApiLoading = ref(false);
@@ -236,7 +236,8 @@ const fetchZohoDetails = async () => {
   zohoApiError.value = "";
 
   try {
-    const response = await axios.get(ZOHO_API_URL);
+    const companyId = authStore.getCompanyId();
+    const response = await axios.get(`${API_BASE_URL}/Zoho/zoho/${companyId}`);
     const data = response?.data ?? null;
     zohoApiData.value = data;
 
