@@ -206,29 +206,60 @@
         }
     };
 
-    const loginWithGoogle = async () => {
-        localStorage.setItem("loginType", "google");
-        await loginWithRedirect({
-            authorizationParams: {
-                scope: 'openid profile email',
-                connection: "google-oauth2"
-            },
-        });
-        await handleRedirectCallback();
-        // Ensure the user is authenticated
-        if (isAuthenticated.value) {
-            authResponseTemp.value.access_token = await getAccessTokenSilently();
+    const recordSocialLoginFailure = async (provider: string, reason: string, emailAddress?: string) => {
+        if (!emailAddress) {
+            return;
+        }
 
-            email.value = user.value?.email ?? '';
-            const zohoInfo = await verifyEmail();
-            console.log(zohoInfo);
-            authResponseTemp.value.companyId = zohoInfo.CompanyId;
-            authResponseTemp.value.companyName = zohoInfo.CompanyName;
-            localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
-            console.log(authResponseTemp);
-            checkUserAndRedirect();
-        } else {
-            router.push("/login"); // Redirect to login if not authenticated
+        try {
+            await axios.post(API_BASE_URL + '/Zoho/zoho/login-failure', {
+                email: emailAddress,
+                logintype: provider,
+                details: reason
+            });
+        } catch (err) {
+            console.error("Failed to record social login failure", err);
+        }
+    };
+
+    const loginWithGoogle = async () => {
+        try {
+            localStorage.setItem("loginType", "google");
+            await loginWithRedirect({
+                authorizationParams: {
+                    scope: 'openid profile email',
+                    connection: "google-oauth2"
+                },
+            });
+            await handleRedirectCallback();
+            // Ensure the user is authenticated
+            if (isAuthenticated.value) {
+                authResponseTemp.value.access_token = await getAccessTokenSilently();
+
+                email.value = user.value?.email ?? '';
+                const zohoInfo = await verifyEmail();
+                console.log(zohoInfo);
+
+                if (!zohoInfo) {
+                    await recordSocialLoginFailure("google", "Google auth succeeded but user is not linked in app.", email.value);
+                    errorMessage.value = "Email not exist, please contact support@brandingarc.com";
+                    logout();
+                    return;
+                }
+
+                authResponseTemp.value.companyId = zohoInfo.CompanyId;
+                authResponseTemp.value.companyName = zohoInfo.CompanyName;
+                localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
+                console.log(authResponseTemp);
+                checkUserAndRedirect();
+            } else {
+                await recordSocialLoginFailure("google", "Google login failed at provider callback.", user.value?.email);
+                router.push("/login"); // Redirect to login if not authenticated
+            }
+        } catch (err) {
+            await recordSocialLoginFailure("google", "Google login exception occurred.", user.value?.email || email.value);
+            errorMessage.value = "Google login failed. Please try again.";
+            console.error("Google login error:", err);
         }
     };
 
@@ -263,28 +294,43 @@
     };
 
     const loginWithLinkedIn = async () => {
-        localStorage.setItem("loginType", "linkedin");
-        await loginWithRedirect({
-            authorizationParams: {
-                scope: 'openid profile email',
-                connection: "linkedin"
-            },
-        });
-        await handleRedirectCallback();
-        // Ensure the user is authenticated
-        if (isAuthenticated.value) {
-            authResponseTemp.value.access_token = await getAccessTokenSilently();
+        try {
+            localStorage.setItem("loginType", "linkedin");
+            await loginWithRedirect({
+                authorizationParams: {
+                    scope: 'openid profile email',
+                    connection: "linkedin"
+                },
+            });
+            await handleRedirectCallback();
+            // Ensure the user is authenticated
+            if (isAuthenticated.value) {
+                authResponseTemp.value.access_token = await getAccessTokenSilently();
 
-            email.value = user.value?.email ?? '';
-            const zohoInfo = await verifyEmail();
-            console.log(zohoInfo);
-            authResponseTemp.value.companyId = zohoInfo.CompanyId;
-            authResponseTemp.value.companyName = zohoInfo.CompanyName;
-            localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
-            console.log(authResponseTemp);
-            checkUserAndRedirect();
-        } else {
-            router.push("/login"); // Redirect to login if not authenticated
+                email.value = user.value?.email ?? '';
+                const zohoInfo = await verifyEmail();
+                console.log(zohoInfo);
+
+                if (!zohoInfo) {
+                    await recordSocialLoginFailure("linkedin", "LinkedIn auth succeeded but user is not linked in app.", email.value);
+                    errorMessage.value = "Email not exist, please contact support@brandingarc.com";
+                    logout();
+                    return;
+                }
+
+                authResponseTemp.value.companyId = zohoInfo.CompanyId;
+                authResponseTemp.value.companyName = zohoInfo.CompanyName;
+                localStorage.setItem('user', JSON.stringify(authResponseTemp.value));
+                console.log(authResponseTemp);
+                checkUserAndRedirect();
+            } else {
+                await recordSocialLoginFailure("linkedin", "LinkedIn login failed at provider callback.", user.value?.email);
+                router.push("/login"); // Redirect to login if not authenticated
+            }
+        } catch (err) {
+            await recordSocialLoginFailure("linkedin", "LinkedIn login exception occurred.", user.value?.email || email.value);
+            errorMessage.value = "LinkedIn login failed. Please try again.";
+            console.error("LinkedIn login error:", err);
         }
     };
 
