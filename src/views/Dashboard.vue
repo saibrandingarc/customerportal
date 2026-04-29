@@ -9,7 +9,7 @@
     <div class="page-content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-12">
+          <!-- <div class="col-12">
             <div class="card card-height-100">
               <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Company Information</h4>
@@ -25,7 +25,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
           <div class="col-6">
             <div class="card summary-card" @click="goToInvoices">
               <div class="card-body">
@@ -114,7 +114,7 @@ const snackbar = ref<boolean>(false);
 const loading = ref(false);
 const outstandingBalance = ref(0);
 const pastDue = ref(0);
-const ZOHO_API_URL = "https://localhost:7083/Zoho/zoho/3293516000043629616";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 const ZOHO_API_STORAGE_KEY = "dashboardZohoData";
 const zohoApiData = ref<Record<string, unknown> | null>(null);
 const zohoApiLoading = ref(false);
@@ -236,7 +236,8 @@ const fetchZohoDetails = async () => {
   zohoApiError.value = "";
 
   try {
-    const response = await axios.get(ZOHO_API_URL);
+    const companyId = authStore.getCompanyId();
+    const response = await axios.get(`${API_BASE_URL}/Zoho/zoho/${companyId}`);
     const data = response?.data ?? null;
     zohoApiData.value = data;
 
