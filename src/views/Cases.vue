@@ -97,6 +97,7 @@
           <button type="button" class="btn-close" @click="close"></button>
         </div>
         <div class="modal-body">
+          <div v-if="error" class="alert alert-danger py-2">{{ error }}</div>
           <div class="mb-3">
             <label class="form-label">Subject</label>
             <input type="text" class="form-control" v-model="editedItem.Subject" />
@@ -104,6 +105,36 @@
           <div class="mb-3">
             <label class="form-label">Description</label>
             <textarea class="form-control" v-model="editedItem.Description"></textarea>
+          </div>
+          <div v-if="editedIndex === -1" class="mb-3">
+            <label class="form-label">Attachments</label>
+            <input
+              ref="attachmentInput"
+              type="file"
+              class="form-control"
+              multiple
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip"
+              @change="onAttachmentsSelected"
+            />
+            <div class="form-text text-muted">
+              Optional. Up to 5 files, 25 MB each (PDF, Office, images, text, or ZIP).
+            </div>
+            <ul v-if="caseAttachments.length" class="list-unstyled small mt-2 mb-0">
+              <li
+                v-for="(file, index) in caseAttachments"
+                :key="`${file.name}-${file.size}-${index}`"
+                class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1"
+              >
+                <span>{{ file.name }} ({{ formatFileSize(file.size) }})</span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-link text-danger p-0"
+                  @click="removeAttachment(index)"
+                >
+                  Remove
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
         <div class="modal-footer">
@@ -205,6 +236,11 @@ const closedheaders: Header[] = [
 
 const dialog = ref(false)
 const dialogDelete = ref(false)
+const attachmentInput = ref<HTMLInputElement | null>(null)
+const caseAttachments = ref<File[]>([])
+
+const MAX_ATTACHMENTS = 5
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024
 
 onMounted(() => {
   console.log("API Base URL : "+API_BASE_URL);
@@ -315,11 +351,53 @@ const deleteItemConfirm = async () => {
   closeDelete()
 }
 
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+const resetAttachments = () => {
+  caseAttachments.value = []
+  if (attachmentInput.value) {
+    attachmentInput.value.value = ''
+  }
+}
+
+const onAttachmentsSelected = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const selected = input.files ? Array.from(input.files) : []
+  if (!selected.length) return
+
+  const combined = [...caseAttachments.value, ...selected]
+  if (combined.length > MAX_ATTACHMENTS) {
+    error.value = `You can attach up to ${MAX_ATTACHMENTS} files.`
+    input.value = ''
+    return
+  }
+
+  const oversized = combined.find((file) => file.size > MAX_ATTACHMENT_BYTES)
+  if (oversized) {
+    error.value = `${oversized.name} exceeds the 25 MB limit.`
+    input.value = ''
+    return
+  }
+
+  error.value = ''
+  caseAttachments.value = combined
+  input.value = ''
+}
+
+const removeAttachment = (index: number) => {
+  caseAttachments.value.splice(index, 1)
+}
+
 // Method to close the form dialog
 const close = () => {
   dialog.value = false
   editedItem.value = { ...defaultItem }
   editedIndex.value = -1
+  resetAttachments()
 }
 
 // Method to close the delete confirmation dialog
@@ -331,34 +409,56 @@ const closeDelete = () => {
 
 // Method to save the edited or new item
 const save = async () => {
-  text.value = "Case added";
-  snackbar.value = true;
-    
-  console.log(editedItem);
-  var user = authStore.authResponse;
-  console.log(user);
-  var companyId = authStore.getCompanyId();
+  if (!editedItem.value.Subject?.trim()) {
+    error.value = 'Subject is required.'
+    return
+  }
 
-  editedItem.value.Account_Name.id = companyId;
-  editedItem.value.Email = user?.Email;
-  loading.value = true;
+  const user = authStore.authResponse
+  const companyId = authStore.getCompanyId()
+
+  editedItem.value.Account_Name = editedItem.value.Account_Name ?? { id: '', name: '' }
+  editedItem.value.Account_Name.id = companyId
+  editedItem.value.Email = user?.Email
+
+  loading.value = true
+  error.value = ''
+
   try {
-    // const data = { key1: 'value1', key2: 'value2' };
-    const response = await axios.post(API_BASE_URL+'/Zoho/zoho/newcase', editedItem.value);
-    console.log('Form submitted:', response.data);
-    editedItem.value.Account_Name.name = authStore.getCompanyName();
-    editedItem.value.Case_Number = response.data.data[0].details.id;
-    editedItem.value.Status = "New";
-    error.value = '';
+    const payload = { ...editedItem.value }
+    const formData = new FormData()
+    formData.append('caseData', JSON.stringify(payload))
+    caseAttachments.value.forEach((file) => {
+      formData.append('attachments', file)
+    })
+
+    const response = await axios.post(
+      `${API_BASE_URL}/Zoho/zoho/newcase`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    )
+
+    console.log('Form submitted:', response.data)
+    editedItem.value.Account_Name.name = authStore.getCompanyName()
+    editedItem.value.Case_Number = response.data.data[0].details.id
+    editedItem.value.Status = 'New'
     items.value.push({ ...editedItem.value })
-    snackbar.value = true;
-    text.value = "Case added";
-    fetchCases();
+    snackbar.value = true
+    text.value = caseAttachments.value.length
+      ? 'Case added with attachments'
+      : 'Case added'
+    await fetchCases()
     close()
-  } catch (err) {
-    error.value = err.message;
+  } catch (err: unknown) {
+    const message =
+      axios.isAxiosError(err) && err.response?.data?.message
+        ? String(err.response.data.message)
+        : err instanceof Error
+          ? err.message
+          : 'Failed to create case.'
+    error.value = message
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
