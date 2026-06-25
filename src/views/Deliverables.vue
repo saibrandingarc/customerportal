@@ -15,7 +15,7 @@
               <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
             </div>
 
-            <ul class="nav nav-tabs mb-3">
+            <ul class="nav nav-tabs nav-justified deliverables-tabs mb-3">
               <li class="nav-item">
                 <button
                   class="nav-link"
@@ -53,7 +53,7 @@
 
             <div class="tab-content">
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'pending' }">
-                <div class="pending-deliverables-wrapper">
+                <div class="pending-deliverables-wrapper d-none d-md-block">
                   <EasyDataTable
                     :headers="pendingheaders"
                     :items="pendingDeliverables"
@@ -109,7 +109,7 @@
                           @mousedown.stop.prevent
                           @click.stop.prevent="openRejectForDeliverable(deliverableRow.id)"
                         >
-                          Reject
+                          Feedback
                         </button>
                       </div>
                       <span v-else class="text-muted">—</span>
@@ -194,7 +194,7 @@
                                 @mousedown.stop.prevent
                                 @click.stop.prevent="rejectFileDirect(deliverable.id, fileRow.id)"
                               >
-                                Reject
+                                Feedback
                               </button>
                             </div>
                           </template>
@@ -203,10 +203,79 @@
                     </template>
                   </EasyDataTable>
                 </div>
+
+                <!-- Mobile card view -->
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!pendingDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in pendingDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Doc</span>
+                      <span class="dc-value">
+                        <a v-if="row.content_doc_url" :href="row.content_doc_url" target="_blank" rel="noopener"
+                          class="text-primary">Content Doc</a>
+                        <span v-else class="text-muted">—</span>
+                      </span>
+                    </div>
+
+                    <div v-if="!isArticleContentType(row.Main_Content_Type)" class="dc-actions">
+                      <button type="button" class="btn btn-success btn-sm" :disabled="actionLoading"
+                        @click="openApproveForDeliverable(row.id)">Approve</button>
+                      <button type="button" class="btn btn-danger btn-sm" :disabled="actionLoading"
+                        @click="openRejectForDeliverable(row.id)">Feedback</button>
+                    </div>
+
+                    <template v-else>
+                      <button type="button" class="btn btn-outline-secondary btn-sm w-100 mt-2"
+                        @click="toggleCard(row.id)">
+                        {{ isCardExpanded(row.id) ? 'Hide Files' : 'View Files' }}
+                      </button>
+                      <div v-if="isCardExpanded(row.id)" class="dc-files mt-2">
+                        <p v-if="!row.driveFiles?.length" class="text-muted mb-0">
+                          No files found in Google Drive folder.
+                        </p>
+                        <div v-for="file in row.driveFiles" :key="file.id" class="dc-file">
+                          <div class="d-flex align-items-center justify-content-between">
+                            <a v-if="file.webViewLink" :href="file.webViewLink" target="_blank" rel="noopener"
+                              class="text-primary fw-semibold">{{ file.name }}</a>
+                            <span v-else class="fw-semibold">{{ file.name }}</span>
+                            <span v-if="file.status" class="badge ms-2"
+                              :class="file.status === 'Approved' ? 'bg-success' : 'bg-danger'">{{ file.status }}</span>
+                          </div>
+                          <p v-if="getFileNote(row.id, file.id).trim()" class="file-saved-note mb-1 mt-1">
+                            {{ getFileNote(row.id, file.id) }}
+                          </p>
+                          <textarea v-if="!isFileReviewComplete(file)" class="form-control form-control-sm mt-1" rows="2"
+                            :value="getFileNote(row.id, file.id)" :placeholder="`Notes for ${file.name}`"
+                            @input="onFileNoteInput(row.id, file.id, $event)"></textarea>
+                          <div v-if="!isFileReviewComplete(file)" class="dc-actions mt-2">
+                            <button type="button" class="btn btn-success btn-sm" :disabled="actionLoading"
+                              @click="approveFileDirect(row.id, file.id)">Approve</button>
+                            <button type="button" class="btn btn-danger btn-sm" :disabled="actionLoading"
+                              @click="rejectFileDirect(row.id, file.id)">Feedback</button>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'upcoming' }">
-                <div class="table-responsive">
+                <div class="table-responsive d-none d-md-block">
                   <EasyDataTable
                     :headers="headers"
                     :items="upcomingDeliverables"
@@ -216,6 +285,31 @@
                     :searchable="true"
                     buttons-pagination
                   />
+                </div>
+
+                <!-- Mobile card view -->
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!upcomingDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in upcomingDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Status</span>
+                      <span class="dc-value">{{ row.Status }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -228,7 +322,7 @@
                     </option>
                   </select>
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive d-none d-md-block">
                   <EasyDataTable
                     :headers="completedheaders"
                     :items="completedDeliverables"
@@ -252,6 +346,39 @@
                       <span v-else class="text-muted">—</span>
                     </template>
                   </EasyDataTable>
+                </div>
+
+                <!-- Mobile card view -->
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!completedDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in completedDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Date Published</span>
+                      <span class="dc-value">{{ row.Publish_Date }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Link</span>
+                      <span class="dc-value">
+                        <a v-if="row.Final_Publication" :href="row.Final_Publication" target="_blank" rel="noopener"
+                          class="text-primary">Final Publication</a>
+                        <span v-else class="text-muted">—</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -321,13 +448,13 @@
       <div class="deliverable-file-modal-backdrop" @click="closeRejectModal"></div>
       <div class="deliverable-file-modal-panel shadow-lg">
         <div class="deliverable-file-modal-header">
-          <h5 id="reject-deliverable-title" class="mb-0">Reject Deliverable</h5>
+          <h5 id="reject-deliverable-title" class="mb-0">Feedback</h5>
           <button type="button" class="btn-close" aria-label="Close" @click="closeRejectModal"></button>
         </div>
 
         <div class="deliverable-file-modal-body">
           <div class="mb-3">
-            <label class="form-label">Reason for Rejection</label>
+            <label class="form-label">Feedback</label>
             <p class="form-text text-muted mb-2">
               *Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
             </p>
@@ -672,6 +799,21 @@ function isFileReviewComplete(file: PendingDeliverableFile): boolean {
   return file.status === 'Approved' || file.status === 'Rejected';
 }
 
+// Mobile card view: track which deliverable cards are expanded to show files
+const expandedCardIds = ref<Set<string>>(new Set());
+
+function toggleCard(id: string | number | null | undefined) {
+  if (id == null) return;
+  const key = String(id);
+  const next = new Set(expandedCardIds.value);
+  next.has(key) ? next.delete(key) : next.add(key);
+  expandedCardIds.value = next;
+}
+
+function isCardExpanded(id: string | number | null | undefined): boolean {
+  return id != null && expandedCardIds.value.has(String(id));
+}
+
 function getPendingRowClassName(item: DeliverableRow): string {
   return isArticleContentType(item.Main_Content_Type)
     ? 'pending-article-row'
@@ -738,13 +880,10 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
 
       const baseFiles = isArticle ? buildDeliverableFiles(driveFiles) : [];
 
-      const shouldIncludeContentDocInFilesList =
-        isArticle &&
-        !!contentDocUrl &&
-        contentDocUrl !== GOOGLE_DRIVE_FOLDER_URL;
+      const shouldIncludeContentDocInFilesList = isArticle && !!contentDocUrl;
 
       if (shouldIncludeContentDocInFilesList && contentDocUrl) {
-        baseFiles.unshift(buildContentDocFile(row, contentDocUrl));
+        baseFiles.push(buildContentDocFile(row, contentDocUrl));
       }
 
       const mergedDriveFiles = isArticle
@@ -1254,6 +1393,60 @@ const submitRejection = async () => {
   min-width: 80px;
 }
 
+/* Mobile card view for tables */
+.deliverable-card {
+  border: 1px solid #e9ebec;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.dc-row + .dc-row {
+  border-top: 1px dashed #f0f0f0;
+}
+
+.dc-label {
+  color: #878a99;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.dc-value {
+  text-align: right;
+  word-break: break-word;
+}
+
+.dc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dc-actions .btn {
+  flex: 1;
+}
+
+.dc-file {
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.dc-file:first-child {
+  border-top: none;
+  margin-top: 0;
+}
+
 .topicWidth {
   width: 150px;
 }
@@ -1269,14 +1462,39 @@ const submitRejection = async () => {
   white-space: nowrap;
 }
 
-.nav-tabs .nav-link.active {
+.deliverables-tabs {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.deliverables-tabs .nav-item {
+  margin-bottom: -1px;
+}
+
+.deliverables-tabs .nav-link {
+  color: #198fd9;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid transparent;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+  white-space: nowrap;
+}
+
+.deliverables-tabs .nav-link:hover {
+  background-color: rgba(25, 143, 217, 0.08);
+}
+
+.deliverables-tabs .nav-link.active {
   background-color: #198fd9;
   border-color: #198fd9;
   color: #ffffff;
 }
 
-.nav-tabs .nav-link {
-  color: #198fd9;
+@media (max-width: 575.98px) {
+  .deliverables-tabs .nav-link {
+    padding: 0.45rem 0.35rem;
+    font-size: 0.8rem;
+  }
 }
 
 .deliverable-files-expand {
@@ -1324,13 +1542,13 @@ const submitRejection = async () => {
 
 .deliverable-files-expand :deep(.vue3-easy-data-table__footer) {
   position: relative;
-  z-index: 2;
+  z-index: 10;
   overflow: visible;
 }
 
 .deliverable-files-expand :deep(.easy-data-table__rows-selector) {
   position: relative;
-  z-index: 3;
+  z-index: 11;
   overflow: visible;
 }
 </style>
@@ -1432,7 +1650,12 @@ const submitRejection = async () => {
   margin-bottom: 0.5rem;
   white-space: pre-wrap;
   word-break: break-word;
-  color: #495057;
-  font-size: 0.875rem;
+  color: #000000;
+  font-size: 14px;
+}
+
+.file-note-cell textarea {
+  color: #000000;
+  font-size: 14px;
 }
 </style>

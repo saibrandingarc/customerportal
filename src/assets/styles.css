@@ -59,7 +59,7 @@
 }
 
 html {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 @media (min-width: 768px) {
@@ -70,6 +70,11 @@ html {
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+.vue3-easy-data-table {
+  --easy-table-body-row-font-size: 14px;
+  --easy-table-header-font-size: 14px;
 }
 
 html {
@@ -3754,7 +3759,7 @@ textarea.form-control-lg {
 .btn-group-sm > .btn, .btn-sm {
     --vz-btn-padding-y: 0.25rem;
     --vz-btn-padding-x: 0.5rem;
-    --vz-btn-font-size: 0.721875rem;
+    --vz-btn-font-size: 14px;
     --vz-btn-border-radius: var(--vz-border-radius-sm)
 }
 
@@ -18635,7 +18640,7 @@ code {
     --vz-vertical-menu-item-hover-color: #6691e7;
     --vz-vertical-menu-item-active-color: #6691e7;
     --vz-vertical-menu-item-active-bg: rgba(102,145,231,.15);
-    --vz-vertical-menu-sub-item-color: #7c7f90;
+    --vz-vertical-menu-sub-item-color: #000000;
     --vz-vertical-menu-sub-item-hover-color: #6691e7;
     --vz-vertical-menu-sub-item-active-color: #6691e7;
     --vz-vertical-menu-title-color: #919da9;
@@ -18791,7 +18796,7 @@ code {
     --vz-vertical-menu-item-hover-color: #6691e7;
     --vz-vertical-menu-item-active-color: #6691e7;
     --vz-vertical-menu-item-active-bg: rgba(102,145,231,.15);
-    --vz-vertical-menu-sub-item-color: #7c7f90;
+    --vz-vertical-menu-sub-item-color: #000000;
     --vz-vertical-menu-sub-item-hover-color: #6691e7;
     --vz-vertical-menu-sub-item-active-color: #6691e7;
     --vz-vertical-menu-title-color: #919da9

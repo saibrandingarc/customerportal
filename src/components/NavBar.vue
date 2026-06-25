@@ -2,11 +2,17 @@
   <header id="page-topbar">
     <div class="layout-width">
       <div class="navbar-header">
-        <div class="d-flex">
-          <!-- LOGO -->
-          <div class="navbar-brand-box horizontal-logo">
-            
-          </div>
+        <div class="d-flex align-items-center">
+          <!-- Mobile sidebar toggle -->
+          <button v-if="isAuthenticated" type="button"
+            class="btn btn-sm px-2 fs-22 header-item sidebar-toggle-btn d-md-none" aria-label="Toggle menu"
+            @click="toggleSidebar">
+            <i class="mdi mdi-menu"></i>
+          </button>
+          <!-- LOGO (mobile only) -->
+          <a href="#" class="navbar-brand-box horizontal-logo d-md-none" @click.prevent="goToHome">
+            <img src="/logo.png" alt="logo" height="26">
+          </a>
         </div>
 
         <div class="d-flex align-items-center">
@@ -15,7 +21,7 @@
               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <span class="d-flex align-items-left">
                 <!-- Show this icon only on mobile -->
-                <i class="mdi mdi-menu d-xl-none fs-24"></i>
+                <i class="mdi mdi-account-circle d-xl-none fs-24"></i>
                 <!-- <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg"
                   alt="Header Avatar"> -->
                 <span class="">
@@ -49,7 +55,9 @@ import { ref, computed, watch, onMounted } from 'vue';
 import router from '@/router';
 import axios from 'axios';
 import { API_BASE_URL } from '@/api/config';
+import { useSidebar } from '@/composables/useSidebar';
 
+const { toggleSidebar } = useSidebar();
 const accessToken = localStorage.getItem('auth_token');
 const authStore = useAuthStore();
 const username = ref("");
@@ -83,6 +91,18 @@ const login = () => {
   loginWithRedirect();
 };
 
+const isUserLoggedIn = (): boolean => {
+  const loginType = localStorage.getItem('loginType');
+  if (loginType === 'username-password') {
+    return authStore.isTokenValid();
+  }
+  return isAuthenticated.value;
+};
+
+const goToHome = () => {
+  router.push(isUserLoggedIn() ? '/dashboard' : '/login');
+};
+
 const logoutUser = async () => {
   try {
     const userData = JSON.parse(localStorage.getItem('user') || 'null');
@@ -108,5 +128,28 @@ const logoutUser = async () => {
 #mobileAuthNavBar {
   min-height: 125px;
   justify-content: space-between;
+}
+
+.sidebar-toggle-btn {
+  color: var(--vz-header-item-sub-color);
+  border: none;
+  line-height: 1;
+}
+
+.sidebar-toggle-btn:focus {
+  box-shadow: none;
+}
+
+.horizontal-logo.d-md-none {
+  display: inline-flex !important;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .horizontal-logo.d-md-none {
+    display: none !important;
+  }
 }
 </style>
