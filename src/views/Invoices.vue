@@ -8,7 +8,7 @@
     <div class="page-content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-6">
+          <div class="col-12 col-sm-6">
             <div class="card">
               <div class="card-body">
                 <h4>Outstanding Balance</h4>
@@ -16,7 +16,7 @@
               </div>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-12 col-sm-6">
             <div class="card">
               <div class="card-body">
                 <h4>Past Due</h4>
@@ -32,7 +32,7 @@
               <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
             </div>
             <div class="row">
-              <div class="col-12">
+              <div class="col-12 d-none d-md-block">
                 <EasyDataTable :headers="headers" :items="items" :rows-per-page="10" table-class="table-bordered"
                   show-index :searchable="true">
                   <template #item-TotalAmount="{ TotalAmount }">
@@ -44,6 +44,46 @@
                       class="btn btn-sm btn-primary mx-2">Pay Now</a>
                   </template>
                 </EasyDataTable>
+              </div>
+            </div>
+
+            <!-- Mobile card view -->
+            <div class="d-md-none invoice-cards">
+              <p v-if="!items.length" class="text-muted text-center py-3 mb-0">
+                No Available Data
+              </p>
+              <div v-for="(row, i) in items" :key="row.Id ?? i" class="invoice-card">
+                <div class="dc-row">
+                  <span class="dc-label">Invoice ID</span>
+                  <span class="dc-value fw-semibold">{{ row.Id }}</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-label">Status</span>
+                  <span class="dc-value">
+                    <span class="badge" :class="row.Status === 'Paid' ? 'bg-success' : 'bg-warning'">
+                      {{ row.Status }}
+                    </span>
+                  </span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-label">Invoice Date</span>
+                  <span class="dc-value">{{ row.InvoiceDate }}</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-label">Due Date</span>
+                  <span class="dc-value">{{ row.DueDate }}</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-label">Total Amount</span>
+                  <span class="dc-value fw-semibold">
+                    {{ Number(row.TotalAmount).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+                  </span>
+                </div>
+                <div class="dc-actions">
+                  <button class="btn btn-sm btn-primary" @click="handleRowClick(row.Id)">Download</button>
+                  <a v-if="row.Status !== 'Paid'" :href="row.InvoiceLink" target="_blank" rel="noopener noreferrer"
+                    class="btn btn-sm btn-primary">Pay Now</a>
+                </div>
               </div>
             </div>
           </div>
@@ -203,3 +243,48 @@ onMounted(() => {
 });
 
 </script>
+
+<style scoped>
+/* Mobile card view for the invoices table */
+.invoice-card {
+  border: 1px solid #e9ebec;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.dc-row + .dc-row {
+  border-top: 1px dashed #f0f0f0;
+}
+
+.dc-label {
+  color: #878a99;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.dc-value {
+  text-align: right;
+  word-break: break-word;
+}
+
+.dc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dc-actions .btn {
+  flex: 1;
+}
+</style>

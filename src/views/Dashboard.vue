@@ -26,7 +26,7 @@
               </div>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-12 col-sm-6">
             <div class="card summary-card" @click="goToInvoices">
               <div class="card-body">
                 <h4>Outstanding Balance</h4>
@@ -34,7 +34,7 @@
               </div>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-12 col-sm-6">
             <div class="card summary-card" @click="goToInvoices">
               <div class="card-body">
                 <h4>Past Due</h4>
@@ -44,7 +44,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-sm-6 mb-4">
+          <div class="col-12 col-sm-6 mb-4">
             <div class="card card-height-100">
               <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Deliverables</h4>
@@ -67,7 +67,7 @@
               </div>
             </div>
           </div>
-          <div class="col-sm-6 mb-4">
+          <div class="col-12 col-sm-6 mb-4">
             <div class="card card-height-100">
               <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Cases</h4>

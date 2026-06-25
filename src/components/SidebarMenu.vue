@@ -1,5 +1,5 @@
 <template>
-  <div class="app-menu navbar-menu">
+  <div class="app-menu navbar-menu" :class="{ 'app-menu-show': isSidebarOpen }">
     <!-- LOGO -->
     <div class="navbar-brand-box">
       <!-- Dark Logo-->
@@ -20,6 +20,11 @@
           <img src="/logo.png" alt="" width="120">
         </span>
       </a>
+      <!-- Close button (mobile only) -->
+      <button type="button" class="btn btn-sm p-0 fs-22 header-item sidebar-close-btn d-md-none"
+        aria-label="Close menu" @click="closeSidebar">
+        <i class="mdi mdi-close"></i>
+      </button>
       <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
         id="vertical-hover">
         <i class="ri-record-circle-line"></i>
@@ -50,11 +55,12 @@
                             aria-label="scrollable content" style="height: auto; overflow: hidden;">
                             <div class="simplebar-content" style="padding: 0px;">
                               <li class="menu-title"><span data-key="t-menu">Menu</span></li>
-                              <ul class="nav nav-sm flex-column">
+                              <ul class="nav flex-column">
                                 <li class="nav-item" v-for="(item, index) in filteredMenuItems" :key="index"
                                   @click="navigate(item.route)" role="button">
-                                  <div class="d-flex align-items-center nav-link">
-                                    <!-- <i :class="item.icon + ' me-2'"></i> -->
+                                  <div class="d-flex align-items-center nav-link"
+                                    :class="{ active: isActive(item.route) }">
+                                    <i :class="['mdi', item.icon, 'menu-icon']"></i>
                                     <span>{{ item.title }}</span>
                                   </div>
                                 </li>
@@ -98,15 +104,20 @@
     <div class="sidebar-background"></div>
   </div>
 
+  <!-- Mobile drawer backdrop -->
+  <div v-if="isSidebarOpen" class="sidebar-overlay d-md-none" @click="closeSidebar"></div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/userStore';
 import { useAuth0 } from '@auth0/auth0-vue';
+import { useSidebar } from '@/composables/useSidebar';
 
 const router = useRouter();
+const route = useRoute();
+const { isSidebarOpen, closeSidebar } = useSidebar();
 const drawer = ref(true);
 const authStore = useAuthStore();
 const userRoles = ref();
@@ -131,8 +142,13 @@ const filteredMenuItems = computed(() => {
   return menuItems.filter(item => item.roles.some(role => userRoles.value.includes(role)));
 });
 
-const navigate = (route: string) => {
-  router.push(route);
+const navigate = (path: string) => {
+  router.push(path);
+  closeSidebar();
+};
+
+const isActive = (path: string): boolean => {
+  return route.path === path || route.path.startsWith(path + '/');
 };
 
 const isUserLoggedIn = (): boolean => {
@@ -175,5 +191,67 @@ onMounted(() => {
 
 .list-item:hover {
   background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Menu item icons + active/hover states */
+.nav-item .nav-link {
+  border-radius: 6px;
+  margin: 2px 10px;
+  padding: 0.6rem 0.85rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.menu-icon {
+  min-width: 1.5rem;
+  margin-right: 0.65rem;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.nav-item .nav-link:hover {
+  background-color: rgba(64, 81, 137, 0.07);
+  color: var(--vz-vertical-menu-item-hover-color);
+}
+
+.nav-item .nav-link.active {
+  background-color: rgba(64, 81, 137, 0.1);
+  color: var(--vz-vertical-menu-item-active-color);
+  font-weight: 500;
+}
+
+.sidebar-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  color: var(--vz-vertical-menu-item-color);
+}
+
+/* Mobile off-canvas drawer */
+@media (max-width: 767.98px) {
+  .app-menu.navbar-menu {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease-in-out;
+    width: 250px;
+  }
+
+  .app-menu.navbar-menu.app-menu-show {
+    transform: translateX(0);
+    z-index: 1004;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Show the logo at the top of the drawer on mobile */
+  .navbar-brand-box {
+    display: block !important;
+    text-align: left;
+    padding-top: 10px;
+  }
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(54, 61, 72, 0.4);
+  z-index: 1003;
 }
 </style>
