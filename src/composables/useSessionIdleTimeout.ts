@@ -50,8 +50,11 @@ export function useSessionIdleTimeout() {
     void (async () => {
       await recordLogoutActivity();
       authStore.logout();
+      // Use the app origin as returnTo so it matches Auth0's Allowed Logout
+      // URLs (same value the manual NavBar logout relies on). Auth0 redirects
+      // back to "/", and the router's auth guard then forwards to Login.
       await logout({
-        logoutParams: { returnTo: `${window.location.origin}/login` },
+        logoutParams: { returnTo: window.location.origin },
       }).catch(() => {
         /* username-password users may not have an Auth0 session */
       });

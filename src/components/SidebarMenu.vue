@@ -3,7 +3,7 @@
     <!-- LOGO -->
     <div class="navbar-brand-box">
       <!-- Dark Logo-->
-      <a href="index.html" class="logo logo-dark">
+      <a href="#" @click.prevent="goToHome" class="logo logo-dark">
         <span class="logo-sm">
           <img src="/logo.png" alt="" width="120">
         </span>
@@ -12,7 +12,7 @@
         </span>
       </a>
       <!-- Light Logo-->
-      <a href="index.html" class="logo logo-light">
+      <a href="#" @click.prevent="goToHome" class="logo logo-light">
         <span class="logo-sm">
           <img src="/logo.png" alt="" width="120">
         </span>
@@ -51,7 +51,7 @@
                             <div class="simplebar-content" style="padding: 0px;">
                               <li class="menu-title"><span data-key="t-menu">Menu</span></li>
                               <ul class="nav nav-sm flex-column">
-                                <li class="nav-item my-2" v-for="(item, index) in filteredMenuItems" :key="index"
+                                <li class="nav-item" v-for="(item, index) in filteredMenuItems" :key="index"
                                   @click="navigate(item.route)" role="button">
                                   <div class="d-flex align-items-center nav-link">
                                     <!-- <i :class="item.icon + ' me-2'"></i> -->
@@ -133,6 +133,22 @@ const filteredMenuItems = computed(() => {
 
 const navigate = (route: string) => {
   router.push(route);
+};
+
+const isUserLoggedIn = (): boolean => {
+  const loginType = localStorage.getItem('loginType');
+  if (loginType === 'username-password') {
+    return authStore.isTokenValid();
+  }
+  return isAuthenticated.value;
+};
+
+const goToHome = () => {
+  if (isUserLoggedIn()) {
+    router.push('/dashboard');
+  } else {
+    router.push('/login');
+  }
 };
 
 // const isAuthenticated = ref(false);

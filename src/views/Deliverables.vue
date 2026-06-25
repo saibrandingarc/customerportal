@@ -109,7 +109,7 @@
                           @mousedown.stop.prevent
                           @click.stop.prevent="openRejectForDeliverable(deliverableRow.id)"
                         >
-                          Reject
+                          Feedback
                         </button>
                       </div>
                       <span v-else class="text-muted">—</span>
@@ -194,7 +194,7 @@
                                 @mousedown.stop.prevent
                                 @click.stop.prevent="rejectFileDirect(deliverable.id, fileRow.id)"
                               >
-                                Reject
+                                Feedback
                               </button>
                             </div>
                           </template>
@@ -321,13 +321,13 @@
       <div class="deliverable-file-modal-backdrop" @click="closeRejectModal"></div>
       <div class="deliverable-file-modal-panel shadow-lg">
         <div class="deliverable-file-modal-header">
-          <h5 id="reject-deliverable-title" class="mb-0">Reject Deliverable</h5>
+          <h5 id="reject-deliverable-title" class="mb-0">Feedback</h5>
           <button type="button" class="btn-close" aria-label="Close" @click="closeRejectModal"></button>
         </div>
 
         <div class="deliverable-file-modal-body">
           <div class="mb-3">
-            <label class="form-label">Reason for Rejection</label>
+            <label class="form-label">Feedback</label>
             <p class="form-text text-muted mb-2">
               *Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
             </p>
@@ -738,13 +738,10 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
 
       const baseFiles = isArticle ? buildDeliverableFiles(driveFiles) : [];
 
-      const shouldIncludeContentDocInFilesList =
-        isArticle &&
-        !!contentDocUrl &&
-        contentDocUrl !== GOOGLE_DRIVE_FOLDER_URL;
+      const shouldIncludeContentDocInFilesList = isArticle && !!contentDocUrl;
 
       if (shouldIncludeContentDocInFilesList && contentDocUrl) {
-        baseFiles.unshift(buildContentDocFile(row, contentDocUrl));
+        baseFiles.push(buildContentDocFile(row, contentDocUrl));
       }
 
       const mergedDriveFiles = isArticle
@@ -1324,13 +1321,13 @@ const submitRejection = async () => {
 
 .deliverable-files-expand :deep(.vue3-easy-data-table__footer) {
   position: relative;
-  z-index: 2;
+  z-index: 10;
   overflow: visible;
 }
 
 .deliverable-files-expand :deep(.easy-data-table__rows-selector) {
   position: relative;
-  z-index: 3;
+  z-index: 11;
   overflow: visible;
 }
 </style>
@@ -1432,7 +1429,12 @@ const submitRejection = async () => {
   margin-bottom: 0.5rem;
   white-space: pre-wrap;
   word-break: break-word;
-  color: #495057;
-  font-size: 0.875rem;
+  color: #000000;
+  font-size: 14px;
+}
+
+.file-note-cell textarea {
+  color: #000000;
+  font-size: 14px;
 }
 </style>
