@@ -67,12 +67,14 @@
                     sort-type="desc"
                     buttons-pagination
                   >
+                    <!-- Drive folder expand disabled — pending deliverables shown directly
                     <template #item-expand="deliverableRow">
                       <i
                         v-if="isArticleContentType(deliverableRow.Main_Content_Type)"
                         class="expand-icon"
                       ></i>
                     </template>
+                    -->
                     <template #item-content_doc_url="{ content_doc_url }">
                       <a
                         v-if="content_doc_url"
@@ -88,7 +90,6 @@
                     </template>
                     <template #item-actions="deliverableRow">
                       <div
-                        v-if="!isArticleContentType(deliverableRow.Main_Content_Type)"
                         class="file-action-buttons"
                         @click.stop
                         @mousedown.stop
@@ -112,8 +113,8 @@
                           Reject
                         </button>
                       </div>
-                      <span v-else class="text-muted">—</span>
                     </template>
+                    <!-- Drive folder file expand disabled
                     <template #expand="deliverable">
                       <div
                         v-if="isArticleContentType(deliverable.Main_Content_Type)"
@@ -201,6 +202,7 @@
                         </EasyDataTable>
                       </div>
                     </template>
+                    -->
                   </EasyDataTable>
                 </div>
               </div>
@@ -395,8 +397,9 @@ import { useAuthStore } from '@/stores/userStore';
 import { Header } from 'vue3-easy-data-table';
 import Toastify from 'toastify-js'
 import 'toastify-js/src/toastify.css'
-import { API_BASE_URL, GOOGLE_DRIVE_FOLDER_URL } from '@/api/config';
-import { fetchDriveFolderFiles, type DriveItem } from '@/api/googleDrive';
+import { API_BASE_URL } from '@/api/config';
+// import { GOOGLE_DRIVE_FOLDER_URL } from '@/api/config';
+// import { fetchDriveFolderFiles, type DriveItem } from '@/api/googleDrive';
 import {
   getDeliverableFileApprovals,
   submitDeliverableFileApproval,
@@ -438,132 +441,132 @@ interface DeliverableRow {
   driveFiles?: PendingDeliverableFile[];
 }
 
-let cachedDriveFiles: DriveItem[] | null = null;
-
-async function loadDriveFiles(force = false): Promise<DriveItem[]> {
-  if (!force && cachedDriveFiles) {
-    return cachedDriveFiles;
-  }
-
-  const result = await fetchDriveFolderFiles(GOOGLE_DRIVE_FOLDER_URL);
-  cachedDriveFiles = result.files ?? [];
-  return cachedDriveFiles;
-}
-
-function buildDeliverableFiles(driveFiles: DriveItem[]): PendingDeliverableFile[] {
-  return driveFiles.map((file, index) => ({
-    id: file.id ?? `${file.name ?? 'file'}-${index}`,
-    name: file.name ?? 'Untitled',
-    webViewLink: file.webViewLink,
-    note: '',
-  }));
-}
-
-function mergeDeliverableFilesWithApprovals(
-  driveFiles: PendingDeliverableFile[],
-  dbApprovals: DeliverableFileApprovalRecord[]
-): PendingDeliverableFile[] {
-  const approvalByFileId = new Map(
-    dbApprovals.map((approval) => [String(approval.fileId), approval])
-  );
-
-  const merged = driveFiles.map((file) => {
-    const approval = approvalByFileId.get(String(file.id));
-    if (!approval) {
-      return file;
-    }
-
-    return {
-      ...file,
-      name: approval.fileName || file.name,
-      webViewLink: approval.fileUrl || file.webViewLink,
-      note: approval.notes ?? file.note,
-      status: approval.status,
-    };
-  });
-
-  for (const approval of dbApprovals) {
-    if (merged.some((file) => String(file.id) === String(approval.fileId))) {
-      continue;
-    }
-
-    merged.push({
-      id: approval.fileId,
-      name: approval.fileName,
-      webViewLink: approval.fileUrl,
-      note: approval.notes ?? '',
-      status: approval.status,
-    });
-  }
-
-  return merged;
-}
-
-function buildContentDocFile(
-  deliverable: DeliverableRow,
-  contentDocUrl: string
-): PendingDeliverableFile {
-  const deliverableId = deliverable.id != null ? String(deliverable.id) : '';
-  // Backend uses FileId as a unique key per deliverable; this synthetic id lets us store approvals for the Content Doc.
-  const fileId = deliverableId ? `content-doc-${deliverableId}` : 'content-doc';
-  return {
-    id: fileId,
-    name: 'Content Doc',
-    webViewLink: contentDocUrl,
-    note: '',
-  };
-}
-
-async function loadDeliverableFileApprovalsByDeliverableId(
-  rows: DeliverableRow[]
-): Promise<Map<string, DeliverableFileApprovalRecord[]>> {
-  const approvalsByDeliverableId = new Map<string, DeliverableFileApprovalRecord[]>();
-  const rowsWithId = rows.filter((row) => row.id != null);
-
-  await Promise.all(
-    rowsWithId.map(async (row) => {
-      const deliverableId = String(row.id);
-      try {
-        const approvals = await getDeliverableFileApprovals(deliverableId);
-        approvalsByDeliverableId.set(deliverableId, approvals);
-      } catch (error) {
-        console.error(`Failed to load file approvals for deliverable ${deliverableId}`, error);
-        approvalsByDeliverableId.set(deliverableId, []);
-      }
-    })
-  );
-
-  return approvalsByDeliverableId;
-}
-
-function resolveContentDocUrl(row: DeliverableRow, driveFiles: DriveItem[] = []): string {
-  const zohoContentDoc = row.Content_Doc?.trim();
-  if (zohoContentDoc) {
-    return zohoContentDoc;
-  }
-
-  return resolveContentFileGoogleUrl(row, driveFiles);
-}
-
-function resolveContentFileGoogleUrl(row: DeliverableRow, driveFiles: DriveItem[]): string {
-  if (row.content_file_google_url) {
-    return row.content_file_google_url;
-  }
-
-  const topicName = row.Name?.trim().toLowerCase();
-  if (topicName) {
-    const match = driveFiles.find(
-      (file) =>
-        file.name?.trim().toLowerCase() === topicName ||
-        file.name?.trim().toLowerCase().includes(topicName)
-    );
-    if (match?.webViewLink) {
-      return match.webViewLink;
-    }
-  }
-
-  return GOOGLE_DRIVE_FOLDER_URL;
-}
+// Google Drive folder fetch disabled — pending deliverables use Zoho fields directly.
+// let cachedDriveFiles: DriveItem[] | null = null;
+//
+// async function loadDriveFiles(force = false): Promise<DriveItem[]> {
+//   if (!force && cachedDriveFiles) {
+//     return cachedDriveFiles;
+//   }
+//
+//   const result = await fetchDriveFolderFiles(GOOGLE_DRIVE_FOLDER_URL);
+//   cachedDriveFiles = result.files ?? [];
+//   return cachedDriveFiles;
+// }
+//
+// function buildDeliverableFiles(driveFiles: DriveItem[]): PendingDeliverableFile[] {
+//   return driveFiles.map((file, index) => ({
+//     id: file.id ?? `${file.name ?? 'file'}-${index}`,
+//     name: file.name ?? 'Untitled',
+//     webViewLink: file.webViewLink,
+//     note: '',
+//   }));
+// }
+//
+// function mergeDeliverableFilesWithApprovals(
+//   driveFiles: PendingDeliverableFile[],
+//   dbApprovals: DeliverableFileApprovalRecord[]
+// ): PendingDeliverableFile[] {
+//   const approvalByFileId = new Map(
+//     dbApprovals.map((approval) => [String(approval.fileId), approval])
+//   );
+//
+//   const merged = driveFiles.map((file) => {
+//     const approval = approvalByFileId.get(String(file.id));
+//     if (!approval) {
+//       return file;
+//     }
+//
+//     return {
+//       ...file,
+//       name: approval.fileName || file.name,
+//       webViewLink: approval.fileUrl || file.webViewLink,
+//       note: approval.notes ?? file.note,
+//       status: approval.status,
+//     };
+//   });
+//
+//   for (const approval of dbApprovals) {
+//     if (merged.some((file) => String(file.id) === String(approval.fileId))) {
+//       continue;
+//     }
+//
+//     merged.push({
+//       id: approval.fileId,
+//       name: approval.fileName,
+//       webViewLink: approval.fileUrl,
+//       note: approval.notes ?? '',
+//       status: approval.status,
+//     });
+//   }
+//
+//   return merged;
+// }
+//
+// function buildContentDocFile(
+//   deliverable: DeliverableRow,
+//   contentDocUrl: string
+// ): PendingDeliverableFile {
+//   const deliverableId = deliverable.id != null ? String(deliverable.id) : '';
+//   const fileId = deliverableId ? `content-doc-${deliverableId}` : 'content-doc';
+//   return {
+//     id: fileId,
+//     name: 'Content Doc',
+//     webViewLink: contentDocUrl,
+//     note: '',
+//   };
+// }
+//
+// async function loadDeliverableFileApprovalsByDeliverableId(
+//   rows: DeliverableRow[]
+// ): Promise<Map<string, DeliverableFileApprovalRecord[]>> {
+//   const approvalsByDeliverableId = new Map<string, DeliverableFileApprovalRecord[]>();
+//   const rowsWithId = rows.filter((row) => row.id != null);
+//
+//   await Promise.all(
+//     rowsWithId.map(async (row) => {
+//       const deliverableId = String(row.id);
+//       try {
+//         const approvals = await getDeliverableFileApprovals(deliverableId);
+//         approvalsByDeliverableId.set(deliverableId, approvals);
+//       } catch (error) {
+//         console.error(`Failed to load file approvals for deliverable ${deliverableId}`, error);
+//         approvalsByDeliverableId.set(deliverableId, []);
+//       }
+//     })
+//   );
+//
+//   return approvalsByDeliverableId;
+// }
+//
+// function resolveContentDocUrl(row: DeliverableRow, driveFiles: DriveItem[] = []): string {
+//   const zohoContentDoc = row.Content_Doc?.trim();
+//   if (zohoContentDoc) {
+//     return zohoContentDoc;
+//   }
+//
+//   return resolveContentFileGoogleUrl(row, driveFiles);
+// }
+//
+// function resolveContentFileGoogleUrl(row: DeliverableRow, driveFiles: DriveItem[]): string {
+//   if (row.content_file_google_url) {
+//     return row.content_file_google_url;
+//   }
+//
+//   const topicName = row.Name?.trim().toLowerCase();
+//   if (topicName) {
+//     const match = driveFiles.find(
+//       (file) =>
+//         file.name?.trim().toLowerCase() === topicName ||
+//         file.name?.trim().toLowerCase().includes(topicName)
+//     );
+//     if (match?.webViewLink) {
+//       return match.webViewLink;
+//     }
+//   }
+//
+//   return GOOGLE_DRIVE_FOLDER_URL;
+// }
 
 // Function to generate months relative to the current date
 const generateRelativeMonthsArray = (past: number, future: number): string[] => {
@@ -717,49 +720,56 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
         return blockA.localeCompare(blockB);
       });
 
-    const hasArticleDeliverables = pendingRows.some((row) =>
-      isArticleContentType(row.Main_Content_Type)
-    );
-    const driveFiles = hasArticleDeliverables ? await loadDriveFiles() : [];
-    const approvalsByDeliverableId = await loadDeliverableFileApprovalsByDeliverableId(
-      pendingRows.filter((row) => isArticleContentType(row.Main_Content_Type))
-    );
+    pendingDeliverables.value = pendingRows.map((row) => ({
+      ...row,
+      content_doc_url:
+        row.Content_Doc?.trim() || row.content_file_google_url || undefined,
+    }));
 
-    pendingDeliverables.value = pendingRows.map((row) => {
-      const isArticle = isArticleContentType(row.Main_Content_Type);
-      const articleDriveFiles = isArticle ? driveFiles : [];
-      const deliverableId = row.id != null ? String(row.id) : '';
-      const dbApprovals = deliverableId
-        ? approvalsByDeliverableId.get(deliverableId) ?? []
-        : [];
-
-      const contentDocUrl =
-        resolveContentDocUrl(row, articleDriveFiles) || undefined;
-
-      const baseFiles = isArticle ? buildDeliverableFiles(driveFiles) : [];
-
-      const shouldIncludeContentDocInFilesList =
-        isArticle &&
-        !!contentDocUrl &&
-        contentDocUrl !== GOOGLE_DRIVE_FOLDER_URL;
-
-      if (shouldIncludeContentDocInFilesList && contentDocUrl) {
-        baseFiles.unshift(buildContentDocFile(row, contentDocUrl));
-      }
-
-      const mergedDriveFiles = isArticle
-        ? mergeDeliverableFilesWithApprovals(baseFiles, dbApprovals)
-        : [];
-
-      return {
-        ...row,
-        driveFiles: mergedDriveFiles,
-        content_file_google_url: isArticle
-          ? resolveContentFileGoogleUrl(row, driveFiles)
-          : undefined,
-        content_doc_url: contentDocUrl,
-      };
-    });
+    // Google Drive folder fetch + per-file approvals (disabled)
+    // const hasArticleDeliverables = pendingRows.some((row) =>
+    //   isArticleContentType(row.Main_Content_Type)
+    // );
+    // const driveFiles = hasArticleDeliverables ? await loadDriveFiles() : [];
+    // const approvalsByDeliverableId = await loadDeliverableFileApprovalsByDeliverableId(
+    //   pendingRows.filter((row) => isArticleContentType(row.Main_Content_Type))
+    // );
+    //
+    // pendingDeliverables.value = pendingRows.map((row) => {
+    //   const isArticle = isArticleContentType(row.Main_Content_Type);
+    //   const articleDriveFiles = isArticle ? driveFiles : [];
+    //   const deliverableId = row.id != null ? String(row.id) : '';
+    //   const dbApprovals = deliverableId
+    //     ? approvalsByDeliverableId.get(deliverableId) ?? []
+    //     : [];
+    //
+    //   const contentDocUrl =
+    //     resolveContentDocUrl(row, articleDriveFiles) || undefined;
+    //
+    //   const baseFiles = isArticle ? buildDeliverableFiles(driveFiles) : [];
+    //
+    //   const shouldIncludeContentDocInFilesList =
+    //     isArticle &&
+    //     !!contentDocUrl &&
+    //     contentDocUrl !== GOOGLE_DRIVE_FOLDER_URL;
+    //
+    //   if (shouldIncludeContentDocInFilesList && contentDocUrl) {
+    //     baseFiles.unshift(buildContentDocFile(row, contentDocUrl));
+    //   }
+    //
+    //   const mergedDriveFiles = isArticle
+    //     ? mergeDeliverableFilesWithApprovals(baseFiles, dbApprovals)
+    //     : [];
+    //
+    //   return {
+    //     ...row,
+    //     driveFiles: mergedDriveFiles,
+    //     content_file_google_url: isArticle
+    //       ? resolveContentFileGoogleUrl(row, driveFiles)
+    //       : undefined,
+    //     content_doc_url: contentDocUrl,
+    //   };
+    // });
   }
 }
 
@@ -785,9 +795,9 @@ const fetchDeliverables = async (
   loading.value = true;
   try {
     console.log(authStore);
-    if (tab === 'pending' && force) {
-      cachedDriveFiles = null;
-    }
+    // if (tab === 'pending' && force) {
+    //   cachedDriveFiles = null;
+    // }
     const response = await axios.get(
       API_BASE_URL + '/Zoho/zoho/deliverables/' + companyId + '/' + block + '/' + tab
     );
