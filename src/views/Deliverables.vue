@@ -53,153 +53,144 @@
 
             <div class="tab-content">
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'pending' }">
+                <p class="pending-tab-note text-muted mb-3">
+                  <strong>Note:</strong> Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
+                </p>
                 <div class="pending-deliverables-wrapper d-none d-md-block">
                   <EasyDataTable
+                    ref="pendingDataTableRef"
                     :headers="pendingheaders"
                     :items="pendingDeliverables"
                     :rows-per-page="10"
+                    :index-column-width="48"
                     table-class="table-bordered"
-                    body-expand-row-class-name="deliverable-expand-row"
-                    :body-row-class-name="getPendingRowClassName"
                     show-index
                     :searchable="true"
                     sort-by="Block"
                     sort-type="desc"
                     buttons-pagination
+                    @update-page-items="onPendingPageItems"
                   >
-                    <template #item-expand="deliverableRow">
-                      <i
-                        v-if="isArticleContentType(deliverableRow.Main_Content_Type)"
-                        class="expand-icon"
-                      ></i>
-                    </template>
-                    <template #item-content_doc_url="{ content_doc_url }">
-                      <a
-                        v-if="content_doc_url"
-                        :href="content_doc_url"
-                        target="_blank"
-                        rel="noopener"
-                        class="text-primary text-truncate d-inline-block content-doc-link"
-                        @click.stop
-                      >
-                        Content Doc
-                      </a>
-                      <span v-else class="text-muted">—</span>
-                    </template>
-                    <template #item-actions="deliverableRow">
-                      <div
-                        v-if="!isArticleContentType(deliverableRow.Main_Content_Type)"
-                        class="file-action-buttons"
-                        @click.stop
-                        @mousedown.stop
-                      >
-                        <button
-                          type="button"
-                          class="btn btn-success btn-sm me-2"
-                          :disabled="actionLoading"
-                          @mousedown.stop.prevent
-                          @click.stop.prevent="openApproveForDeliverable(deliverableRow.id)"
+                    <template #body>
+                      <tbody class="vue3-easy-data-table__body">
+                        <template
+                          v-for="(deliverable, index) in pendingPageItems"
+                          :key="deliverable.id ?? index"
                         >
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          class="btn btn-danger btn-sm"
-                          :disabled="actionLoading"
-                          @mousedown.stop.prevent
-                          @click.stop.prevent="openRejectForDeliverable(deliverableRow.id)"
-                        >
-                          Feedback
-                        </button>
-                      </div>
-                      <span v-else class="text-muted">—</span>
-                    </template>
-                    <template #expand="deliverable">
-                      <div
-                        v-if="isArticleContentType(deliverable.Main_Content_Type)"
-                        class="p-3 deliverable-files-expand"
-                      >
-                        <p v-if="!deliverable.driveFiles?.length" class="text-muted mb-0">
-                          No files found in Google Drive folder.
-                        </p>
-                        <EasyDataTable
-                          v-else
-                          class="deliverable-files-table"
-                          :headers="pendingFileHeaders"
-                          :items="deliverable.driveFiles"
-                          :rows-per-page="5"
-                          table-class="table-bordered"
-                          show-index
-                          :searchable="true"
-                          buttons-pagination
-                        >
-                          <template #item-name="file">
-                            <a
-                              v-if="file.webViewLink"
-                              :href="file.webViewLink"
-                              target="_blank"
-                              rel="noopener"
-                              class="text-primary fw-semibold"
-                            >
-                              {{ file.name }}
-                            </a>
-                            <span v-else>{{ file.name }}</span>
-                          </template>
-                          <template #item-note="file">
-                            <div class="file-note-cell">
-                              <span
-                                v-if="file.status"
-                                class="badge mb-2"
-                                :class="file.status === 'Approved' ? 'bg-success' : 'bg-danger'"
-                              >
-                                {{ file.status }}
-                              </span>
-                              <p
-                                v-if="getFileNote(deliverable.id, file.id).trim()"
-                                class="file-saved-note mb-2"
-                              >
-                                {{ getFileNote(deliverable.id, file.id) }}
-                              </p>
-                              <textarea
-                                v-if="!isFileReviewComplete(file)"
-                                class="form-control form-control-sm"
-                                rows="2"
-                                :value="getFileNote(deliverable.id, file.id)"
-                                :placeholder="`Notes for ${file.name}`"
-                                @input="onFileNoteInput(deliverable.id, file.id, $event)"
-                              ></textarea>
-                              <span
-                                v-else-if="!getFileNote(deliverable.id, file.id).trim()"
-                                class="text-muted"
-                              >
-                                —
-                              </span>
-                            </div>
-                          </template>
-                          <template #item-actions="fileRow">
-                            <div class="file-action-buttons" @click.stop @mousedown.stop>
-                              <button
-                                type="button"
-                                class="btn btn-success btn-sm me-2"
-                                :disabled="actionLoading"
-                                @mousedown.stop.prevent
-                                @click.stop.prevent="approveFileDirect(deliverable.id, fileRow.id)"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                type="button"
-                                class="btn btn-danger btn-sm"
-                                :disabled="actionLoading"
-                                @mousedown.stop.prevent
-                                @click.stop.prevent="rejectFileDirect(deliverable.id, fileRow.id)"
-                              >
-                                Feedback
-                              </button>
-                            </div>
-                          </template>
-                        </EasyDataTable>
-                      </div>
+                          <tr
+                            :class="[
+                              getPendingRowClassName(deliverable),
+                              { 'even-row': (index + 1) % 2 === 0 },
+                            ]"
+                          >
+                            <td>{{ getPendingRowNumber(index) }}</td>
+                            <td>{{ deliverable.Block }}</td>
+                            <td>{{ deliverable.Main_Content_Type }}</td>
+                            <td>{{ deliverable.Name }}</td>
+                            <td>
+                              <span class="text-muted">—</span>
+                            </td>
+                          </tr>
+                          <tr class="deliverable-expand-row">
+                            <td :colspan="pendingRowColspan" class="expand">
+                              <div class="deliverable-files-expand">
+                                <p
+                                  v-if="isVideoContentTypeValue(deliverable.Main_Content_Type)"
+                                  class="video-content-note mb-2"
+                                >
+                                  *PLEASE NOTE: Once the script and voiceover content are approved, changes cannot be made after video production begins without restarting the project. Please make sure you are completely satisfied with the content prior to approval.
+                                </p>
+                                <p v-if="!deliverable.driveFiles?.length" class="text-muted mb-0">
+                                  No files found in Google Drive folder.
+                                </p>
+                                <EasyDataTable
+                                  v-else
+                                  class="deliverable-files-table"
+                                  :headers="pendingFileHeaders"
+                                  :items="deliverable.driveFiles"
+                                  :rows-per-page="5"
+                                  :index-column-width="48"
+                                  table-class="table-bordered"
+                                  show-index
+                                  :searchable="true"
+                                  buttons-pagination
+                                >
+                                  <template #item-name="file">
+                                    <a
+                                      v-if="file.webViewLink"
+                                      :href="file.webViewLink"
+                                      target="_blank"
+                                      rel="noopener"
+                                      class="text-primary fw-semibold"
+                                    >
+                                      {{ file.name }}
+                                    </a>
+                                    <span v-else>{{ file.name }}</span>
+                                  </template>
+                                  <template #item-note="file">
+                                    <div class="file-note-cell">
+                                      <span
+                                        v-if="file.status === 'Approved'"
+                                        class="badge bg-success file-status-badge"
+                                      >
+                                        {{ file.status }}
+                                      </span>
+                                      <p
+                                        v-if="
+                                          isFileReviewComplete(file) &&
+                                          getFileNote(deliverable.id, file.id).trim()
+                                        "
+                                        class="file-saved-note"
+                                      >
+                                        {{ getFileNote(deliverable.id, file.id) }}
+                                      </p>
+                                      <textarea
+                                        v-if="!isFileReviewComplete(file)"
+                                        class="form-control form-control-sm file-note-textarea"
+                                        rows="2"
+                                        :value="getFileNote(deliverable.id, file.id)"
+                                        @input="onFileNoteInput(deliverable.id, file.id, $event)"
+                                      ></textarea>
+                                      <span
+                                        v-else-if="!getFileNote(deliverable.id, file.id).trim()"
+                                        class="text-muted file-note-empty"
+                                      >
+                                        —
+                                      </span>
+                                    </div>
+                                  </template>
+                                  <template #item-actions="fileRow">
+                                    <div class="file-action-buttons" @click.stop @mousedown.stop>
+                                      <button
+                                        type="button"
+                                        class="btn btn-success btn-sm file-action-btn"
+                                        :disabled="actionLoading"
+                                        @mousedown.stop.prevent
+                                        @click.stop.prevent="
+                                          approveFileDirect(deliverable.id, fileRow.id)
+                                        "
+                                      >
+                                        Approve
+                                      </button>
+                                      <button
+                                        type="button"
+                                        class="btn btn-danger btn-sm file-action-btn"
+                                        :disabled="actionLoading"
+                                        @mousedown.stop.prevent
+                                        @click.stop.prevent="
+                                          rejectFileDirect(deliverable.id, fileRow.id)
+                                        "
+                                      >
+                                        Feedback
+                                      </button>
+                                    </div>
+                                  </template>
+                                </EasyDataTable>
+                              </div>
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
                     </template>
                   </EasyDataTable>
                 </div>
@@ -222,54 +213,42 @@
                       <span class="dc-label">Topic</span>
                       <span class="dc-value">{{ row.Name }}</span>
                     </div>
-                    <div class="dc-row">
-                      <span class="dc-label">Content Doc</span>
-                      <span class="dc-value">
-                        <a v-if="row.content_doc_url" :href="row.content_doc_url" target="_blank" rel="noopener"
-                          class="text-primary">Content Doc</a>
-                        <span v-else class="text-muted">—</span>
-                      </span>
-                    </div>
 
-                    <div v-if="!isArticleContentType(row.Main_Content_Type)" class="dc-actions">
-                      <button type="button" class="btn btn-success btn-sm" :disabled="actionLoading"
-                        @click="openApproveForDeliverable(row.id)">Approve</button>
-                      <button type="button" class="btn btn-danger btn-sm" :disabled="actionLoading"
-                        @click="openRejectForDeliverable(row.id)">Feedback</button>
-                    </div>
-
-                    <template v-else>
-                      <button type="button" class="btn btn-outline-secondary btn-sm w-100 mt-2"
-                        @click="toggleCard(row.id)">
-                        {{ isCardExpanded(row.id) ? 'Hide Files' : 'View Files' }}
-                      </button>
-                      <div v-if="isCardExpanded(row.id)" class="dc-files mt-2">
-                        <p v-if="!row.driveFiles?.length" class="text-muted mb-0">
-                          No files found in Google Drive folder.
+                    <p
+                      v-if="isVideoContentTypeValue(row.Main_Content_Type)"
+                      class="video-content-note mb-2"
+                    >
+                      *PLEASE NOTE: Once the script and voiceover content are approved, changes cannot be made after video production begins without restarting the project. Please make sure you are completely satisfied with the content prior to approval.
+                    </p>
+                    <div class="dc-files mt-2">
+                      <p v-if="!row.driveFiles?.length" class="text-muted mb-0">
+                        No files found in Google Drive folder.
+                      </p>
+                      <div v-for="file in row.driveFiles" :key="file.id" class="dc-file">
+                        <div class="d-flex align-items-center justify-content-between">
+                          <a v-if="file.webViewLink" :href="file.webViewLink" target="_blank" rel="noopener"
+                            class="text-primary fw-semibold">{{ file.name }}</a>
+                          <span v-else class="fw-semibold">{{ file.name }}</span>
+                          <span v-if="file.status === 'Approved'" class="badge ms-2 bg-success">{{ file.status }}</span>
+                        </div>
+                        <p v-if="isFileReviewComplete(file) && getFileNote(row.id, file.id).trim()" class="file-saved-note">
+                          {{ getFileNote(row.id, file.id) }}
                         </p>
-                        <div v-for="file in row.driveFiles" :key="file.id" class="dc-file">
-                          <div class="d-flex align-items-center justify-content-between">
-                            <a v-if="file.webViewLink" :href="file.webViewLink" target="_blank" rel="noopener"
-                              class="text-primary fw-semibold">{{ file.name }}</a>
-                            <span v-else class="fw-semibold">{{ file.name }}</span>
-                            <span v-if="file.status" class="badge ms-2"
-                              :class="file.status === 'Approved' ? 'bg-success' : 'bg-danger'">{{ file.status }}</span>
-                          </div>
-                          <p v-if="getFileNote(row.id, file.id).trim()" class="file-saved-note mb-1 mt-1">
-                            {{ getFileNote(row.id, file.id) }}
-                          </p>
-                          <textarea v-if="!isFileReviewComplete(file)" class="form-control form-control-sm mt-1" rows="2"
-                            :value="getFileNote(row.id, file.id)" :placeholder="`Notes for ${file.name}`"
-                            @input="onFileNoteInput(row.id, file.id, $event)"></textarea>
-                          <div v-if="!isFileReviewComplete(file)" class="dc-actions mt-2">
-                            <button type="button" class="btn btn-success btn-sm" :disabled="actionLoading"
-                              @click="approveFileDirect(row.id, file.id)">Approve</button>
-                            <button type="button" class="btn btn-danger btn-sm" :disabled="actionLoading"
-                              @click="rejectFileDirect(row.id, file.id)">Feedback</button>
-                          </div>
+                        <textarea
+                          v-if="!isFileReviewComplete(file)"
+                          class="form-control form-control-sm file-note-textarea"
+                          rows="2"
+                          :value="getFileNote(row.id, file.id)"
+                          @input="onFileNoteInput(row.id, file.id, $event)"
+                        ></textarea>
+                        <div v-if="!isFileReviewComplete(file)" class="file-action-buttons mt-2">
+                          <button type="button" class="btn btn-success btn-sm file-action-btn" :disabled="actionLoading"
+                            @click="approveFileDirect(row.id, file.id)">Approve</button>
+                          <button type="button" class="btn btn-danger btn-sm file-action-btn" :disabled="actionLoading"
+                            @click="rejectFileDirect(row.id, file.id)">Feedback</button>
                         </div>
                       </div>
-                    </template>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -561,20 +540,208 @@ interface DeliverableRow {
   Account?: { name?: string };
   Content_Doc?: string;
   content_file_google_url?: string;
+  GDrive_Folder?: string | null;
   content_doc_url?: string;
   driveFiles?: PendingDeliverableFile[];
 }
 
-let cachedDriveFiles: DriveItem[] | null = null;
+const driveFilesByFolderUrl = new Map<string, DriveItem[]>();
 
-async function loadDriveFiles(force = false): Promise<DriveItem[]> {
-  if (!force && cachedDriveFiles) {
-    return cachedDriveFiles;
+const MONTH_NAMES = [
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+];
+
+function isDriveFolder(item: DriveItem): boolean {
+  return item.mimeType === 'application/vnd.google-apps.folder';
+}
+
+function isDriveFile(item: DriveItem): boolean {
+  return !isDriveFolder(item);
+}
+
+function resolveDeliverableFolderUrl(row: DeliverableRow): string {
+  const gdriveFolder = row.GDrive_Folder?.trim();
+  if (gdriveFolder) {
+    return gdriveFolder;
   }
 
-  const result = await fetchDriveFolderFiles(GOOGLE_DRIVE_FOLDER_URL);
-  cachedDriveFiles = result.files ?? [];
-  return cachedDriveFiles;
+  const contentFileUrl = row.content_file_google_url?.trim();
+  if (contentFileUrl?.includes('/folders/')) {
+    return contentFileUrl;
+  }
+
+  return GOOGLE_DRIVE_FOLDER_URL;
+}
+
+function usesSharedDefaultFolder(row: DeliverableRow): boolean {
+  return resolveDeliverableFolderUrl(row) === GOOGLE_DRIVE_FOLDER_URL;
+}
+
+function getBlockFolderMatchTerms(block?: string | number | null): string[] {
+  if (block == null) {
+    return [];
+  }
+
+  const blockStr = block.toString().trim();
+  if (!blockStr) {
+    return [];
+  }
+
+  const terms = new Set<string>([blockStr.toLowerCase()]);
+  const match = blockStr.match(/^(\d{4})-(\d{1,2})$/);
+  if (!match) {
+    return [...terms];
+  }
+
+  const year = match[1];
+  const monthIndex = parseInt(match[2], 10) - 1;
+  if (monthIndex >= 0 && monthIndex < 12) {
+    const monthName = MONTH_NAMES[monthIndex];
+    terms.add(`${monthName} ${year}`);
+    terms.add(`${monthName.slice(0, 3)} ${year}`);
+  }
+
+  return [...terms];
+}
+
+function findMatchingDriveSubfolder(
+  row: DeliverableRow,
+  rootItems: DriveItem[]
+): DriveItem | null {
+  const folders = rootItems.filter(isDriveFolder);
+  if (!folders.length) {
+    return null;
+  }
+
+  const blockTerms = getBlockFolderMatchTerms(row.Block);
+  const topicName = row.Name?.trim().toLowerCase();
+  const accountName = row.Account?.name?.trim().toLowerCase();
+
+  for (const folder of folders) {
+    const folderName = folder.name?.trim().toLowerCase() ?? '';
+    if (!folderName) {
+      continue;
+    }
+
+    if (blockTerms.some((term) => folderName === term || folderName.includes(term))) {
+      return folder;
+    }
+    if (topicName && (folderName === topicName || folderName.includes(topicName))) {
+      return folder;
+    }
+    if (accountName && folderName.includes(accountName)) {
+      return folder;
+    }
+  }
+
+  return null;
+}
+
+function filterDriveFilesForRow(row: DeliverableRow, driveFiles: DriveItem[]): DriveItem[] {
+  if (!usesSharedDefaultFolder(row)) {
+    return driveFiles;
+  }
+
+  const topicName = row.Name?.trim().toLowerCase();
+  const accountName = row.Account?.name?.trim().toLowerCase();
+  const block = row.Block?.toString().trim().toLowerCase();
+
+  if (!topicName && !accountName && !block) {
+    return driveFiles;
+  }
+
+  return driveFiles.filter((file) => {
+    const fileName = file.name?.trim().toLowerCase() ?? '';
+    if (!fileName) {
+      return false;
+    }
+
+    const normalizedAccount = accountName?.replace(/\s+/g, '') ?? '';
+    const matchesTopic =
+      !!topicName && (fileName === topicName || fileName.includes(topicName));
+    const matchesAccount =
+      !!normalizedAccount &&
+      (fileName.includes(normalizedAccount) || fileName.includes(accountName ?? ''));
+    const matchesBlock = !!block && fileName.includes(block);
+
+    return matchesTopic || matchesAccount || matchesBlock;
+  });
+}
+
+async function loadDriveFilesForFolder(
+  folderUrl: string,
+  force = false
+): Promise<DriveItem[]> {
+  const normalizedUrl = folderUrl.trim();
+  if (!normalizedUrl) {
+    return [];
+  }
+
+  if (!force && driveFilesByFolderUrl.has(normalizedUrl)) {
+    return driveFilesByFolderUrl.get(normalizedUrl)!;
+  }
+
+  try {
+    const result = await fetchDriveFolderFiles(normalizedUrl);
+    const files = result.files ?? [];
+    driveFilesByFolderUrl.set(normalizedUrl, files);
+    return files;
+  } catch (error) {
+    console.error(`Failed to load Google Drive files for folder ${normalizedUrl}`, error);
+    driveFilesByFolderUrl.set(normalizedUrl, []);
+    return [];
+  }
+}
+
+async function loadDriveFilesForRows(rows: DeliverableRow[], force = false): Promise<void> {
+  await loadDriveFilesForFolder(GOOGLE_DRIVE_FOLDER_URL, force);
+
+  const folderUrls = [
+    ...new Set(
+      rows
+        .map((row) => resolveDeliverableFolderUrl(row))
+        .filter((url) => url !== GOOGLE_DRIVE_FOLDER_URL)
+    ),
+  ];
+  await Promise.all(folderUrls.map((folderUrl) => loadDriveFilesForFolder(folderUrl, force)));
+}
+
+async function resolveRowDriveFiles(row: DeliverableRow, force = false): Promise<DriveItem[]> {
+  const folderUrl = resolveDeliverableFolderUrl(row);
+
+  if (!usesSharedDefaultFolder(row)) {
+    const files = await loadDriveFilesForFolder(folderUrl, force);
+    return files.filter(isDriveFile);
+  }
+
+  const rootFiles =
+    driveFilesByFolderUrl.get(GOOGLE_DRIVE_FOLDER_URL) ??
+    (await loadDriveFilesForFolder(GOOGLE_DRIVE_FOLDER_URL, force));
+
+  const matchedSubfolder = findMatchingDriveSubfolder(row, rootFiles);
+  if (matchedSubfolder?.webViewLink) {
+    const subfolderFiles = await loadDriveFilesForFolder(matchedSubfolder.webViewLink, force);
+    const filesInSubfolder = subfolderFiles.filter(isDriveFile);
+    if (filesInSubfolder.length > 0) {
+      return filesInSubfolder;
+    }
+
+    // Some drives keep month PDFs alongside the month folder at the root level.
+    return rootFiles.filter(isDriveFile);
+  }
+
+  return filterDriveFilesForRow(row, rootFiles.filter(isDriveFile));
 }
 
 function buildDeliverableFiles(driveFiles: DriveItem[]): PendingDeliverableFile[] {
@@ -743,14 +910,17 @@ const pendingheaders: Header[] = [
   { text: 'Block', value: 'Block', sortable: true },
   { text: 'Content Type', value: 'Main_Content_Type', sortable: true },
   { text: 'Topic', value: 'Name', sortable: true },
-  { text: 'Content Doc', value: 'content_doc_url' },
   { text: 'Actions', value: 'actions' },
 ];
 
+const pendingRowColspan = 5;
+const pendingDataTableRef = ref<{ currentPageFirstIndex?: number } | null>(null);
+const pendingPageItems = ref<DeliverableRow[]>([]);
+
 const pendingFileHeaders: Header[] = [
-  { text: 'File Name', value: 'name', sortable: true },
-  { text: 'Notes', value: 'note' },
-  { text: 'Actions', value: 'actions' },
+  { text: 'File Name', value: 'name', sortable: true, width: 240 },
+  { text: 'Notes', value: 'note', width: 280 },
+  { text: 'Actions', value: 'actions', width: 200 },
 ];
 
 const completedheaders = [
@@ -791,33 +961,25 @@ function invalidateDeliverablesCacheForBlock(companyId: string, block: string) {
   }
 }
 
-function isArticleContentType(contentType?: string | null): boolean {
-  return (contentType ?? '').trim().toLowerCase() === 'article';
+function getPendingRowClassName(_item: DeliverableRow): string {
+  return 'pending-deliverable-row';
 }
 
 function isFileReviewComplete(file: PendingDeliverableFile): boolean {
   return file.status === 'Approved' || file.status === 'Rejected';
 }
 
-// Mobile card view: track which deliverable cards are expanded to show files
-const expandedCardIds = ref<Set<string>>(new Set());
-
-function toggleCard(id: string | number | null | undefined) {
-  if (id == null) return;
-  const key = String(id);
-  const next = new Set(expandedCardIds.value);
-  next.has(key) ? next.delete(key) : next.add(key);
-  expandedCardIds.value = next;
+function isVideoContentTypeValue(contentType?: string | null): boolean {
+  return (contentType ?? '').toString().trim().toLowerCase().includes('article');
 }
 
-function isCardExpanded(id: string | number | null | undefined): boolean {
-  return id != null && expandedCardIds.value.has(String(id));
+function getPendingRowNumber(index: number): number {
+  const firstIndex = pendingDataTableRef.value?.currentPageFirstIndex ?? 0;
+  return firstIndex + index + 1;
 }
 
-function getPendingRowClassName(item: DeliverableRow): string {
-  return isArticleContentType(item.Main_Content_Type)
-    ? 'pending-article-row'
-    : 'pending-non-article-row';
+function onPendingPageItems(items: DeliverableRow[]) {
+  pendingPageItems.value = items;
 }
 
 function findDeliverable(
@@ -829,7 +991,11 @@ function findDeliverable(
   );
 }
 
-async function applyDeliverablesResponse(tab: DeliverablesTab, rows: DeliverableRow[]) {
+async function applyDeliverablesResponse(
+  tab: DeliverablesTab,
+  rows: DeliverableRow[],
+  forceRefreshDriveFiles = false
+) {
   items.value = rows as unknown as Case[];
   if (tab === 'upcoming') {
     upcomingDeliverables.value = rows
@@ -859,46 +1025,36 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
         return blockA.localeCompare(blockB);
       });
 
-    const hasArticleDeliverables = pendingRows.some((row) =>
-      isArticleContentType(row.Main_Content_Type)
-    );
-    const driveFiles = hasArticleDeliverables ? await loadDriveFiles() : [];
+    await loadDriveFilesForRows(pendingRows, forceRefreshDriveFiles);
     const approvalsByDeliverableId = await loadDeliverableFileApprovalsByDeliverableId(
-      pendingRows.filter((row) => isArticleContentType(row.Main_Content_Type))
+      pendingRows
     );
 
-    pendingDeliverables.value = pendingRows.map((row) => {
-      const isArticle = isArticleContentType(row.Main_Content_Type);
-      const articleDriveFiles = isArticle ? driveFiles : [];
-      const deliverableId = row.id != null ? String(row.id) : '';
-      const dbApprovals = deliverableId
-        ? approvalsByDeliverableId.get(deliverableId) ?? []
-        : [];
+    pendingDeliverables.value = await Promise.all(
+      pendingRows.map(async (row) => {
+        const deliverableId = row.id != null ? String(row.id) : '';
+        const dbApprovals = deliverableId
+          ? approvalsByDeliverableId.get(deliverableId) ?? []
+          : [];
 
-      const contentDocUrl =
-        resolveContentDocUrl(row, articleDriveFiles) || undefined;
+        const rowDriveFiles = await resolveRowDriveFiles(row, forceRefreshDriveFiles);
+        const contentDocUrl = resolveContentDocUrl(row, rowDriveFiles) || undefined;
+        const baseFiles = buildDeliverableFiles(rowDriveFiles);
 
-      const baseFiles = isArticle ? buildDeliverableFiles(driveFiles) : [];
+        if (contentDocUrl) {
+          baseFiles.push(buildContentDocFile(row, contentDocUrl));
+        }
 
-      const shouldIncludeContentDocInFilesList = isArticle && !!contentDocUrl;
+        const mergedDriveFiles = mergeDeliverableFilesWithApprovals(baseFiles, dbApprovals);
 
-      if (shouldIncludeContentDocInFilesList && contentDocUrl) {
-        baseFiles.push(buildContentDocFile(row, contentDocUrl));
-      }
-
-      const mergedDriveFiles = isArticle
-        ? mergeDeliverableFilesWithApprovals(baseFiles, dbApprovals)
-        : [];
-
-      return {
-        ...row,
-        driveFiles: mergedDriveFiles,
-        content_file_google_url: isArticle
-          ? resolveContentFileGoogleUrl(row, driveFiles)
-          : undefined,
-        content_doc_url: contentDocUrl,
-      };
-    });
+        return {
+          ...row,
+          driveFiles: mergedDriveFiles,
+          content_file_google_url: resolveContentFileGoogleUrl(row, rowDriveFiles),
+          content_doc_url: contentDocUrl,
+        };
+      })
+    );
   }
 }
 
@@ -925,7 +1081,7 @@ const fetchDeliverables = async (
   try {
     console.log(authStore);
     if (tab === 'pending' && force) {
-      cachedDriveFiles = null;
+      driveFilesByFolderUrl.clear();
     }
     const response = await axios.get(
       API_BASE_URL + '/Zoho/zoho/deliverables/' + companyId + '/' + block + '/' + tab
@@ -934,7 +1090,7 @@ const fetchDeliverables = async (
     error.value = '';
     const rows = [...(response.data.data as DeliverableRow[])];
     deliverablesByKey.set(key, rows);
-    await applyDeliverablesResponse(tab, rows);
+    await applyDeliverablesResponse(tab, rows, force);
     console.log('test :' + completedDeliverables);
   } catch (err) {
     error.value = err instanceof Error ? err.message : String(err);
@@ -1025,13 +1181,9 @@ const selectedPendingDeliverable = computed(() =>
   )
 );
 
-const isVideoContentType = computed(() => {
-  const contentType = (selectedPendingDeliverable.value?.Main_Content_Type ?? '')
-    .toString()
-    .trim()
-    .toLowerCase();
-  return contentType === 'video';
-});
+const isVideoContentType = computed(() =>
+  isVideoContentTypeValue(selectedPendingDeliverable.value?.Main_Content_Type)
+);
 
 function findDeliverableFile(
   deliverableId: string | number | null | undefined,
@@ -1140,7 +1292,7 @@ async function rejectFileDirect(
 
   if (!ctx.file.note.trim()) {
     Toastify({
-      text: 'Please provide a reason for rejection in the notes field.',
+      text: 'Please provide feedback in the notes field.',
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1220,7 +1372,7 @@ async function submitDeliverableRejection(deliverable: DeliverableRow, note: str
     invalidateDeliverablesCacheForBlock(authStore.getCompanyId(), selectedBlock.value);
     await fetchDeliverables(activeDeliverablesTab.value, true);
     Toastify({
-      text: 'Deliverable status updated successfully!',
+      text: 'Feedback submitted successfully!',
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1231,7 +1383,7 @@ async function submitDeliverableRejection(deliverable: DeliverableRow, note: str
   } catch (error) {
     console.error('Rejection failed', error);
     Toastify({
-      text: 'Failed to update the deliverable rejection.',
+      text: 'Failed to submit feedback.',
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1327,7 +1479,7 @@ async function submitFileRejection(
     invalidateDeliverablesCacheForBlock(authStore.getCompanyId(), selectedBlock.value);
     await fetchDeliverables(activeDeliverablesTab.value, true);
     Toastify({
-      text: `Rejected ${file.name} successfully!`,
+      text: `Feedback submitted for ${file.name} successfully!`,
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1338,7 +1490,7 @@ async function submitFileRejection(
   } catch (error) {
     console.error('Rejection failed', error);
     Toastify({
-      text: `Failed to reject ${file.name}.`,
+      text: `Failed to submit feedback for ${file.name}.`,
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1371,7 +1523,7 @@ const closeRejectModal = () => {
 const submitRejection = async () => {
   if (!rejectReason.value.trim()) {
     Toastify({
-      text: 'Please provide a reason for rejection.',
+      text: 'Please provide feedback.',
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1391,6 +1543,20 @@ const submitRejection = async () => {
 <style scoped>
 .v-btn {
   min-width: 80px;
+}
+
+.pending-tab-note {
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.video-content-note {
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
 }
 
 /* Mobile card view for tables */
@@ -1438,13 +1604,17 @@ const submitRejection = async () => {
 
 .dc-file {
   border-top: 1px solid #eee;
-  padding-top: 8px;
-  margin-top: 8px;
+  padding: 0.75rem 0;
+  margin: 0;
 }
 
 .dc-file:first-child {
   border-top: none;
-  margin-top: 0;
+  padding-top: 0;
+}
+
+.dc-file .file-note-textarea {
+  max-width: 100%;
 }
 
 .topicWidth {
@@ -1498,11 +1668,92 @@ const submitRejection = async () => {
 }
 
 .deliverable-files-expand {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   position: relative;
   z-index: 1;
   overflow: visible;
-  padding-bottom: 0.5rem;
+  padding: 0.75rem;
+}
+
+.deliverable-files-table :deep(table) {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.deliverable-files-table :deep(.vue3-easy-data-table__header th),
+.deliverable-files-table :deep(.vue3-easy-data-table__body td) {
+  vertical-align: middle;
+  padding: 0.5rem 0.75rem;
+}
+
+.deliverable-files-table :deep(.vue3-easy-data-table__header th) {
+  background-color: rgba(25, 143, 217, 0.12);
+  color: #198fd9;
+}
+
+.deliverable-files-table :deep(.vue3-easy-data-table__body td) {
+  overflow: hidden;
+}
+
+.deliverable-files-table :deep(.vue3-easy-data-table__header th:nth-child(1)),
+.deliverable-files-table :deep(.vue3-easy-data-table__body td:nth-child(1)) {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  text-align: center;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.deliverable-files-table :deep(.vue3-easy-data-table__header th:nth-child(2)),
+.deliverable-files-table :deep(.vue3-easy-data-table__body td:nth-child(2)) {
+  width: 240px;
+}
+
+.deliverable-files-table :deep(.vue3-easy-data-table__header th:nth-child(3)),
+.deliverable-files-table :deep(.vue3-easy-data-table__body td:nth-child(3)) {
+  width: 280px;
+}
+
+.deliverable-files-table :deep(.vue3-easy-data-table__header th:nth-child(4)),
+.deliverable-files-table :deep(.vue3-easy-data-table__body td:nth-child(4)) {
+  width: 200px;
+  min-width: 200px;
+}
+
+.pending-deliverables-wrapper :deep(.vue3-easy-data-table__header th) {
+  vertical-align: middle;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(25, 143, 217, 0.12);
+  color: #198fd9;
+}
+
+.pending-deliverables-wrapper :deep(tr.pending-deliverable-row td) {
+  vertical-align: middle;
+  padding: 0.5rem 0.75rem;
+}
+
+.pending-deliverables-wrapper :deep(.vue3-easy-data-table__header th:first-child),
+.pending-deliverables-wrapper :deep(tr.pending-deliverable-row td:first-child) {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  text-align: center;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.pending-deliverables-wrapper :deep(tr.pending-deliverable-row td),
+.pending-deliverables-wrapper :deep(tr.deliverable-expand-row > td.expand) {
+  vertical-align: middle;
+}
+
+.pending-deliverables-wrapper :deep(tr.deliverable-expand-row td.expand) {
+  position: relative;
+  z-index: 1000;
+  overflow: visible;
+  background-color: #ffffff;
+  padding: 0;
 }
 
 .pending-deliverables-wrapper {
@@ -1516,13 +1767,6 @@ const submitRejection = async () => {
 .pending-deliverables-wrapper :deep(tr.deliverable-expand-row) {
   position: relative;
   z-index: 1000;
-}
-
-.pending-deliverables-wrapper :deep(tr.deliverable-expand-row td.expand) {
-  position: relative;
-  z-index: 1000;
-  overflow: visible;
-  background-color: #f8f9fa;
 }
 
 .deliverable-files-table {
@@ -1617,45 +1861,63 @@ const submitRejection = async () => {
   padding: 1rem 1.25rem;
 }
 
-.pending-deliverables-wrapper tr.pending-non-article-row td.can-expand {
-  pointer-events: none;
-  cursor: default;
-}
-
-.pending-deliverables-wrapper tr.pending-non-article-row + tr.deliverable-expand-row {
-  display: none !important;
-}
-
-.pending-deliverables-wrapper td.can-expand .expand-icon {
-  border: solid;
-  border-color: #212121;
-  border-width: 0 2px 2px 0;
-  display: inline-block;
-  padding: 3px;
-  transform: rotate(-45deg);
-  transition: 0.2s;
-}
-
 .file-action-buttons {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
   position: relative;
   z-index: 5;
   pointer-events: auto;
+  white-space: nowrap;
+}
+
+.file-action-btn {
+  min-width: 82px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25;
 }
 
 .file-note-cell {
-  min-width: 220px;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.file-status-badge {
+  display: inline-block;
+  margin-bottom: 0.5rem;
 }
 
 .file-saved-note {
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.5rem;
   white-space: pre-wrap;
   word-break: break-word;
   color: #000000;
   font-size: 14px;
+  line-height: 1.4;
 }
 
-.file-note-cell textarea {
+.file-note-textarea {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  height: 56px;
+  resize: none;
+  margin: 0;
+  box-sizing: border-box;
   color: #000000;
   font-size: 14px;
+  line-height: 1.4;
+  padding: 0.375rem 0.5rem;
+}
+
+.file-note-empty {
+  display: block;
+  min-height: 56px;
+  line-height: 56px;
+  margin: 0;
 }
 </style>
