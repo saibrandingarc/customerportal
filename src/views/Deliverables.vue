@@ -438,7 +438,6 @@ interface DeliverableRow {
   Account?: { name?: string };
   Content_Doc?: string;
   Client_Review_Folder?: string;
-  content_file_google_url?: string;
   content_doc_url?: string;
   driveFiles?: PendingDeliverableFile[];
 }
@@ -683,7 +682,7 @@ function getReviewDocUrl(row: DeliverableRow): string | undefined {
     return clientReviewFolder;
   }
 
-  return row.Content_Doc?.trim() || row.content_file_google_url || undefined;
+  return row.Content_Doc?.trim() || undefined;
 }
 
 function isFileReviewComplete(file: PendingDeliverableFile): boolean {
