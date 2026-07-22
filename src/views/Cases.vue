@@ -65,7 +65,6 @@
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeCasesTab === 'closed' }">
-                <div class="alert alert-success" v-if="snackbar">{{ text }}</div>
                 <input v-model="searchClosed" class="form-control mb-3" placeholder="Search..." />
                 <EasyDataTable
                   :headers="closedheaders"
@@ -174,11 +173,11 @@ import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 import { Header } from 'vue3-easy-data-table';
 import { API_BASE_URL } from '@/api/config';
+import Toastify from 'toastify-js'
+import 'toastify-js/src/toastify.css'
 
 const router = useRouter();
 const authStore = useAuthStore();
-const text = ref("Hello, I'm a snackbar");
-const snackbar = ref<boolean>(false);
 const activeCasesTab = ref<'open' | 'closed'>('open');
 
 interface Account {
@@ -254,6 +253,38 @@ const error = ref('');
 const items = ref<Case[]>([]);
 const openitems = ref<Case[]>([]);
 const closeditems = ref<Case[]>([]);
+
+interface ZohoCaseActionResult {
+  code?: string;
+  message?: string;
+  status?: string;
+}
+
+function showCaseToast(message: string, isError = false) {
+  Toastify({
+    text: message,
+    duration: 3000,
+    gravity: 'top',
+    position: 'right',
+    backgroundColor: isError ? '#ed5e5e' : '#13c56b',
+    close: true,
+    stopOnFocus: true,
+  }).showToast();
+}
+
+function getCaseActionMessage(
+  responseData: { data?: ZohoCaseActionResult[] } | undefined,
+  fallback: string
+): string {
+  const result = responseData?.data?.[0];
+  if (!result?.message) return fallback;
+
+  const message = result.message.trim();
+  if (!message) return fallback;
+
+  return message.charAt(0).toUpperCase() + message.slice(1);
+}
+
 const fetchCases = async () => {
   loading.value = true;
     try {
@@ -340,8 +371,7 @@ const deleteItemConfirm = async () => {
     console.log('Form submitted:', response.data);
     items.value.splice(editedIndex.value, 1)
     close()
-    snackbar.value = true;
-    text.value = "Case deleted";
+    showCaseToast('Case deleted successfully.');
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -443,10 +473,15 @@ const save = async () => {
     editedItem.value.Case_Number = response.data.data[0].details.id
     editedItem.value.Status = 'New'
     items.value.push({ ...editedItem.value })
-    snackbar.value = true
-    text.value = caseAttachments.value.length
-      ? 'Case added with attachments'
-      : 'Case added'
+
+    const successMessage = getCaseActionMessage(
+      response.data,
+      caseAttachments.value.length
+        ? 'Case added with attachments.'
+        : 'Case added successfully.'
+    )
+    showCaseToast(successMessage)
+    activeCasesTab.value = 'open'
     await fetchCases()
     close()
   } catch (err: unknown) {
@@ -457,6 +492,7 @@ const save = async () => {
           ? err.message
           : 'Failed to create case.'
     error.value = message
+    showCaseToast(message, true)
   } finally {
     loading.value = false
   }
