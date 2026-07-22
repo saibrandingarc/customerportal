@@ -48,14 +48,24 @@ export function useSessionIdleTimeout() {
     }
 
     void (async () => {
+      const loginType = localStorage.getItem('loginType');
       await recordLogoutActivity();
       authStore.logout();
-      await logout({
-        logoutParams: { returnTo: `${window.location.origin}/login` },
-      }).catch(() => {
-        /* username-password users may not have an Auth0 session */
-      });
-      await router.push({ name: 'Login' });
+
+      const isUsernamePasswordLogin = loginType === 'username-password';
+
+      if (!isUsernamePasswordLogin) {
+        try {
+          await logout({
+            logoutParams: { returnTo: `${window.location.origin}/login` },
+          });
+          return;
+        } catch {
+          /* Auth0 session may already be expired; fall back to app login */
+        }
+      }
+
+      await router.replace({ name: 'Login' });
     })();
   };
 

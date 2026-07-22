@@ -84,7 +84,7 @@
                         class="text-primary text-truncate d-inline-block content-doc-link"
                         @click.stop
                       >
-                        Content Doc
+                        Review Doc
                       </a>
                       <span v-else class="text-muted">—</span>
                     </template>
@@ -110,7 +110,7 @@
                           @mousedown.stop.prevent
                           @click.stop.prevent="openRejectForDeliverable(deliverableRow.id)"
                         >
-                          Reject
+                          Feedback
                         </button>
                       </div>
                     </template>
@@ -153,7 +153,7 @@
                                 class="badge mb-2"
                                 :class="file.status === 'Approved' ? 'bg-success' : 'bg-danger'"
                               >
-                                {{ file.status }}
+                                {{ formatFileStatus(file.status) }}
                               </span>
                               <p
                                 v-if="getFileNote(deliverable.id, file.id).trim()"
@@ -195,7 +195,7 @@
                                 @mousedown.stop.prevent
                                 @click.stop.prevent="rejectFileDirect(deliverable.id, fileRow.id)"
                               >
-                                Reject
+                                Feedback
                               </button>
                             </div>
                           </template>
@@ -318,18 +318,18 @@
       class="deliverable-file-modal-root"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="reject-deliverable-title"
+      aria-labelledby="feedback-deliverable-title"
     >
       <div class="deliverable-file-modal-backdrop" @click="closeRejectModal"></div>
       <div class="deliverable-file-modal-panel shadow-lg">
         <div class="deliverable-file-modal-header">
-          <h5 id="reject-deliverable-title" class="mb-0">Reject Deliverable</h5>
+          <h5 id="feedback-deliverable-title" class="mb-0">Deliverable Feedback</h5>
           <button type="button" class="btn-close" aria-label="Close" @click="closeRejectModal"></button>
         </div>
 
         <div class="deliverable-file-modal-body">
           <div class="mb-3">
-            <label class="form-label">Reason for Rejection</label>
+            <label class="form-label">Feedback</label>
             <p class="form-text text-muted mb-2">
               *Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
             </p>
@@ -349,6 +349,7 @@
       </div>
     </div>
 
+
     <div
       v-if="approveDialog"
       class="deliverable-file-modal-root"
@@ -366,9 +367,9 @@
         <div class="deliverable-file-modal-body">
           <p>Are you sure you want to approve this deliverable?</p>
 
-          <p v-if="isVideoContentType" class="form-text text-muted mb-3">
+          <div v-if="isVideoContentType" class="alert alert-warning mb-3" role="alert">
             *PLEASE NOTE: Once the script and voiceover content are approved, changes cannot be made after video production begins without restarting the project. Please make sure you are completely satisfied with the content prior to approval.
-          </p>
+          </div>
 
           <div class="mb-3">
             <label class="form-label">Approval Note (optional)</label>
@@ -436,6 +437,7 @@ interface DeliverableRow {
   Name?: string;
   Account?: { name?: string };
   Content_Doc?: string;
+  Client_Review_Folder?: string;
   content_file_google_url?: string;
   content_doc_url?: string;
   driveFiles?: PendingDeliverableFile[];
@@ -619,7 +621,7 @@ const pendingheaders: Header[] = [
   { text: 'Block', value: 'Block', sortable: true },
   { text: 'Content Type', value: 'Main_Content_Type', sortable: true },
   { text: 'Topic', value: 'Name', sortable: true },
-  { text: 'Content Doc', value: 'content_doc_url' },
+  { text: 'Review Doc', value: 'content_doc_url' },
   { text: 'Actions', value: 'actions' },
 ];
 
@@ -671,8 +673,26 @@ function isArticleContentType(contentType?: string | null): boolean {
   return (contentType ?? '').trim().toLowerCase() === 'article';
 }
 
+function isVideoProjectContentType(contentType?: string | null): boolean {
+  return (contentType ?? '').trim().toLowerCase() === 'video';
+}
+
+function getReviewDocUrl(row: DeliverableRow): string | undefined {
+  const clientReviewFolder = row.Client_Review_Folder?.trim();
+  if (clientReviewFolder) {
+    return clientReviewFolder;
+  }
+
+  return row.Content_Doc?.trim() || row.content_file_google_url || undefined;
+}
+
 function isFileReviewComplete(file: PendingDeliverableFile): boolean {
   return file.status === 'Approved' || file.status === 'Rejected';
+}
+
+function formatFileStatus(status?: string | null): string {
+  if (status === 'Rejected') return 'Feedback';
+  return status ?? '';
 }
 
 function getPendingRowClassName(item: DeliverableRow): string {
@@ -722,8 +742,7 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
 
     pendingDeliverables.value = pendingRows.map((row) => ({
       ...row,
-      content_doc_url:
-        row.Content_Doc?.trim() || row.content_file_google_url || undefined,
+      content_doc_url: getReviewDocUrl(row),
     }));
 
     // Google Drive folder fetch + per-file approvals (disabled)
@@ -896,13 +915,9 @@ const selectedPendingDeliverable = computed(() =>
   )
 );
 
-const isVideoContentType = computed(() => {
-  const contentType = (selectedPendingDeliverable.value?.Main_Content_Type ?? '')
-    .toString()
-    .trim()
-    .toLowerCase();
-  return contentType === 'video';
-});
+const isVideoContentType = computed(() =>
+  isVideoProjectContentType(selectedPendingDeliverable.value?.Main_Content_Type)
+);
 
 function findDeliverableFile(
   deliverableId: string | number | null | undefined,
@@ -1011,7 +1026,7 @@ async function rejectFileDirect(
 
   if (!ctx.file.note.trim()) {
     Toastify({
-      text: 'Please provide a reason for rejection in the notes field.',
+      text: 'Please provide feedback in the notes field.',
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1102,7 +1117,7 @@ async function submitDeliverableRejection(deliverable: DeliverableRow, note: str
   } catch (error) {
     console.error('Rejection failed', error);
     Toastify({
-      text: 'Failed to update the deliverable rejection.',
+      text: 'Failed to update the deliverable feedback.',
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1198,7 +1213,7 @@ async function submitFileRejection(
     invalidateDeliverablesCacheForBlock(authStore.getCompanyId(), selectedBlock.value);
     await fetchDeliverables(activeDeliverablesTab.value, true);
     Toastify({
-      text: `Rejected ${file.name} successfully!`,
+      text: `Feedback submitted for ${file.name} successfully!`,
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1209,7 +1224,7 @@ async function submitFileRejection(
   } catch (error) {
     console.error('Rejection failed', error);
     Toastify({
-      text: `Failed to reject ${file.name}.`,
+      text: `Failed to submit feedback for ${file.name}.`,
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1242,7 +1257,7 @@ const closeRejectModal = () => {
 const submitRejection = async () => {
   if (!rejectReason.value.trim()) {
     Toastify({
-      text: 'Please provide a reason for rejection.',
+      text: 'Please provide feedback.',
       duration: 3000,
       gravity: 'top',
       position: 'right',
