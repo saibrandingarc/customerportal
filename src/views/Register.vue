@@ -200,22 +200,29 @@
   };
   
   const submit = async () => {
+    const complexityResult = checkPasswordComplexity(password.value);
+    if (!complexityResult.isValid) {
+      errorMessage.value = complexityResult.message;
+      return;
+    }
+
+    const matchResult = checkPasswordsMatch(password.value, confirmpassword.value);
+    if (!matchResult.isValid) {
+      errorMessage.value = matchResult.message;
+      return;
+    }
+
     loading.value = true;
-    if (password.value && confirmpassword.value) {
-      try {
-        const response = await axios.post(
-          API_BASE_URL+"/Zoho/zoho/register",
-          { email: email.value, password: password.value }
-        );
-        errorMessage.value = response.data.message;
-        setTimeout(() => router.push({ name: "Login" }), 5000);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        loading.value = false;
-      }
-    } else {
-      alert("Please enter a valid password.");
+    try {
+      const response = await axios.post(
+        API_BASE_URL+"/Zoho/zoho/register",
+        { email: email.value, password: password.value }
+      );
+      errorMessage.value = response.data.message;
+      setTimeout(() => router.push({ name: "Login" }), 5000);
+    } catch (err) {
+      console.log(err);
+    } finally {
       loading.value = false;
     }
   };
