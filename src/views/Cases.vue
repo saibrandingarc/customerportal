@@ -20,6 +20,9 @@
               </button>
               <button class="btn btn-primary" @click="dialog = true">New Case</button>
             </div>
+            <p>Need help with your website?</p>
+            <p>Submit a Case below for minor updates, technical issues, questions, or general support. Describe what you need, attach any relevant files or screenshots, and our team will track and resolve your request.</p>
+            <p><strong>Larger website changes, new pages, or full content rewrites should be submitted via email as a separate project request.</strong>  </p>
           </div>
           <div class="card-body">
             <ul class="nav nav-tabs mb-3">
