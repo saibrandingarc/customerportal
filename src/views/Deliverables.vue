@@ -15,7 +15,7 @@
               <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
             </div>
 
-            <ul class="nav nav-tabs mb-3">
+            <ul class="nav nav-tabs nav-justified deliverables-tabs mb-3">
               <li class="nav-item">
                 <button
                   class="nav-link"

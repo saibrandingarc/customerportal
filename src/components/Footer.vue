@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-sm-6">
         <div class="text-sm-first">
-          2025 © Branding Arc.
+          2026 © Branding Arc.
         </div>
       </div>
       <div class="col-sm-6">
