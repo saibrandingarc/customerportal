@@ -2,34 +2,39 @@
   <header id="page-topbar">
     <div class="layout-width">
       <div class="navbar-header">
-        <div class="d-flex">
-          <!-- LOGO -->
-          <div class="navbar-brand-box horizontal-logo">
-            
-          </div>
+        <div class="d-flex align-items-center">
+          <button
+            type="button"
+            class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger"
+            id="topnav-hamburger-icon"
+            aria-label="Toggle navigation"
+            @click="toggleSidebar"
+          >
+            <span class="hamburger-icon" :class="{ open: sidebarOpen }">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </button>
+          <router-link to="/dashboard" class="header-mobile-logo d-md-none ms-1">
+            <img src="/logo.png" alt="Branding Arc" width="110">
+          </router-link>
         </div>
 
         <div class="d-flex align-items-center">
           <div class="dropdown ms-sm-3 header-item topbar-user">
             <button v-if="isAuthenticated" type="button" class="btn material-shadow-none" id="page-header-user-dropdown"
               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <span class="d-flex align-items-left">
-                <!-- Show this icon only on mobile -->
-                <i class="mdi mdi-menu d-xl-none fs-24"></i>
-                <!-- <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg"
-                  alt="Header Avatar"> -->
-                <span class="">
+              <span class="d-flex align-items-center">
+                <i class="mdi mdi-account-circle fs-24"></i>
+                <span>
                   <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">Hi <strong>{{ username }} </strong>!</span>
                 </span>
               </span>
               <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ companyname }}</span>
             </button>
             <div class="dropdown-menu dropdown-menu-end">
-              <!-- item-->
               <h6 class="dropdown-header">Welcome {{ username }}!</h6>
-              <!-- <button class="btn btn-outline-secondary d-flex align-items-center">
-                          <i class="bi bi-power me-2"></i> Logout
-                        </button> -->
               <a class="dropdown-item" @click.prevent="logoutUser"><i
                   class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span class="align-middle"
                   data-key="t-logout">Logout</span></a>
@@ -45,43 +50,34 @@
 <script lang="ts" setup>
 import { useAuthStore } from '@/stores/userStore';
 import { useAuth0 } from '@auth0/auth0-vue';
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import router from '@/router';
 import axios from 'axios';
 import { API_BASE_URL } from '@/api/config';
+import { sidebarOpen, toggleSidebar } from '@/composables/useSidebar';
 
-const accessToken = localStorage.getItem('auth_token');
 const authStore = useAuthStore();
 const username = ref("");
 const companyname = ref("");
 username.value = authStore.getUsername();
 companyname.value = authStore.getCompanyName();
-const { loginWithRedirect, isAuthenticated, logout, user, getAccessTokenSilently } = useAuth0();
-
+const { isAuthenticated, logout } = useAuth0();
 onMounted(() => {
   const logintype = localStorage.getItem("loginType");
   if (logintype == "username-password") {
     const authStore = useAuthStore();
     isAuthenticated.value = authStore.isTokenValid();
   } else {
-    console.log("Login Type : " + logintype);
     if (logintype === "google") {
       const userString = localStorage.getItem("user");
       if (userString) {
         const userdata = JSON.parse(userString);
         username.value = userdata.nickname;
         companyname.value = userdata.companyName;
-        // use userdata if necessary
-      } else {
-        console.warn("No user data found in localStorage for google login.");
       }
     }
   }
 });
-
-const login = () => {
-  loginWithRedirect();
-};
 
 const logoutUser = async () => {
   try {
@@ -101,12 +97,4 @@ const logoutUser = async () => {
     router.push('/');
   }
 };
-
 </script>
-
-<style>
-#mobileAuthNavBar {
-  min-height: 125px;
-  justify-content: space-between;
-}
-</style>

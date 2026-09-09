@@ -8,7 +8,7 @@
     <div class="page-content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-6">
+          <div class="col-12 col-md-6 mb-3">
             <div class="card">
               <div class="card-body">
                 <h4>Outstanding Balance</h4>
@@ -16,7 +16,7 @@
               </div>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-12 col-md-6 mb-3">
             <div class="card">
               <div class="card-body">
                 <h4>Past Due</h4>

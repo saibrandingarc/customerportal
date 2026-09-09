@@ -9,7 +9,7 @@
     <div class="page-content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-6">
+          <div class="col-12 col-md-6 mb-3">
             <div class="card clickable-card" role="button" tabindex="0" @click="goToInvoices" @keydown.enter="goToInvoices">
               <div class="card-body">
                 <h4>Outstanding Balance</h4>
@@ -17,7 +17,7 @@
               </div>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-12 col-md-6 mb-3">
             <div class="card clickable-card" role="button" tabindex="0" @click="goToInvoices" @keydown.enter="goToInvoices">
               <div class="card-body">
                 <h4>Past Due</h4>
@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-sm-6 mb-4">
+          <div class="col-12 col-lg-6 mb-4">
             <div class="card card-height-100">
               <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Deliverables</h4>
@@ -46,11 +46,13 @@
                 </div>
               </div>
               <div class="card-body">
-                <BarChart v-bind="deliverablesBarChartProps" ref="deliverablesBarChartRef" />
+                <div class="chart-wrap" :style="{ height: deliverablesChartHeight }">
+                  <BarChart v-bind="deliverablesBarChartProps" ref="deliverablesBarChartRef" />
+                </div>
               </div>
             </div>
           </div>
-          <div class="col-sm-6 mb-4">
+          <div class="col-12 col-lg-6 mb-4">
             <div class="card card-height-100">
               <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Cases</h4>
@@ -69,7 +71,9 @@
                 </div>
               </div>
               <div class="card-body">
-                <BarChart v-bind="barChartProps" ref="barChartRef" />
+                <div class="chart-wrap" :style="{ height: casesChartHeight }">
+                  <BarChart v-bind="barChartProps" ref="barChartRef" />
+                </div>
               </div>
             </div>
           </div>
@@ -81,7 +85,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/userStore';
@@ -104,6 +108,19 @@ const pastDue = ref(0);
 
 // Register Chart.js
 Chart.register(...registerables);
+const isMobile = ref(false);
+
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth < 768;
+};
+
+const deliverablesChartHeight = computed(() => {
+  if (!isMobile.value) return '320px';
+  const rows = Math.max(dataLabels.value.length, 4);
+  return `${Math.min(480, 40 + rows * 28)}px`;
+});
+
+const casesChartHeight = computed(() => (isMobile.value ? '260px' : '320px'));
 const toggleLegend = ref(true);
 const dataValues = ref<number[]>([]);
 const dataLabels = ref<string[]>([]);
@@ -169,11 +186,26 @@ const deliverablesChartData = computed<ChartData<"bar">>(() => ({
 
 const deliverablesChartOptions = computed<ChartOptions<"bar">>(() => ({
   responsive: true,
+  maintainAspectRatio: false,
+  indexAxis: isMobile.value ? 'y' : 'x',
   plugins: {
-    legend: { display: true },
+    legend: { display: !isMobile.value },
     title: {
       display: true,
       text: "Deliverables by Type (Records)",
+    },
+  },
+  scales: {
+    x: {
+      ticks: {
+        maxRotation: isMobile.value ? 0 : 45,
+        autoSkip: true,
+      },
+    },
+    y: {
+      ticks: {
+        autoSkip: false,
+      },
     },
   },
 }));
@@ -194,9 +226,15 @@ const deliverables = ref([]);
 
 // Fetch data on mount
 onMounted(async () => {
+  updateIsMobile();
+  window.addEventListener('resize', updateIsMobile);
   await fetchCases();
   await fetchDeliverables();
   await fetchInvoices();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateIsMobile);
 });
 
 // Utility function to format date to 'YYYY-MM'
@@ -356,8 +394,9 @@ const chartData = computed<ChartData<"bar">>(() => ({
 // Bar Chart Options
 const chartOptions = computed<ChartOptions<"bar">>(() => ({
   responsive: true,
+  maintainAspectRatio: false,
   plugins: {
-    legend: { display: true },
+    legend: { display: !isMobile.value },
     title: {
       display: true,
       text: "Monthly Case Count",

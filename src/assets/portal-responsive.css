@@ -1,0 +1,70 @@
+html[data-layout='vertical'] {
+  overflow-x: hidden;
+}
+
+body.vertical-sidebar-enable {
+  overflow: hidden;
+}
+
+.wrapper {
+  min-width: 0;
+}
+
+.main-content,
+.page-content,
+.container-fluid {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.page-content .card {
+  overflow: hidden;
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 767.98px) {
+  .page-content {
+    padding-top: calc(70px + 1rem);
+  }
+
+  .page-content .card-body h2 {
+    font-size: 1.35rem;
+    word-break: break-word;
+  }
+
+  .page-content .card-body h4 {
+    font-size: 0.95rem;
+  }
+
+  .header-mobile-logo {
+    display: flex;
+    align-items: center;
+  }
+
+  .header-mobile-logo img {
+    max-height: 36px;
+    width: auto;
+  }
+
+  .table-responsive,
+  .vue3-easy-data-table {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  html[data-layout='vertical'] .navbar-brand-box {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) {
+  .vertical-menu-btn {
+    display: none;
+  }
+}
+
