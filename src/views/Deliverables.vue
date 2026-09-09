@@ -53,7 +53,7 @@
 
             <div class="tab-content">
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'pending' }">
-                <div class="pending-deliverables-wrapper">
+                <div class="pending-deliverables-wrapper d-none d-md-block">
                   <EasyDataTable
                     :headers="pendingheaders"
                     :items="pendingDeliverables"
@@ -205,10 +205,57 @@
                     -->
                   </EasyDataTable>
                 </div>
+
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!pendingDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in pendingDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Review Doc</span>
+                      <span class="dc-value">
+                        <a
+                          v-if="row.content_doc_url"
+                          :href="row.content_doc_url"
+                          target="_blank"
+                          rel="noopener"
+                          class="text-primary"
+                        >Review Doc</a>
+                        <span v-else class="text-muted">—</span>
+                      </span>
+                    </div>
+                    <div class="dc-actions">
+                      <button
+                        type="button"
+                        class="btn btn-success btn-sm"
+                        :disabled="actionLoading"
+                        @click="openApproveForDeliverable(row.id)"
+                      >Approve</button>
+                      <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        :disabled="actionLoading"
+                        @click="openRejectForDeliverable(row.id)"
+                      >Feedback</button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'upcoming' }">
-                <div class="table-responsive">
+                <div class="table-responsive d-none d-md-block">
                   <EasyDataTable
                     :headers="headers"
                     :items="upcomingDeliverables"
@@ -218,6 +265,30 @@
                     :searchable="true"
                     buttons-pagination
                   />
+                </div>
+
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!upcomingDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in upcomingDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Status</span>
+                      <span class="dc-value">{{ row.Status }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -230,7 +301,7 @@
                     </option>
                   </select>
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive d-none d-md-block">
                   <EasyDataTable
                     :headers="completedheaders"
                     :items="completedDeliverables"
@@ -254,6 +325,38 @@
                       <span v-else class="text-muted">—</span>
                     </template>
                   </EasyDataTable>
+                </div>
+
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!completedDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in completedDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Date Published</span>
+                      <span class="dc-value">{{ row.Publish_Date }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Link</span>
+                      <span class="dc-value">
+                        <a v-if="row.Final_Publication" :href="row.Final_Publication" target="_blank" rel="noopener"
+                          class="text-primary">Final Publication</a>
+                        <span v-else class="text-muted">—</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1458,5 +1561,47 @@ const submitRejection = async () => {
   word-break: break-word;
   color: #495057;
   font-size: 0.875rem;
+}
+
+.deliverable-card {
+  border: 1px solid #e9ebec;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.dc-row + .dc-row {
+  border-top: 1px dashed #f0f0f0;
+}
+
+.dc-label {
+  color: #878a99;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.dc-value {
+  text-align: right;
+  word-break: break-word;
+}
+
+.dc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dc-actions .btn {
+  flex: 1;
 }
 </style>

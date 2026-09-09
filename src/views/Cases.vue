@@ -51,39 +51,115 @@
             <div class="tab-content">
               <div class="tab-pane fade" :class="{ 'show active': activeCasesTab === 'open' }">
                 <input v-model="searchOpen" class="form-control mb-3" placeholder="Search..." />
-                <EasyDataTable
-                  :headers="headers"
-                  :items="openitems"
-                  :rows-per-page="10"
-                  table-class="table-bordered"
-                  show-index
-                  :searchable="true"
-                >
-                  <template #item-Operation="{ id, Case_Number }">
-                    <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
-                    <button class="btn btn-sm btn-warning me-2" @click="editItem(id)">Edit</button>
-                    <button class="btn btn-sm btn-danger" @click="deleteItem(id)">Delete</button>
-                  </template>
-                </EasyDataTable>
+                <div class="d-none d-md-block">
+                  <EasyDataTable
+                    :headers="headers"
+                    :items="openitems"
+                    :rows-per-page="10"
+                    table-class="table-bordered"
+                    show-index
+                    :searchable="true"
+                  >
+                    <template #item-Operation="{ id, Case_Number }">
+                      <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
+                      <button class="btn btn-sm btn-warning me-2" @click="editItem(id)">Edit</button>
+                      <button class="btn btn-sm btn-danger" @click="deleteItem(id)">Delete</button>
+                    </template>
+                  </EasyDataTable>
+                </div>
+
+                <div class="d-md-none case-cards">
+                  <p v-if="!filteredOpenItems.length" class="text-muted text-center py-3 mb-0">
+                    No Available Data
+                  </p>
+                  <div v-for="(row, i) in filteredOpenItems" :key="row.id ?? i" class="case-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Case Number</span>
+                      <span class="dc-value fw-semibold">{{ row.Case_Number }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Subject</span>
+                      <span class="dc-value">{{ row.Subject }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Status</span>
+                      <span class="dc-value">{{ row.Status }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Open Date</span>
+                      <span class="dc-value">{{ row.Case_Open_Date }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Type</span>
+                      <span class="dc-value">{{ row.Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Reason</span>
+                      <span class="dc-value">{{ row.Case_Reason }}</span>
+                    </div>
+                    <div class="dc-actions">
+                      <button class="btn btn-sm btn-primary" @click="viewItem(row.id)">View</button>
+                      <button class="btn btn-sm btn-warning" @click="editItem(row.id)">Edit</button>
+                      <button class="btn btn-sm btn-danger" @click="deleteItem(row.id)">Delete</button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeCasesTab === 'closed' }">
                 <input v-model="searchClosed" class="form-control mb-3" placeholder="Search..." />
-                <EasyDataTable
-                  :headers="closedheaders"
-                  :items="closeditems"
-                  :rows-per-page="10"
-                  table-class="table-bordered"
-                  show-index
-                  :searchable="true"
-                  buttons-pagination
-                  sort-by="Case_Closed_Date"
-                  sort-type="desc"
-                >
-                  <template #item-Operation="{ id, Case_Number }">
-                    <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
-                  </template>
-                </EasyDataTable>
+                <div class="d-none d-md-block">
+                  <EasyDataTable
+                    :headers="closedheaders"
+                    :items="closeditems"
+                    :rows-per-page="10"
+                    table-class="table-bordered"
+                    show-index
+                    :searchable="true"
+                    buttons-pagination
+                    sort-by="Case_Closed_Date"
+                    sort-type="desc"
+                  >
+                    <template #item-Operation="{ id, Case_Number }">
+                      <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
+                    </template>
+                  </EasyDataTable>
+                </div>
+
+                <div class="d-md-none case-cards">
+                  <p v-if="!filteredClosedItems.length" class="text-muted text-center py-3 mb-0">
+                    No Available Data
+                  </p>
+                  <div v-for="(row, i) in filteredClosedItems" :key="row.id ?? i" class="case-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Case Number</span>
+                      <span class="dc-value fw-semibold">{{ row.Case_Number }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Subject</span>
+                      <span class="dc-value">{{ row.Subject }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Open Date</span>
+                      <span class="dc-value">{{ row.Case_Open_Date }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Close Date</span>
+                      <span class="dc-value">{{ row.Case_Closed_Date }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Type</span>
+                      <span class="dc-value">{{ row.Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Reason</span>
+                      <span class="dc-value">{{ row.Case_Reason }}</span>
+                    </div>
+                    <div class="dc-actions">
+                      <button class="btn btn-sm btn-primary" @click="viewItem(row.id)">View</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -256,6 +332,18 @@ const error = ref('');
 const items = ref<Case[]>([]);
 const openitems = ref<Case[]>([]);
 const closeditems = ref<Case[]>([]);
+
+const filterCases = (list: Case[], term: string): Case[] => {
+  const q = term.trim().toLowerCase();
+  if (!q) return list;
+  return list.filter((c) =>
+    [c.Case_Number, c.Subject, c.Status, c.Type, c.Case_Reason].some((v) =>
+      String(v ?? '').toLowerCase().includes(q)
+    )
+  );
+};
+const filteredOpenItems = computed<Case[]>(() => filterCases(openitems.value, searchOpen.value));
+const filteredClosedItems = computed<Case[]>(() => filterCases(closeditems.value, searchClosed.value));
 
 interface ZohoCaseActionResult {
   code?: string;
@@ -516,5 +604,47 @@ const save = async () => {
 
 .nav-tabs .nav-link {
   color: #198fd9;
+}
+
+.case-card {
+  border: 1px solid #e9ebec;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.dc-row + .dc-row {
+  border-top: 1px dashed #f0f0f0;
+}
+
+.dc-label {
+  color: #878a99;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.dc-value {
+  text-align: right;
+  word-break: break-word;
+}
+
+.dc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dc-actions .btn {
+  flex: 1;
 }
 </style>
