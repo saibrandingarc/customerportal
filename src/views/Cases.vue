@@ -25,7 +25,7 @@
             <p>Need help with your website?</p>
             <p>Submit a Case below for minor updates, technical issues, questions, or general support. Describe what you need, attach any relevant files or screenshots, and our team will track and resolve your request.</p>
             <p><strong>Larger website changes, new pages, or full content rewrites should be submitted via email as a separate project request.</strong>  </p>
-            <ul class="nav nav-tabs mb-3">
+            <ul class="nav nav-tabs nav-justified cases-tabs mb-3">
               <li class="nav-item">
                 <button
                   class="nav-link"
@@ -596,14 +596,32 @@ const save = async () => {
   min-width: 80px;
 }
 
-.nav-tabs .nav-link.active {
+.cases-tabs {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.cases-tabs .nav-item {
+  margin-bottom: -1px;
+}
+
+.cases-tabs .nav-link {
+  color: #198fd9;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid transparent;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+  white-space: nowrap;
+}
+
+.cases-tabs .nav-link:hover {
+  background-color: rgba(25, 143, 217, 0.08);
+}
+
+.cases-tabs .nav-link.active {
   background-color: #198fd9;
   border-color: #198fd9;
   color: #ffffff;
-}
-
-.nav-tabs .nav-link {
-  color: #198fd9;
 }
 
 .case-card {

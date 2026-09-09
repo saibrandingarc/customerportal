@@ -53,6 +53,9 @@
 
             <div class="tab-content">
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'pending' }">
+                <p class="pending-tab-note text-muted mb-3">
+                  <strong>Note:</strong> Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
+                </p>
                 <div class="pending-deliverables-wrapper d-none d-md-block">
                   <EasyDataTable
                     :headers="pendingheaders"
@@ -1396,14 +1399,45 @@ const submitRejection = async () => {
   white-space: nowrap;
 }
 
-.nav-tabs .nav-link.active {
+.pending-tab-note {
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.deliverables-tabs {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.deliverables-tabs .nav-item {
+  margin-bottom: -1px;
+}
+
+.deliverables-tabs .nav-link {
+  color: #198fd9;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid transparent;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+  white-space: nowrap;
+}
+
+.deliverables-tabs .nav-link:hover {
+  background-color: rgba(25, 143, 217, 0.08);
+}
+
+.deliverables-tabs .nav-link.active {
   background-color: #198fd9;
   border-color: #198fd9;
   color: #ffffff;
 }
 
-.nav-tabs .nav-link {
-  color: #198fd9;
+@media (max-width: 575.98px) {
+  .deliverables-tabs .nav-link {
+    padding: 0.45rem 0.35rem;
+    font-size: 0.8rem;
+  }
 }
 
 .deliverable-files-expand {
