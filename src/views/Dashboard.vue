@@ -118,15 +118,10 @@ const updateIsMobile = () => {
   isMobile.value = window.innerWidth < 768;
 };
 
-const deliverablesChartHeight = computed(() => {
-  if (!isMobile.value) return '320px';
-  const rows = Math.max(dataLabels.value.length, 1);
-  // Title + axis padding + one row per status so bars are not clipped
-  return `${Math.max(220, 72 + rows * 56)}px`;
-});
+const deliverablesChartHeight = computed(() => (isMobile.value ? '280px' : '320px'));
 
 const deliverablesChartKey = computed(
-  () => `${isMobile.value ? 'y' : 'x'}-${dataLabels.value.join('|')}`
+  () => `x-${dataLabels.value.join('|')}`
 );
 
 const casesChartHeight = computed(() => (isMobile.value ? '260px' : '320px'));
@@ -189,53 +184,47 @@ const deliverablesChartData = computed<ChartData<"bar">>(() => ({
       backgroundColor: deliverablesBarColor,
       borderColor: deliverablesBarBorderColor,
       borderWidth: 1,
+      maxBarThickness: isMobile.value ? 28 : 56,
     },
   ],
 }));
 
-const deliverablesChartOptions = computed<ChartOptions<"bar">>(() => {
-  const horizontal = isMobile.value;
-  const categoryTicks = {
-    autoSkip: false,
-    maxRotation: horizontal ? 0 : 45,
-    minRotation: horizontal ? 0 : 0,
-    font: { size: horizontal ? 11 : 12 },
-  };
-
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    indexAxis: horizontal ? "y" : "x",
-    datasets: {
-      bar: {
-        maxBarThickness: 48,
-        categoryPercentage: 0.7,
-        barPercentage: 0.8,
+const deliverablesChartOptions = computed<ChartOptions<"bar">>(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  indexAxis: "x",
+  datasets: {
+    bar: {
+      maxBarThickness: isMobile.value ? 28 : 56,
+      categoryPercentage: isMobile.value ? 0.45 : 0.6,
+      barPercentage: isMobile.value ? 0.5 : 0.7,
+    },
+  },
+  plugins: {
+    legend: { display: !isMobile.value },
+    title: {
+      display: true,
+      text: "Deliverables by Type (Records)",
+    },
+  },
+  scales: {
+    x: {
+      ticks: {
+        autoSkip: false,
+        maxRotation: isMobile.value ? 60 : 45,
+        minRotation: isMobile.value ? 45 : 0,
+        font: { size: isMobile.value ? 10 : 12 },
       },
     },
-    plugins: {
-      legend: { display: !horizontal },
-      title: {
-        display: true,
-        text: "Deliverables by Type (Records)",
+    y: {
+      beginAtZero: true,
+      ticks: {
+        autoSkip: true,
+        maxTicksLimit: 6,
       },
     },
-    scales: {
-      x: {
-        ...(horizontal ? { beginAtZero: true } : {}),
-        ticks: horizontal
-          ? { autoSkip: true, maxTicksLimit: 6 }
-          : categoryTicks,
-      },
-      y: {
-        ...(!horizontal ? { beginAtZero: true } : {}),
-        ticks: horizontal
-          ? categoryTicks
-          : { autoSkip: true, maxTicksLimit: 6 },
-      },
-    },
-  };
-});
+  },
+}));
 
 const { barChartProps: deliverablesBarChartProps, barChartRef: deliverablesBarChartRef } = useBarChart({
   chartData: deliverablesChartData,
