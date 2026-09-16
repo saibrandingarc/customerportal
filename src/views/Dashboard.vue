@@ -76,7 +76,7 @@
               </div>
               <div class="card-body">
                 <div class="chart-wrap" :style="{ height: casesChartHeight }">
-                  <BarChart v-bind="barChartProps" ref="barChartRef" />
+                  <BarChart :key="casesChartKey" v-bind="barChartProps" ref="barChartRef" />
                 </div>
               </div>
             </div>
@@ -118,13 +118,86 @@ const updateIsMobile = () => {
   isMobile.value = window.innerWidth < 768;
 };
 
-const deliverablesChartHeight = computed(() => (isMobile.value ? '280px' : '320px'));
+const deliverablesChartHeight = computed(() => (isMobile.value ? '340px' : '320px'));
+const casesChartHeight = computed(() => '320px');
 
 const deliverablesChartKey = computed(
   () => `x-${dataLabels.value.join('|')}`
 );
 
-const casesChartHeight = computed(() => (isMobile.value ? '260px' : '320px'));
+function wrapChartLabel(label: string, maxLen: number): string | string[] {
+  const text = String(label ?? "").trim();
+  if (!text || text.length <= maxLen) return text;
+  if (text.includes(" - ")) {
+    const [left, ...rest] = text.split(" - ");
+    return [left.trim(), rest.join(" - ").trim()].filter(Boolean);
+  }
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > maxLen && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+function verticalBarOptions(title: string): ChartOptions<"bar"> {
+  const mobile = isMobile.value;
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: "x",
+    layout: {
+      padding: { top: 4, right: 8, bottom: mobile ? 16 : 8, left: 4 },
+    },
+    datasets: {
+      bar: {
+        maxBarThickness: mobile ? 28 : 56,
+        categoryPercentage: mobile ? 0.45 : 0.6,
+        barPercentage: mobile ? 0.5 : 0.7,
+      },
+    },
+    plugins: {
+      legend: { display: !mobile },
+      title: {
+        display: true,
+        text: title,
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          autoSkip: false,
+          maxRotation: 0,
+          minRotation: 0,
+          padding: 8,
+          font: { size: mobile ? 11 : 12 },
+          callback(value) {
+            const label = this.getLabelForValue(value as number);
+            return wrapChartLabel(label, mobile ? 14 : 20);
+          },
+        },
+        afterFit(axis) {
+          axis.height = Math.max(axis.height, mobile ? 64 : 48);
+        },
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          autoSkip: true,
+          maxTicksLimit: 6,
+        },
+      },
+    },
+  };
+}
 const toggleLegend = ref(true);
 const dataValues = ref<number[]>([]);
 const dataLabels = ref<string[]>([]);
@@ -189,42 +262,9 @@ const deliverablesChartData = computed<ChartData<"bar">>(() => ({
   ],
 }));
 
-const deliverablesChartOptions = computed<ChartOptions<"bar">>(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  indexAxis: "x",
-  datasets: {
-    bar: {
-      maxBarThickness: isMobile.value ? 28 : 56,
-      categoryPercentage: isMobile.value ? 0.45 : 0.6,
-      barPercentage: isMobile.value ? 0.5 : 0.7,
-    },
-  },
-  plugins: {
-    legend: { display: !isMobile.value },
-    title: {
-      display: true,
-      text: "Deliverables by Type (Records)",
-    },
-  },
-  scales: {
-    x: {
-      ticks: {
-        autoSkip: false,
-        maxRotation: isMobile.value ? 60 : 45,
-        minRotation: isMobile.value ? 45 : 0,
-        font: { size: isMobile.value ? 10 : 12 },
-      },
-    },
-    y: {
-      beginAtZero: true,
-      ticks: {
-        autoSkip: true,
-        maxTicksLimit: 6,
-      },
-    },
-  },
-}));
+const deliverablesChartOptions = computed<ChartOptions<"bar">>(() =>
+  verticalBarOptions("Deliverables by Type (Records)")
+);
 
 const { barChartProps: deliverablesBarChartProps, barChartRef: deliverablesBarChartRef } = useBarChart({
   chartData: deliverablesChartData,
@@ -391,34 +431,36 @@ const fetchInvoices = async () => {
 };
 
 // Transform countsPerMonth into Chart.js data
-const casesChartLabels = computed(() => Object.keys(countsPerMonth.value));
+const casesChartLabels = computed(() =>
+  Object.keys(countsPerMonth.value).map((ym) => {
+    const [year, month] = ym.split("-");
+    const date = new Date(Number(year), Number(month) - 1, 1);
+    if (Number.isNaN(date.getTime())) return ym;
+    return date.toLocaleString("en-US", { month: "short", year: "numeric" });
+  })
+);
 const casesChartValues = computed(() => Object.values(countsPerMonth.value));
+const casesChartKey = computed(
+  () => `cases-x-${casesChartLabels.value.join('|')}`
+);
 
 const chartData = computed<ChartData<"bar">>(() => ({
-  labels: casesChartLabels.value, // Months as labels
+  labels: casesChartLabels.value,
   datasets: [
     {
       label: "Cases Per Month",
-      data: casesChartValues.value, // Counts as data
+      data: casesChartValues.value,
       backgroundColor: "#42A5F5",
       borderColor: "#1E88E5",
       borderWidth: 1,
+      maxBarThickness: isMobile.value ? 28 : 56,
     },
   ],
 }));
 
-// Bar Chart Options
-const chartOptions = computed<ChartOptions<"bar">>(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: !isMobile.value },
-    title: {
-      display: true,
-      text: "Monthly Case Count",
-    },
-  },
-}));
+const chartOptions = computed<ChartOptions<"bar">>(() =>
+  verticalBarOptions("Monthly Case Count")
+);
 
 // Initialize Bar Chart with vue-chart-3
 const { barChartProps, barChartRef } = useBarChart({

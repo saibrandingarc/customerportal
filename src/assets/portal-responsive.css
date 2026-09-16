@@ -21,6 +21,10 @@ body.vertical-sidebar-enable {
   overflow: hidden;
 }
 
+.page-content .card:has(.chart-wrap) {
+  overflow: visible;
+}
+
 .chart-wrap {
   position: relative;
   width: 100%;
