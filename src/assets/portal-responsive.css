@@ -25,6 +25,11 @@ body.vertical-sidebar-enable {
   position: relative;
   width: 100%;
   min-width: 0;
+  overflow: visible;
+}
+
+.chart-wrap canvas {
+  max-width: 100%;
 }
 
 @media (max-width: 767.98px) {

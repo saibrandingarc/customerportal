@@ -47,7 +47,11 @@
               </div>
               <div class="card-body">
                 <div class="chart-wrap" :style="{ height: deliverablesChartHeight }">
-                  <BarChart v-bind="deliverablesBarChartProps" ref="deliverablesBarChartRef" />
+                  <BarChart
+                    :key="deliverablesChartKey"
+                    v-bind="deliverablesBarChartProps"
+                    ref="deliverablesBarChartRef"
+                  />
                 </div>
               </div>
             </div>
@@ -116,9 +120,14 @@ const updateIsMobile = () => {
 
 const deliverablesChartHeight = computed(() => {
   if (!isMobile.value) return '320px';
-  const rows = Math.max(dataLabels.value.length, 4);
-  return `${Math.min(480, 40 + rows * 28)}px`;
+  const rows = Math.max(dataLabels.value.length, 1);
+  // Title + axis padding + one row per status so bars are not clipped
+  return `${Math.max(220, 72 + rows * 56)}px`;
 });
+
+const deliverablesChartKey = computed(
+  () => `${isMobile.value ? 'y' : 'x'}-${dataLabels.value.join('|')}`
+);
 
 const casesChartHeight = computed(() => (isMobile.value ? '260px' : '320px'));
 const toggleLegend = ref(true);
@@ -184,31 +193,49 @@ const deliverablesChartData = computed<ChartData<"bar">>(() => ({
   ],
 }));
 
-const deliverablesChartOptions = computed<ChartOptions<"bar">>(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  indexAxis: isMobile.value ? 'y' : 'x',
-  plugins: {
-    legend: { display: !isMobile.value },
-    title: {
-      display: true,
-      text: "Deliverables by Type (Records)",
-    },
-  },
-  scales: {
-    x: {
-      ticks: {
-        maxRotation: isMobile.value ? 0 : 45,
-        autoSkip: true,
+const deliverablesChartOptions = computed<ChartOptions<"bar">>(() => {
+  const horizontal = isMobile.value;
+  const categoryTicks = {
+    autoSkip: false,
+    maxRotation: horizontal ? 0 : 45,
+    minRotation: horizontal ? 0 : 0,
+    font: { size: horizontal ? 11 : 12 },
+  };
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: horizontal ? "y" : "x",
+    datasets: {
+      bar: {
+        maxBarThickness: 48,
+        categoryPercentage: 0.7,
+        barPercentage: 0.8,
       },
     },
-    y: {
-      ticks: {
-        autoSkip: false,
+    plugins: {
+      legend: { display: !horizontal },
+      title: {
+        display: true,
+        text: "Deliverables by Type (Records)",
       },
     },
-  },
-}));
+    scales: {
+      x: {
+        ...(horizontal ? { beginAtZero: true } : {}),
+        ticks: horizontal
+          ? { autoSkip: true, maxTicksLimit: 6 }
+          : categoryTicks,
+      },
+      y: {
+        ...(!horizontal ? { beginAtZero: true } : {}),
+        ticks: horizontal
+          ? categoryTicks
+          : { autoSkip: true, maxTicksLimit: 6 },
+      },
+    },
+  };
+});
 
 const { barChartProps: deliverablesBarChartProps, barChartRef: deliverablesBarChartRef } = useBarChart({
   chartData: deliverablesChartData,
