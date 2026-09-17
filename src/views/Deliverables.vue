@@ -99,21 +99,21 @@
                       >
                         <button
                           type="button"
-                          class="btn btn-success btn-sm me-2"
-                          :disabled="actionLoading"
-                          @mousedown.stop.prevent
-                          @click.stop.prevent="openApproveForDeliverable(deliverableRow.id)"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          type="button"
                           class="btn btn-danger btn-sm"
                           :disabled="actionLoading"
                           @mousedown.stop.prevent
                           @click.stop.prevent="openRejectForDeliverable(deliverableRow.id)"
                         >
                           Feedback
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-success btn-sm me-2"
+                          :disabled="actionLoading"
+                          @mousedown.stop.prevent
+                          @click.stop.prevent="openApproveForDeliverable(deliverableRow.id)"
+                        >
+                          Approve
                         </button>
                       </div>
                     </template>
