@@ -168,103 +168,93 @@
     </div>
   </div>
   <Teleport to="body">
-    <div v-if="dialog" class="case-bootstrap-modal">
-      <div class="modal-backdrop fade show" @click="close"></div>
-      <div
-        class="modal fade show d-block"
-        tabindex="-1"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="caseFormModalTitle"
-      >
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content shadow">
-            <div class="modal-header">
-              <h5 id="caseFormModalTitle" class="modal-title">{{ formTitle }}</h5>
-              <button type="button" class="btn-close" aria-label="Close" @click="close"></button>
-            </div>
-            <div class="modal-body">
-              <div v-if="error" class="alert alert-danger py-2">{{ error }}</div>
-              <div class="mb-3">
-                <label class="form-label">Subject</label>
-                <input type="text" class="form-control" v-model="editedItem.Subject" />
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea class="form-control" rows="4" v-model="editedItem.Description"></textarea>
-              </div>
-              <div v-if="editedIndex === -1" class="mb-0">
-                <label class="form-label">Attachments</label>
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-                  <input
-                    id="case-attachments"
-                    ref="attachmentInput"
-                    type="file"
-                    class="d-none"
-                    multiple
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip"
-                    @change="onAttachmentsSelected"
-                  />
-                  <label for="case-attachments" class="btn btn-outline-primary mb-0">
-                    Choose files
-                  </label>
-                  <span class="text-muted small">{{ attachmentStatusText }}</span>
-                </div>
-                <div class="form-text text-muted">
-                  Optional. Up to 5 files, 25 MB each (PDF, Office, images, text, or ZIP).
-                </div>
-                <ul v-if="caseAttachments.length" class="list-unstyled small mt-2 mb-0">
-                  <li
-                    v-for="(file, index) in caseAttachments"
-                    :key="`${file.name}-${file.size}-${index}`"
-                    class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1"
-                  >
-                    <span>{{ file.name }} ({{ formatFileSize(file.size) }})</span>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-link text-danger p-0"
-                      @click="removeAttachment(index)"
-                    >
-                      Remove
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="close">Cancel</button>
-              <button type="button" class="btn btn-primary" @click="save">Save</button>
-            </div>
+    <div
+      v-if="dialog"
+      class="case-modal-root"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="caseFormModalTitle"
+    >
+      <div class="case-modal-backdrop" @click="close"></div>
+      <div class="case-modal-panel shadow-lg">
+        <div class="case-modal-header">
+          <h5 id="caseFormModalTitle" class="mb-0">{{ formTitle }}</h5>
+          <button type="button" class="btn-close" aria-label="Close" @click="close"></button>
+        </div>
+        <div class="case-modal-body">
+          <div v-if="error" class="alert alert-danger py-2">{{ error }}</div>
+          <div class="mb-3">
+            <label class="form-label">Subject</label>
+            <input type="text" class="form-control" v-model="editedItem.Subject" />
           </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="4" v-model="editedItem.Description"></textarea>
+          </div>
+          <div v-if="editedIndex === -1" class="mb-0">
+            <label class="form-label">Attachments</label>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <input
+                id="case-attachments"
+                ref="attachmentInput"
+                type="file"
+                class="d-none"
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip"
+                @change="onAttachmentsSelected"
+              />
+              <label for="case-attachments" class="btn btn-outline-primary mb-0">
+                Choose files
+              </label>
+              <span class="text-muted small">{{ attachmentStatusText }}</span>
+            </div>
+            <div class="form-text text-muted">
+              Optional. Up to 5 files, 25 MB each (PDF, Office, images, text, or ZIP).
+            </div>
+            <ul v-if="caseAttachments.length" class="list-unstyled small mt-2 mb-0">
+              <li
+                v-for="(file, index) in caseAttachments"
+                :key="`${file.name}-${file.size}-${index}`"
+                class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1"
+              >
+                <span>{{ file.name }} ({{ formatFileSize(file.size) }})</span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-link text-danger p-0"
+                  @click="removeAttachment(index)"
+                >
+                  Remove
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="case-modal-footer">
+          <button type="button" class="btn btn-secondary" @click="close">Cancel</button>
+          <button type="button" class="btn btn-primary" @click="save">Save</button>
         </div>
       </div>
     </div>
-  </Teleport>
 
-  <Teleport to="body">
-    <div v-if="dialogDelete" class="case-bootstrap-modal">
-      <div class="modal-backdrop fade show" @click="closeDelete"></div>
-      <div
-        class="modal fade show d-block"
-        tabindex="-1"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="caseDeleteModalTitle"
-      >
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content shadow">
-            <div class="modal-header">
-              <h5 id="caseDeleteModalTitle" class="modal-title">Confirm Deletion</h5>
-              <button type="button" class="btn-close" aria-label="Close" @click="closeDelete"></button>
-            </div>
-            <div class="modal-body">
-              <p class="mb-0">Are you sure you want to delete this item?</p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="closeDelete">Cancel</button>
-              <button type="button" class="btn btn-danger" @click="deleteItemConfirm">OK</button>
-            </div>
-          </div>
+    <div
+      v-if="dialogDelete"
+      class="case-modal-root"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="caseDeleteModalTitle"
+    >
+      <div class="case-modal-backdrop" @click="closeDelete"></div>
+      <div class="case-modal-panel shadow-lg">
+        <div class="case-modal-header">
+          <h5 id="caseDeleteModalTitle" class="mb-0">Confirm Deletion</h5>
+          <button type="button" class="btn-close" aria-label="Close" @click="closeDelete"></button>
+        </div>
+        <div class="case-modal-body">
+          <p class="mb-0">Are you sure you want to delete this item?</p>
+        </div>
+        <div class="case-modal-footer">
+          <button type="button" class="btn btn-secondary" @click="closeDelete">Cancel</button>
+          <button type="button" class="btn btn-danger" @click="deleteItemConfirm">OK</button>
         </div>
       </div>
     </div>
@@ -273,7 +263,7 @@
 
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
@@ -453,17 +443,6 @@ const viewItem = (id: string) => {
   router.push({ name: 'case', params: { Case_Number: id } });
 };
 const formTitle = computed(() => (editedIndex.value === -1 ? 'New Case' : 'Edit Case'))
-
-watch(
-  [dialog, dialogDelete],
-  ([formOpen, deleteOpen]) => {
-    document.body.classList.toggle('modal-open', Boolean(formOpen || deleteOpen))
-  }
-)
-
-onUnmounted(() => {
-  document.body.classList.remove('modal-open')
-})
 
 // Method to edit an item
 const editItem = (id: string) => {
@@ -703,31 +682,50 @@ const save = async () => {
 .dc-actions .btn {
   flex: 1;
 }
-</style>
 
-<style>
-.case-bootstrap-modal .modal-backdrop {
+.case-modal-root {
   position: fixed;
   inset: 0;
-  z-index: 1050;
-  background-color: rgba(15, 23, 42, 0.55);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
-.case-bootstrap-modal .modal {
-  z-index: 1055;
+.case-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
 }
 
-.case-bootstrap-modal .modal-content {
-  max-width: none;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+.case-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
   border-radius: 0.5rem;
+  pointer-events: auto;
 }
 
-.case-bootstrap-modal .modal-header {
+.case-modal-header,
+.case-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid #dee2e6;
 }
 
-.case-bootstrap-modal .modal-footer {
+.case-modal-footer {
+  border-bottom: none;
   border-top: 1px solid #dee2e6;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.case-modal-body {
+  padding: 1rem 1.25rem;
 }
 </style>

@@ -99,7 +99,7 @@
                       >
                         <button
                           type="button"
-                          class="btn btn-danger btn-sm"
+                          class="btn btn-danger btn-sm me-2"
                           :disabled="actionLoading"
                           @mousedown.stop.prevent
                           @click.stop.prevent="openRejectForDeliverable(deliverableRow.id)"
@@ -108,7 +108,7 @@
                         </button>
                         <button
                           type="button"
-                          class="btn btn-success btn-sm me-2"
+                          class="btn btn-success btn-sm"
                           :disabled="actionLoading"
                           @mousedown.stop.prevent
                           @click.stop.prevent="openApproveForDeliverable(deliverableRow.id)"
