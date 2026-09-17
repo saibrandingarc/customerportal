@@ -191,8 +191,14 @@ function verticalBarOptions(title: string): ChartOptions<"bar"> {
       y: {
         beginAtZero: true,
         ticks: {
+          precision: 0,
+          stepSize: 1,
           autoSkip: true,
-          maxTicksLimit: 6,
+          maxTicksLimit: 8,
+          callback(value) {
+            const n = Number(value);
+            return Number.isInteger(n) ? n : '';
+          },
         },
       },
     },
