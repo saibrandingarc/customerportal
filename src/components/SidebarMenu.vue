@@ -19,7 +19,7 @@
       </router-link>
     </div>
 
-    <div v-if="isAuthenticated" class="h-100">
+    <div v-if="isLoggedIn" class="h-100">
       <div class="container-fluid">
         <ul class="navbar-nav" id="navbar-nav">
           <li class="menu-title"><span data-key="t-menu">Menu</span></li>
@@ -45,20 +45,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/userStore';
-import { useAuth0 } from '@auth0/auth0-vue';
 import { closeSidebar } from '@/composables/useSidebar';
 
 const router = useRouter();
 const authStore = useAuthStore();
-const userRoles = ref();
-userRoles.value = authStore.getRoles();
-if (userRoles.value.length == 0) {
-  userRoles.value.push('User');
-}
-const { isAuthenticated } = useAuth0();
+const { isLoggedIn } = storeToRefs(authStore);
+const userRoles = computed(() => {
+  const roles = authStore.getRoles();
+  return roles.length ? roles : ['User'];
+});
 
 const menuItems = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard', route: '/dashboard', roles: ['Admin', 'User'] },

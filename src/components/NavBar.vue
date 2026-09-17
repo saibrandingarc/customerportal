@@ -23,7 +23,7 @@
 
         <div class="d-flex align-items-center">
           <div class="dropdown ms-sm-3 header-item topbar-user">
-            <button v-if="isAuthenticated" type="button" class="btn material-shadow-none" id="page-header-user-dropdown"
+            <button v-if="isLoggedIn" type="button" class="btn material-shadow-none" id="page-header-user-dropdown"
               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <span class="d-flex align-items-center">
                 <i class="mdi mdi-account-circle fs-24"></i>
@@ -51,30 +51,27 @@
 import { useAuthStore } from '@/stores/userStore';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { ref, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import router from '@/router';
 import axios from 'axios';
 import { API_BASE_URL } from '@/api/config';
 import { sidebarOpen, toggleSidebar } from '@/composables/useSidebar';
 
 const authStore = useAuthStore();
+const { isLoggedIn } = storeToRefs(authStore);
 const username = ref("");
 const companyname = ref("");
 username.value = authStore.getUsername();
 companyname.value = authStore.getCompanyName();
-const { isAuthenticated, logout } = useAuth0();
+const { logout } = useAuth0();
 onMounted(() => {
   const logintype = localStorage.getItem("loginType");
-  if (logintype == "username-password") {
-    const authStore = useAuthStore();
-    isAuthenticated.value = authStore.isTokenValid();
-  } else {
-    if (logintype === "google") {
-      const userString = localStorage.getItem("user");
-      if (userString) {
-        const userdata = JSON.parse(userString);
-        username.value = userdata.nickname;
-        companyname.value = userdata.companyName;
-      }
+  if (logintype === "google") {
+    const userString = localStorage.getItem("user");
+    if (userString) {
+      const userdata = JSON.parse(userString);
+      username.value = userdata.nickname;
+      companyname.value = userdata.companyName;
     }
   }
 });
