@@ -165,9 +165,9 @@ function verticalBarOptions(title: string): ChartOptions<"bar"> {
       },
     },
     plugins: {
-      legend: { display: !mobile },
+      legend: { display: false },
       title: {
-        display: true,
+        display: false,
         text: title,
       },
     },
@@ -252,7 +252,7 @@ const deliverablesChartData = computed<ChartData<"bar">>(() => ({
   labels: dataLabels.value,
   datasets: [
     {
-      label: "Deliverables by Status",
+      label: "",
       data: dataValues.value,
       backgroundColor: deliverablesBarColor,
       borderColor: deliverablesBarBorderColor,
@@ -448,7 +448,7 @@ const chartData = computed<ChartData<"bar">>(() => ({
   labels: casesChartLabels.value,
   datasets: [
     {
-      label: "Cases Per Month",
+      label: "",
       data: casesChartValues.value,
       backgroundColor: "#42A5F5",
       borderColor: "#1E88E5",
