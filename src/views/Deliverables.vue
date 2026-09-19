@@ -242,16 +242,16 @@
                     <div class="dc-actions">
                       <button
                         type="button"
-                        class="btn btn-success btn-sm"
-                        :disabled="actionLoading"
-                        @click="openApproveForDeliverable(row.id)"
-                      >Approve</button>
-                      <button
-                        type="button"
                         class="btn btn-danger btn-sm"
                         :disabled="actionLoading"
                         @click="openRejectForDeliverable(row.id)"
                       >Feedback</button>
+                      <button
+                        type="button"
+                        class="btn btn-success btn-sm"
+                        :disabled="actionLoading"
+                        @click="openApproveForDeliverable(row.id)"
+                      >Approve</button>
                     </div>
                   </div>
                 </div>
