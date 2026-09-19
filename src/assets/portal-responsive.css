@@ -21,19 +21,27 @@ body.vertical-sidebar-enable {
   overflow: hidden;
 }
 
-.page-content .card:has(.chart-wrap) {
-  overflow: visible;
+.page-content .card:has(.chart-wrap) .card-body {
+  overflow: hidden;
 }
 
 .chart-wrap {
   position: relative;
   width: 100%;
   min-width: 0;
-  overflow: visible;
+  overflow: hidden;
+}
+
+.chart-wrap > * {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .chart-wrap canvas {
+  display: block;
   max-width: 100%;
+  max-height: 100%;
 }
 
 @media (max-width: 767.98px) {
