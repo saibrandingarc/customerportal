@@ -19,6 +19,7 @@ import '@mdi/font/css/materialdesignicons.css';
 import { auth } from './plugins/auth';
 import { createPinia } from 'pinia';
 import './assets/styles.css'
+import './assets/portal-responsive.css'
 
 hljs.registerLanguage('json', json);
 

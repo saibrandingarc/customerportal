@@ -22,7 +22,10 @@
             </div>
           </div>
           <div class="card-body">
-            <ul class="nav nav-tabs mb-3">
+            <p>Need help with your website?</p>
+            <p>Submit a Case below for minor updates, technical issues, questions, or general support. Describe what you need, attach any relevant files or screenshots, and our team will track and resolve your request.</p>
+            <p><strong>Larger website changes, new pages, or full content rewrites should be submitted via email as a separate project request.</strong>  </p>
+            <ul class="nav nav-tabs nav-justified cases-tabs mb-3">
               <li class="nav-item">
                 <button
                   class="nav-link"
@@ -48,40 +51,115 @@
             <div class="tab-content">
               <div class="tab-pane fade" :class="{ 'show active': activeCasesTab === 'open' }">
                 <input v-model="searchOpen" class="form-control mb-3" placeholder="Search..." />
-                <EasyDataTable
-                  :headers="headers"
-                  :items="openitems"
-                  :rows-per-page="10"
-                  table-class="table-bordered"
-                  show-index
-                  :searchable="true"
-                >
-                  <template #item-Operation="{ id, Case_Number }">
-                    <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
-                    <button class="btn btn-sm btn-warning me-2" @click="editItem(id)">Edit</button>
-                    <button class="btn btn-sm btn-danger" @click="deleteItem(id)">Delete</button>
-                  </template>
-                </EasyDataTable>
+                <div class="d-none d-md-block">
+                  <EasyDataTable
+                    :headers="headers"
+                    :items="openitems"
+                    :rows-per-page="10"
+                    table-class="table-bordered"
+                    show-index
+                    :searchable="true"
+                  >
+                    <template #item-Operation="{ id, Case_Number }">
+                      <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
+                      <button class="btn btn-sm btn-warning me-2" @click="editItem(id)">Edit</button>
+                      <button class="btn btn-sm btn-danger" @click="deleteItem(id)">Delete</button>
+                    </template>
+                  </EasyDataTable>
+                </div>
+
+                <div class="d-md-none case-cards">
+                  <p v-if="!filteredOpenItems.length" class="text-muted text-center py-3 mb-0">
+                    No Available Data
+                  </p>
+                  <div v-for="(row, i) in filteredOpenItems" :key="row.id ?? i" class="case-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Case Number</span>
+                      <span class="dc-value fw-semibold">{{ row.Case_Number }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Subject</span>
+                      <span class="dc-value">{{ row.Subject }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Status</span>
+                      <span class="dc-value">{{ row.Status }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Open Date</span>
+                      <span class="dc-value">{{ row.Case_Open_Date }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Type</span>
+                      <span class="dc-value">{{ row.Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Reason</span>
+                      <span class="dc-value">{{ row.Case_Reason }}</span>
+                    </div>
+                    <div class="dc-actions">
+                      <button class="btn btn-sm btn-primary" @click="viewItem(row.id)">View</button>
+                      <button class="btn btn-sm btn-warning" @click="editItem(row.id)">Edit</button>
+                      <button class="btn btn-sm btn-danger" @click="deleteItem(row.id)">Delete</button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeCasesTab === 'closed' }">
-                <div class="alert alert-success" v-if="snackbar">{{ text }}</div>
                 <input v-model="searchClosed" class="form-control mb-3" placeholder="Search..." />
-                <EasyDataTable
-                  :headers="closedheaders"
-                  :items="closeditems"
-                  :rows-per-page="10"
-                  table-class="table-bordered"
-                  show-index
-                  :searchable="true"
-                  buttons-pagination
-                  sort-by="Case_Closed_Date"
-                  sort-type="desc"
-                >
-                  <template #item-Operation="{ id, Case_Number }">
-                    <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
-                  </template>
-                </EasyDataTable>
+                <div class="d-none d-md-block">
+                  <EasyDataTable
+                    :headers="closedheaders"
+                    :items="closeditems"
+                    :rows-per-page="10"
+                    table-class="table-bordered"
+                    show-index
+                    :searchable="true"
+                    buttons-pagination
+                    sort-by="Case_Closed_Date"
+                    sort-type="desc"
+                  >
+                    <template #item-Operation="{ id, Case_Number }">
+                      <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
+                    </template>
+                  </EasyDataTable>
+                </div>
+
+                <div class="d-md-none case-cards">
+                  <p v-if="!filteredClosedItems.length" class="text-muted text-center py-3 mb-0">
+                    No Available Data
+                  </p>
+                  <div v-for="(row, i) in filteredClosedItems" :key="row.id ?? i" class="case-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Case Number</span>
+                      <span class="dc-value fw-semibold">{{ row.Case_Number }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Subject</span>
+                      <span class="dc-value">{{ row.Subject }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Open Date</span>
+                      <span class="dc-value">{{ row.Case_Open_Date }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Close Date</span>
+                      <span class="dc-value">{{ row.Case_Closed_Date }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Type</span>
+                      <span class="dc-value">{{ row.Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Reason</span>
+                      <span class="dc-value">{{ row.Case_Reason }}</span>
+                    </div>
+                    <div class="dc-actions">
+                      <button class="btn btn-sm btn-primary" @click="viewItem(row.id)">View</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -89,14 +167,21 @@
       </div>
     </div>
   </div>
-  <div v-if="dialog" class="modal show d-block" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{ formTitle }}</h5>
-          <button type="button" class="btn-close" @click="close"></button>
+  <Teleport to="body">
+    <div
+      v-if="dialog"
+      class="case-modal-root"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="caseFormModalTitle"
+    >
+      <div class="case-modal-backdrop" @click="close"></div>
+      <div class="case-modal-panel shadow-lg">
+        <div class="case-modal-header">
+          <h5 id="caseFormModalTitle" class="mb-0">{{ formTitle }}</h5>
+          <button type="button" class="btn-close" aria-label="Close" @click="close"></button>
         </div>
-        <div class="modal-body">
+        <div class="case-modal-body">
           <div v-if="error" class="alert alert-danger py-2">{{ error }}</div>
           <div class="mb-3">
             <label class="form-label">Subject</label>
@@ -104,18 +189,25 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Description</label>
-            <textarea class="form-control" v-model="editedItem.Description"></textarea>
+            <textarea class="form-control" rows="4" v-model="editedItem.Description"></textarea>
           </div>
-          <div v-if="editedIndex === -1" class="mb-3">
+          <div v-if="editedIndex === -1" class="mb-0">
             <label class="form-label">Attachments</label>
-            <input
-              ref="attachmentInput"
-              type="file"
-              class="form-control"
-              multiple
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip"
-              @change="onAttachmentsSelected"
-            />
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <input
+                id="case-attachments"
+                ref="attachmentInput"
+                type="file"
+                class="d-none"
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip"
+                @change="onAttachmentsSelected"
+              />
+              <label for="case-attachments" class="btn btn-outline-primary mb-0">
+                Choose files
+              </label>
+              <span class="text-muted small">{{ attachmentStatusText }}</span>
+            </div>
             <div class="form-text text-muted">
               Optional. Up to 5 files, 25 MB each (PDF, Office, images, text, or ZIP).
             </div>
@@ -137,36 +229,41 @@
             </ul>
           </div>
         </div>
-        <div class="modal-footer">
+        <div class="case-modal-footer">
           <button type="button" class="btn btn-secondary" @click="close">Cancel</button>
           <button type="button" class="btn btn-primary" @click="save">Save</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Delete Confirmation Modal -->
-  <div v-if="dialogDelete" class="modal show d-block" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Confirm Deletion</h5>
+    <div
+      v-if="dialogDelete"
+      class="case-modal-root"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="caseDeleteModalTitle"
+    >
+      <div class="case-modal-backdrop" @click="closeDelete"></div>
+      <div class="case-modal-panel shadow-lg">
+        <div class="case-modal-header">
+          <h5 id="caseDeleteModalTitle" class="mb-0">Confirm Deletion</h5>
+          <button type="button" class="btn-close" aria-label="Close" @click="closeDelete"></button>
         </div>
-        <div class="modal-body">
-          <p>Are you sure you want to delete this item?</p>
+        <div class="case-modal-body">
+          <p class="mb-0">Are you sure you want to delete this item?</p>
         </div>
-        <div class="modal-footer">
+        <div class="case-modal-footer">
           <button type="button" class="btn btn-secondary" @click="closeDelete">Cancel</button>
           <button type="button" class="btn btn-danger" @click="deleteItemConfirm">OK</button>
         </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import NavBar from "../components/NavBar.vue";
@@ -174,11 +271,11 @@ import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 import { Header } from 'vue3-easy-data-table';
 import { API_BASE_URL } from '@/api/config';
+import Toastify from 'toastify-js'
+import 'toastify-js/src/toastify.css'
 
 const router = useRouter();
 const authStore = useAuthStore();
-const text = ref("Hello, I'm a snackbar");
-const snackbar = ref<boolean>(false);
 const activeCasesTab = ref<'open' | 'closed'>('open');
 
 interface Account {
@@ -254,6 +351,50 @@ const error = ref('');
 const items = ref<Case[]>([]);
 const openitems = ref<Case[]>([]);
 const closeditems = ref<Case[]>([]);
+
+const filterCases = (list: Case[], term: string): Case[] => {
+  const q = term.trim().toLowerCase();
+  if (!q) return list;
+  return list.filter((c) =>
+    [c.Case_Number, c.Subject, c.Status, c.Type, c.Case_Reason].some((v) =>
+      String(v ?? '').toLowerCase().includes(q)
+    )
+  );
+};
+const filteredOpenItems = computed<Case[]>(() => filterCases(openitems.value, searchOpen.value));
+const filteredClosedItems = computed<Case[]>(() => filterCases(closeditems.value, searchClosed.value));
+
+interface ZohoCaseActionResult {
+  code?: string;
+  message?: string;
+  status?: string;
+}
+
+function showCaseToast(message: string, isError = false) {
+  Toastify({
+    text: message,
+    duration: 3000,
+    gravity: 'top',
+    position: 'right',
+    backgroundColor: isError ? '#ed5e5e' : '#13c56b',
+    close: true,
+    stopOnFocus: true,
+  }).showToast();
+}
+
+function getCaseActionMessage(
+  responseData: { data?: ZohoCaseActionResult[] } | undefined,
+  fallback: string
+): string {
+  const result = responseData?.data?.[0];
+  if (!result?.message) return fallback;
+
+  const message = result.message.trim();
+  if (!message) return fallback;
+
+  return message.charAt(0).toUpperCase() + message.slice(1);
+}
+
 const fetchCases = async () => {
   loading.value = true;
     try {
@@ -303,14 +444,6 @@ const viewItem = (id: string) => {
 };
 const formTitle = computed(() => (editedIndex.value === -1 ? 'New Case' : 'Edit Case'))
 
-// Watchers for dialog and dialogDelete
-watch(dialog, (val) => {
-  if (!val) close()
-})
-watch(dialogDelete, (val) => {
-  if (!val) closeDelete()
-})
-
 // Method to edit an item
 const editItem = (id: string) => {
   // editedIndex.value = items.value.indexOf(item)
@@ -340,8 +473,7 @@ const deleteItemConfirm = async () => {
     console.log('Form submitted:', response.data);
     items.value.splice(editedIndex.value, 1)
     close()
-    snackbar.value = true;
-    text.value = "Case deleted";
+    showCaseToast('Case deleted successfully.');
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -356,6 +488,12 @@ const formatFileSize = (bytes: number): string => {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
+
+const attachmentStatusText = computed(() => {
+  if (!caseAttachments.value.length) return 'No file chosen'
+  if (caseAttachments.value.length === 1) return caseAttachments.value[0].name
+  return `${caseAttachments.value.length} files chosen`
+})
 
 const resetAttachments = () => {
   caseAttachments.value = []
@@ -443,10 +581,15 @@ const save = async () => {
     editedItem.value.Case_Number = response.data.data[0].details.id
     editedItem.value.Status = 'New'
     items.value.push({ ...editedItem.value })
-    snackbar.value = true
-    text.value = caseAttachments.value.length
-      ? 'Case added with attachments'
-      : 'Case added'
+
+    const successMessage = getCaseActionMessage(
+      response.data,
+      caseAttachments.value.length
+        ? 'Case added with attachments.'
+        : 'Case added successfully.'
+    )
+    showCaseToast(successMessage)
+    activeCasesTab.value = 'open'
     await fetchCases()
     close()
   } catch (err: unknown) {
@@ -457,6 +600,7 @@ const save = async () => {
           ? err.message
           : 'Failed to create case.'
     error.value = message
+    showCaseToast(message, true)
   } finally {
     loading.value = false
   }
@@ -469,13 +613,119 @@ const save = async () => {
   min-width: 80px;
 }
 
-.nav-tabs .nav-link.active {
+.cases-tabs {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.cases-tabs .nav-item {
+  margin-bottom: -1px;
+}
+
+.cases-tabs .nav-link {
+  color: #198fd9;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid transparent;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+  white-space: nowrap;
+}
+
+.cases-tabs .nav-link:hover {
+  background-color: rgba(25, 143, 217, 0.08);
+}
+
+.cases-tabs .nav-link.active {
   background-color: #198fd9;
   border-color: #198fd9;
   color: #ffffff;
 }
 
-.nav-tabs .nav-link {
-  color: #198fd9;
+.case-card {
+  border: 1px solid #e9ebec;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.dc-row + .dc-row {
+  border-top: 1px dashed #f0f0f0;
+}
+
+.dc-label {
+  color: #878a99;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.dc-value {
+  text-align: right;
+  word-break: break-word;
+}
+
+.dc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dc-actions .btn {
+  flex: 1;
+}
+
+.case-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.case-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.case-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 0.5rem;
+  pointer-events: auto;
+}
+
+.case-modal-header,
+.case-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.case-modal-footer {
+  border-bottom: none;
+  border-top: 1px solid #dee2e6;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.case-modal-body {
+  padding: 1rem 1.25rem;
 }
 </style>

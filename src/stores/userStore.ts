@@ -20,6 +20,21 @@ export const useAuthStore = defineStore('auth', {
     state: () => ({
         authResponse: JSON.parse(localStorage.getItem('user') || 'null') as AnyAuthResponse | null,
     }),
+    getters: {
+        isLoggedIn(state): boolean {
+            if (!state.authResponse) return false;
+
+            const loginType = localStorage.getItem('loginType');
+            if (loginType === 'username-password') {
+                if (!state.authResponse.expiresIn) return false;
+                const expiration = new Date(state.authResponse.expiresIn).getTime();
+                if (Number.isNaN(expiration)) return false;
+                return Date.now() < expiration;
+            }
+
+            return Boolean(state.authResponse.access_token || state.authResponse.email);
+        },
+    },
     actions: {
         setAuthResponse(response: AnyAuthResponse) {
             this.authResponse = response;
@@ -30,13 +45,12 @@ export const useAuthStore = defineStore('auth', {
             localStorage.setItem('user', JSON.stringify(response));
         },
         isTokenValid(): boolean {
+            if (!this.authResponse) return false;
 
-            if (!this.authResponse) return false; // Check directly on authResponse
-
-            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-            const tokenExpirationTime = Math.floor(new Date(this.authResponse.expiresIn).getTime() / 1000);
-
-            return currentTime < tokenExpirationTime;
+            if (!this.authResponse.expiresIn) return false;
+            const expiration = new Date(this.authResponse.expiresIn).getTime();
+            if (Number.isNaN(expiration)) return false;
+            return Date.now() < expiration;
         },
         getCompanyId(): string {
             const companyId = this.authResponse?.companyId ?? "";

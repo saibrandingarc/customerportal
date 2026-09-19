@@ -15,7 +15,7 @@
               <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
             </div>
 
-            <ul class="nav nav-tabs mb-3">
+            <ul class="nav nav-tabs nav-justified deliverables-tabs mb-3">
               <li class="nav-item">
                 <button
                   class="nav-link"
@@ -53,7 +53,10 @@
 
             <div class="tab-content">
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'pending' }">
-                <div class="pending-deliverables-wrapper">
+                <p class="pending-tab-note text-muted mb-3">
+                  <strong>Note:</strong> Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
+                </p>
+                <div class="pending-deliverables-wrapper d-none d-md-block">
                   <EasyDataTable
                     :headers="pendingheaders"
                     :items="pendingDeliverables"
@@ -84,7 +87,7 @@
                         class="text-primary text-truncate d-inline-block content-doc-link"
                         @click.stop
                       >
-                        Content Doc
+                        Review Doc
                       </a>
                       <span v-else class="text-muted">—</span>
                     </template>
@@ -96,21 +99,21 @@
                       >
                         <button
                           type="button"
-                          class="btn btn-success btn-sm me-2"
+                          class="btn btn-danger btn-sm me-2"
+                          :disabled="actionLoading"
+                          @mousedown.stop.prevent
+                          @click.stop.prevent="openRejectForDeliverable(deliverableRow.id)"
+                        >
+                          Feedback
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-success btn-sm"
                           :disabled="actionLoading"
                           @mousedown.stop.prevent
                           @click.stop.prevent="openApproveForDeliverable(deliverableRow.id)"
                         >
                           Approve
-                        </button>
-                        <button
-                          type="button"
-                          class="btn btn-danger btn-sm"
-                          :disabled="actionLoading"
-                          @mousedown.stop.prevent
-                          @click.stop.prevent="openRejectForDeliverable(deliverableRow.id)"
-                        >
-                          Reject
                         </button>
                       </div>
                     </template>
@@ -153,7 +156,7 @@
                                 class="badge mb-2"
                                 :class="file.status === 'Approved' ? 'bg-success' : 'bg-danger'"
                               >
-                                {{ file.status }}
+                                {{ formatFileStatus(file.status) }}
                               </span>
                               <p
                                 v-if="getFileNote(deliverable.id, file.id).trim()"
@@ -195,7 +198,7 @@
                                 @mousedown.stop.prevent
                                 @click.stop.prevent="rejectFileDirect(deliverable.id, fileRow.id)"
                               >
-                                Reject
+                                Feedback
                               </button>
                             </div>
                           </template>
@@ -205,10 +208,57 @@
                     -->
                   </EasyDataTable>
                 </div>
+
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!pendingDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in pendingDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Review Doc</span>
+                      <span class="dc-value">
+                        <a
+                          v-if="row.content_doc_url"
+                          :href="row.content_doc_url"
+                          target="_blank"
+                          rel="noopener"
+                          class="text-primary"
+                        >Review Doc</a>
+                        <span v-else class="text-muted">—</span>
+                      </span>
+                    </div>
+                    <div class="dc-actions">
+                      <button
+                        type="button"
+                        class="btn btn-success btn-sm"
+                        :disabled="actionLoading"
+                        @click="openApproveForDeliverable(row.id)"
+                      >Approve</button>
+                      <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        :disabled="actionLoading"
+                        @click="openRejectForDeliverable(row.id)"
+                      >Feedback</button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'upcoming' }">
-                <div class="table-responsive">
+                <div class="table-responsive d-none d-md-block">
                   <EasyDataTable
                     :headers="headers"
                     :items="upcomingDeliverables"
@@ -218,6 +268,30 @@
                     :searchable="true"
                     buttons-pagination
                   />
+                </div>
+
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!upcomingDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in upcomingDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Status</span>
+                      <span class="dc-value">{{ row.Status }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -230,7 +304,7 @@
                     </option>
                   </select>
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive d-none d-md-block">
                   <EasyDataTable
                     :headers="completedheaders"
                     :items="completedDeliverables"
@@ -254,6 +328,38 @@
                       <span v-else class="text-muted">—</span>
                     </template>
                   </EasyDataTable>
+                </div>
+
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!completedDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in completedDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Date Published</span>
+                      <span class="dc-value">{{ row.Publish_Date }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Link</span>
+                      <span class="dc-value">
+                        <a v-if="row.Final_Publication" :href="row.Final_Publication" target="_blank" rel="noopener"
+                          class="text-primary">Final Publication</a>
+                        <span v-else class="text-muted">—</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -318,18 +424,18 @@
       class="deliverable-file-modal-root"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="reject-deliverable-title"
+      aria-labelledby="feedback-deliverable-title"
     >
       <div class="deliverable-file-modal-backdrop" @click="closeRejectModal"></div>
       <div class="deliverable-file-modal-panel shadow-lg">
         <div class="deliverable-file-modal-header">
-          <h5 id="reject-deliverable-title" class="mb-0">Reject Deliverable</h5>
+          <h5 id="feedback-deliverable-title" class="mb-0">Deliverable Feedback</h5>
           <button type="button" class="btn-close" aria-label="Close" @click="closeRejectModal"></button>
         </div>
 
         <div class="deliverable-file-modal-body">
           <div class="mb-3">
-            <label class="form-label">Reason for Rejection</label>
+            <label class="form-label">Feedback</label>
             <p class="form-text text-muted mb-2">
               *Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
             </p>
@@ -349,6 +455,7 @@
       </div>
     </div>
 
+
     <div
       v-if="approveDialog"
       class="deliverable-file-modal-root"
@@ -366,9 +473,9 @@
         <div class="deliverable-file-modal-body">
           <p>Are you sure you want to approve this deliverable?</p>
 
-          <p v-if="isVideoContentType" class="form-text text-muted mb-3">
+          <div v-if="isVideoContentType" class="alert alert-warning mb-3" role="alert">
             *PLEASE NOTE: Once the script and voiceover content are approved, changes cannot be made after video production begins without restarting the project. Please make sure you are completely satisfied with the content prior to approval.
-          </p>
+          </div>
 
           <div class="mb-3">
             <label class="form-label">Approval Note (optional)</label>
@@ -436,7 +543,7 @@ interface DeliverableRow {
   Name?: string;
   Account?: { name?: string };
   Content_Doc?: string;
-  content_file_google_url?: string;
+  Client_Review_Folder?: string;
   content_doc_url?: string;
   driveFiles?: PendingDeliverableFile[];
 }
@@ -619,7 +726,7 @@ const pendingheaders: Header[] = [
   { text: 'Block', value: 'Block', sortable: true },
   { text: 'Content Type', value: 'Main_Content_Type', sortable: true },
   { text: 'Topic', value: 'Name', sortable: true },
-  { text: 'Content Doc', value: 'content_doc_url' },
+  { text: 'Review Doc', value: 'content_doc_url' },
   { text: 'Actions', value: 'actions' },
 ];
 
@@ -671,8 +778,26 @@ function isArticleContentType(contentType?: string | null): boolean {
   return (contentType ?? '').trim().toLowerCase() === 'article';
 }
 
+function isVideoProjectContentType(contentType?: string | null): boolean {
+  return (contentType ?? '').trim().toLowerCase() === 'video';
+}
+
+function getReviewDocUrl(row: DeliverableRow): string | undefined {
+  const clientReviewFolder = row.Client_Review_Folder?.trim();
+  if (clientReviewFolder) {
+    return clientReviewFolder;
+  }
+
+  return row.Content_Doc?.trim() || undefined;
+}
+
 function isFileReviewComplete(file: PendingDeliverableFile): boolean {
   return file.status === 'Approved' || file.status === 'Rejected';
+}
+
+function formatFileStatus(status?: string | null): string {
+  if (status === 'Rejected') return 'Feedback';
+  return status ?? '';
 }
 
 function getPendingRowClassName(item: DeliverableRow): string {
@@ -722,8 +847,7 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
 
     pendingDeliverables.value = pendingRows.map((row) => ({
       ...row,
-      content_doc_url:
-        row.Content_Doc?.trim() || row.content_file_google_url || undefined,
+      content_doc_url: getReviewDocUrl(row),
     }));
 
     // Google Drive folder fetch + per-file approvals (disabled)
@@ -896,13 +1020,9 @@ const selectedPendingDeliverable = computed(() =>
   )
 );
 
-const isVideoContentType = computed(() => {
-  const contentType = (selectedPendingDeliverable.value?.Main_Content_Type ?? '')
-    .toString()
-    .trim()
-    .toLowerCase();
-  return contentType === 'video';
-});
+const isVideoContentType = computed(() =>
+  isVideoProjectContentType(selectedPendingDeliverable.value?.Main_Content_Type)
+);
 
 function findDeliverableFile(
   deliverableId: string | number | null | undefined,
@@ -1011,7 +1131,7 @@ async function rejectFileDirect(
 
   if (!ctx.file.note.trim()) {
     Toastify({
-      text: 'Please provide a reason for rejection in the notes field.',
+      text: 'Please provide feedback in the notes field.',
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1102,7 +1222,7 @@ async function submitDeliverableRejection(deliverable: DeliverableRow, note: str
   } catch (error) {
     console.error('Rejection failed', error);
     Toastify({
-      text: 'Failed to update the deliverable rejection.',
+      text: 'Failed to update the deliverable feedback.',
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1198,7 +1318,7 @@ async function submitFileRejection(
     invalidateDeliverablesCacheForBlock(authStore.getCompanyId(), selectedBlock.value);
     await fetchDeliverables(activeDeliverablesTab.value, true);
     Toastify({
-      text: `Rejected ${file.name} successfully!`,
+      text: `Feedback submitted for ${file.name} successfully!`,
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1209,7 +1329,7 @@ async function submitFileRejection(
   } catch (error) {
     console.error('Rejection failed', error);
     Toastify({
-      text: `Failed to reject ${file.name}.`,
+      text: `Failed to submit feedback for ${file.name}.`,
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1242,7 +1362,7 @@ const closeRejectModal = () => {
 const submitRejection = async () => {
   if (!rejectReason.value.trim()) {
     Toastify({
-      text: 'Please provide a reason for rejection.',
+      text: 'Please provide feedback.',
       duration: 3000,
       gravity: 'top',
       position: 'right',
@@ -1279,14 +1399,45 @@ const submitRejection = async () => {
   white-space: nowrap;
 }
 
-.nav-tabs .nav-link.active {
+.pending-tab-note {
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.deliverables-tabs {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.deliverables-tabs .nav-item {
+  margin-bottom: -1px;
+}
+
+.deliverables-tabs .nav-link {
+  color: #198fd9;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid transparent;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+  white-space: nowrap;
+}
+
+.deliverables-tabs .nav-link:hover {
+  background-color: rgba(25, 143, 217, 0.08);
+}
+
+.deliverables-tabs .nav-link.active {
   background-color: #198fd9;
   border-color: #198fd9;
   color: #ffffff;
 }
 
-.nav-tabs .nav-link {
-  color: #198fd9;
+@media (max-width: 575.98px) {
+  .deliverables-tabs .nav-link {
+    padding: 0.45rem 0.35rem;
+    font-size: 0.8rem;
+  }
 }
 
 .deliverable-files-expand {
@@ -1444,5 +1595,47 @@ const submitRejection = async () => {
   word-break: break-word;
   color: #495057;
   font-size: 0.875rem;
+}
+
+.deliverable-card {
+  border: 1px solid #e9ebec;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.dc-row + .dc-row {
+  border-top: 1px dashed #f0f0f0;
+}
+
+.dc-label {
+  color: #878a99;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.dc-value {
+  text-align: right;
+  word-break: break-word;
+}
+
+.dc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dc-actions .btn {
+  flex: 1;
 }
 </style>

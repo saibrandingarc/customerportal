@@ -3,19 +3,28 @@ import SidebarMenu from '@/components/SidebarMenu.vue';
 import NavBar from '../components/NavBar.vue';
 import Footer from '../components/Footer.vue';
 import { useSessionIdleTimeout } from '@/composables/useSessionIdleTimeout';
+import { closeSidebar, useSidebar } from '@/composables/useSidebar';
+import { watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 useSessionIdleTimeout();
+useSidebar();
+
+const route = useRoute();
+watch(
+  () => route.fullPath,
+  () => closeSidebar()
+);
 </script>
 
 <template>
-  <div>
+  <div class="layout-root">
     <SidebarMenu />
+    <div class="vertical-overlay" @click="closeSidebar"></div>
     <div class="wrapper d-flex flex-column min-vh-100">
       <NavBar />
       <div class="body flex-grow-1">
-        <CContainer class="px-4" lg>
-          <router-view />
-        </CContainer>
+        <router-view />
       </div>
       <Footer />
     </div>
