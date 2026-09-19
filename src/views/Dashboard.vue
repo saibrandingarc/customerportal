@@ -118,35 +118,12 @@ const updateIsMobile = () => {
   isMobile.value = window.innerWidth < 768;
 };
 
-const deliverablesChartHeight = computed(() => (isMobile.value ? '360px' : '340px'));
-const casesChartHeight = computed(() => (isMobile.value ? '340px' : '320px'));
+const deliverablesChartHeight = computed(() => (isMobile.value ? '420px' : '400px'));
+const casesChartHeight = computed(() => (isMobile.value ? '400px' : '380px'));
 
 const deliverablesChartKey = computed(
   () => `x-${dataLabels.value.join('|')}`
 );
-
-function wrapChartLabel(label: string, maxLen: number): string | string[] {
-  const text = String(label ?? "").trim();
-  if (!text || text.length <= maxLen) return text;
-  if (text.includes(" - ")) {
-    const [left, ...rest] = text.split(" - ");
-    return [left.trim(), rest.join(" - ").trim()].filter(Boolean);
-  }
-  const words = text.split(/\s+/);
-  const lines: string[] = [];
-  let current = "";
-  for (const word of words) {
-    const next = current ? `${current} ${word}` : word;
-    if (next.length > maxLen && current) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = next;
-    }
-  }
-  if (current) lines.push(current);
-  return lines;
-}
 
 function verticalBarOptions(title: string): ChartOptions<"bar"> {
   const mobile = isMobile.value;
@@ -155,13 +132,13 @@ function verticalBarOptions(title: string): ChartOptions<"bar"> {
     maintainAspectRatio: false,
     indexAxis: "x",
     layout: {
-      padding: { top: 8, right: 12, bottom: mobile ? 28 : 20, left: 8 },
+      padding: { top: 8, right: 28, bottom: 8, left: 8 },
     },
     datasets: {
       bar: {
-        maxBarThickness: mobile ? 28 : 56,
-        categoryPercentage: mobile ? 0.45 : 0.6,
-        barPercentage: mobile ? 0.5 : 0.7,
+        maxBarThickness: mobile ? 24 : 40,
+        categoryPercentage: mobile ? 0.5 : 0.65,
+        barPercentage: mobile ? 0.55 : 0.7,
       },
     },
     plugins: {
@@ -170,22 +147,25 @@ function verticalBarOptions(title: string): ChartOptions<"bar"> {
         display: false,
         text: title,
       },
+      tooltip: {
+        callbacks: {
+          title(items) {
+            return items[0]?.label ?? "";
+          },
+        },
+      },
     },
     scales: {
       x: {
         ticks: {
           autoSkip: false,
-          maxRotation: 0,
-          minRotation: 0,
-          padding: 8,
-          font: { size: mobile ? 11 : 12 },
-          callback(value) {
-            const label = this.getLabelForValue(value as number);
-            return wrapChartLabel(label, mobile ? 14 : 20);
-          },
+          maxRotation: 45,
+          minRotation: 45,
+          padding: 4,
+          font: { size: mobile ? 10 : 11 },
         },
         afterFit(axis) {
-          axis.height = Math.max(axis.height, mobile ? 64 : 48);
+          axis.height = Math.max(axis.height, mobile ? 96 : 88);
         },
       },
       y: {
