@@ -118,8 +118,8 @@ const updateIsMobile = () => {
   isMobile.value = window.innerWidth < 768;
 };
 
-const deliverablesChartHeight = computed(() => (isMobile.value ? '340px' : '320px'));
-const casesChartHeight = computed(() => '320px');
+const deliverablesChartHeight = computed(() => (isMobile.value ? '360px' : '340px'));
+const casesChartHeight = computed(() => (isMobile.value ? '340px' : '320px'));
 
 const deliverablesChartKey = computed(
   () => `x-${dataLabels.value.join('|')}`
@@ -155,7 +155,7 @@ function verticalBarOptions(title: string): ChartOptions<"bar"> {
     maintainAspectRatio: false,
     indexAxis: "x",
     layout: {
-      padding: { top: 4, right: 8, bottom: mobile ? 16 : 8, left: 4 },
+      padding: { top: 8, right: 12, bottom: mobile ? 28 : 20, left: 8 },
     },
     datasets: {
       bar: {
