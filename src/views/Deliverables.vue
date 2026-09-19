@@ -53,9 +53,9 @@
 
             <div class="tab-content">
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'pending' }">
-                <p class="pending-tab-note text-muted mb-3">
+                <!-- <p class="pending-tab-note text-muted mb-3">
                   <strong>Note:</strong> Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
-                </p>
+                </p> -->
                 <div class="pending-deliverables-wrapper d-none d-md-block">
                   <EasyDataTable
                     :headers="pendingheaders"
