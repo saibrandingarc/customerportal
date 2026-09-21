@@ -9,6 +9,23 @@
     <div class="page-content">
       <div class="container-fluid">
         <div class="row">
+          <div class="col-12">
+            <div class="card card-height-100">
+              <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Company Information</h4>
+              </div>
+              <div class="card-body">
+                <p v-if="zohoApiLoading" class="mb-0">Loading Zoho data...</p>
+                <p v-else-if="zohoApiError" class="text-danger mb-2">{{ zohoApiError }}</p>
+                <p v-else-if="!zohoApiData" class="mb-0">No Zoho data available.</p>
+                <div v-else>
+                  <div class="mb-1"><strong>Company Name:</strong> {{ companyNameDisplay }}</div>
+                  <div class="mb-1"><strong>Products Engaged:</strong> {{ productsEngagedDisplay }}</div>
+                  <div class="mb-1"><strong>MD Credits:</strong> {{ mdCreditsDisplay }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="col-12 col-md-6 mb-3">
             <div class="card clickable-card" role="button" tabindex="0" @click="goToInvoices" @keydown.enter="goToInvoices">
               <div class="card-body">
@@ -109,6 +126,10 @@ const snackbar = ref<boolean>(false);
 const loading = ref(false);
 const outstandingBalance = ref(0);
 const pastDue = ref(0);
+const ZOHO_API_STORAGE_KEY = "dashboardZohoData";
+const zohoApiData = ref<Record<string, unknown> | null>(null);
+const zohoApiLoading = ref(false);
+const zohoApiError = ref("");
 
 // Register Chart.js
 Chart.register(...registerables);
@@ -270,6 +291,17 @@ const deliverables = ref([]);
 onMounted(async () => {
   updateIsMobile();
   window.addEventListener('resize', updateIsMobile);
+
+  const cachedZohoData = localStorage.getItem(ZOHO_API_STORAGE_KEY);
+  if (cachedZohoData) {
+    try {
+      zohoApiData.value = JSON.parse(cachedZohoData);
+    } catch {
+      localStorage.removeItem(ZOHO_API_STORAGE_KEY);
+    }
+  }
+
+  await fetchZohoDetails();
   await fetchCases();
   await fetchDeliverables();
   await fetchInvoices();
@@ -278,6 +310,82 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('resize', updateIsMobile);
 });
+
+const fetchZohoDetails = async () => {
+  zohoApiLoading.value = true;
+  zohoApiError.value = "";
+
+  try {
+    const companyId = authStore.getCompanyId();
+    const response = await axios.get(`${API_BASE_URL}/Zoho/zoho/${companyId}`);
+    const data = response?.data ?? null;
+    zohoApiData.value = data;
+
+    if (data) {
+      localStorage.setItem(ZOHO_API_STORAGE_KEY, JSON.stringify(data));
+    } else {
+      localStorage.removeItem(ZOHO_API_STORAGE_KEY);
+    }
+  } catch (err) {
+    console.error("Error fetching Zoho details:", err);
+    const errorMessage = axios.isAxiosError(err)
+      ? err.response?.data?.message || err.message
+      : "Unknown error";
+    zohoApiError.value = `Unable to fetch Zoho data from local API. (${errorMessage})`;
+  } finally {
+    zohoApiLoading.value = false;
+  }
+};
+
+const formatZohoValue = (value: unknown): string => {
+  if (value === null || value === undefined) {
+    return "-";
+  }
+
+  if (Array.isArray(value)) {
+    return value.length ? value.map((item) => String(item)).join(", ") : "-";
+  }
+
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+
+  return String(value);
+};
+
+const resolvedZohoRecord = computed<Record<string, unknown> | null>(() => {
+  const payload = zohoApiData.value;
+  if (!payload || typeof payload !== "object") {
+    return null;
+  }
+
+  const rootData = (payload as { data?: unknown }).data;
+
+  if (Array.isArray(rootData)) {
+    const firstRecord = rootData[0];
+    return firstRecord && typeof firstRecord === "object"
+      ? (firstRecord as Record<string, unknown>)
+      : null;
+  }
+
+  if (rootData && typeof rootData === "object") {
+    return rootData as Record<string, unknown>;
+  }
+
+  return payload;
+});
+
+const companyNameDisplay = computed(() =>
+  formatZohoValue(resolvedZohoRecord.value?.Account_Name)
+);
+
+const productsEngagedDisplay = computed(() =>
+  formatZohoValue(resolvedZohoRecord.value?.Products_Engaged)
+);
+
+const mdCreditsDisplay = computed(() =>
+  formatZohoValue(resolvedZohoRecord.value?.MD_Credits)
+);
 
 // Utility function to format date to 'YYYY-MM'
 function getMonthYear(dateString: string | undefined): string | null {
