@@ -9,7 +9,7 @@
     <div class="page-content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-12">
+          <div class="col-12 mt-3">
             <div class="card card-height-100">
               <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Company Information</h4>
@@ -26,7 +26,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12">
+          <div class="col-12 mb-3">
             <div class="card website-status-card">
               <div class="card-body">
                 <p v-if="websiteLoading" class="mb-0">Loading website status...</p>
