@@ -77,6 +77,7 @@ onMounted(() => {
 });
 
 const logoutUser = async () => {
+  const loginType = localStorage.getItem("loginType");
   try {
     const userData = JSON.parse(localStorage.getItem('user') || 'null');
     const email = userData?.email;
@@ -90,8 +91,13 @@ const logoutUser = async () => {
     console.error('Failed to record logout activity:', error);
   } finally {
     authStore.logout();
-    logout();
-    router.push('/');
+    if (loginType && loginType !== "username-password") {
+      await logout({
+        logoutParams: { returnTo: `${window.location.origin}/login` },
+      });
+      return;
+    }
+    await router.replace({ name: "Login" });
   }
 };
 </script>
