@@ -26,6 +26,42 @@
               </div>
             </div>
           </div>
+          <div class="col-12">
+            <div class="card website-status-card">
+              <div class="card-body">
+                <p v-if="websiteLoading" class="mb-0">Loading website status...</p>
+                <p v-else-if="websiteError" class="text-danger mb-0">{{ websiteError }}</p>
+                <p v-else-if="!websiteStatus" class="mb-0">No website status available.</p>
+                <div v-else class="website-status">
+                  <div class="website-status__summary">
+                    <div class="website-status__badge" aria-hidden="true">
+                      <span>STEP</span>
+                      <strong>{{ websiteStepIndex >= 0 ? websiteStepNumber : "–" }}</strong>
+                      <span>OF {{ websiteSteps.length }}</span>
+                    </div>
+                    <div class="website-status__copy">
+                      <h3>{{ websiteStepTitle }}</h3>
+                      <p>{{ websiteStepDescription }}</p>
+                    </div>
+                  </div>
+                  <ol class="website-status__track">
+                    <li
+                      v-for="(step, index) in websiteSteps"
+                      :key="step.label"
+                      class="website-status__step"
+                      :class="{
+                        'is-current': index === websiteStepIndex,
+                        'is-complete': websiteStepIndex >= 0 && index < websiteStepIndex,
+                      }"
+                    >
+                      <span class="website-status__dot">{{ index + 1 }}</span>
+                      <span class="website-status__label">{{ step.label }}</span>
+                    </li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="col-12 col-md-6 mb-3">
             <div class="card clickable-card" role="button" tabindex="0" @click="goToInvoices" @keydown.enter="goToInvoices">
               <div class="card-body">
@@ -130,6 +166,106 @@ const ZOHO_API_STORAGE_KEY = "dashboardZohoData";
 const zohoApiData = ref<Record<string, unknown> | null>(null);
 const zohoApiLoading = ref(false);
 const zohoApiError = ref("");
+const websiteLoading = ref(false);
+const websiteError = ref("");
+const websiteStatus = ref("");
+
+interface WebsiteBuildStep {
+  label: string;
+  title: string;
+  description: string;
+  statuses: string[];
+}
+
+const websiteSteps: WebsiteBuildStep[] = [
+  {
+    label: "Planning / Framework",
+    title: "Planning & Framework",
+    description:
+      "We're laying the groundwork for everything that comes next. This is where we organize the site structure, confirm project requirements, and make sure the pieces are in place before content and design begin.",
+    statuses: ["planning / framework", "planning & framework", "planning and framework"],
+  },
+  {
+    label: "Content Development",
+    title: "Content Development",
+    description:
+      "We're writing and gathering the pages, messages, and materials the site needs so design and build have a clear foundation.",
+    statuses: ["content development"],
+  },
+  {
+    label: "Design & Element Building",
+    title: "Design & Element Building",
+    description:
+      "We're shaping the look of the site and building the elements that bring the structure and content together.",
+    statuses: ["design & element building", "design and element building"],
+  },
+  {
+    label: "Site Configuration",
+    title: "Site Configuration",
+    description:
+      "We're setting up the site itself: pages, tools, and the technical pieces that make the design work in the browser.",
+    statuses: ["site configuration"],
+  },
+  {
+    label: "Internal Review & Refinement",
+    title: "Internal Review & Refinement",
+    description:
+      "Our team is reviewing the site and refining the details before it is ready for you to see.",
+    statuses: ["internal review & refinement", "internal review and refinement"],
+  },
+  {
+    label: "Client Review & Approval",
+    title: "Client Review & Approval",
+    description:
+      "The site is ready for your review. This is where you confirm the direction and we apply your feedback.",
+    statuses: ["client review & approval", "client review and approval"],
+  },
+  {
+    label: "Launch Preparation",
+    title: "Launch Preparation",
+    description:
+      "We're preparing the site to go live, with final checks and the connections that need to be in place on launch day.",
+    statuses: ["launch preparation"],
+  },
+  {
+    label: "Launch / Post-Launch",
+    title: "Launch / Post-Launch",
+    description:
+      "The site is live or in its final launch stage. We're confirming everything is in place and supporting what comes next.",
+    statuses: ["launch / post-launch", "launch", "post-launch", "active", "live"],
+  },
+];
+
+const normalizeWebsiteStatus = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const websiteStepIndex = computed(() => {
+  const normalized = normalizeWebsiteStatus(websiteStatus.value);
+  if (!normalized) return -1;
+  return websiteSteps.findIndex((step) =>
+    step.statuses.some((status) => normalizeWebsiteStatus(status) === normalized)
+  );
+});
+
+const websiteStepNumber = computed(() =>
+  websiteStepIndex.value >= 0 ? websiteStepIndex.value + 1 : 1
+);
+
+const websiteStepTitle = computed(() =>
+  websiteStepIndex.value >= 0
+    ? websiteSteps[websiteStepIndex.value].title
+    : websiteStatus.value
+);
+
+const websiteStepDescription = computed(() =>
+  websiteStepIndex.value >= 0
+    ? websiteSteps[websiteStepIndex.value].description
+    : "This status is outside the 8-step website timeline."
+);
 
 // Register Chart.js
 Chart.register(...registerables);
@@ -302,6 +438,7 @@ onMounted(async () => {
   }
 
   await fetchZohoDetails();
+  await fetchWebsiteStatus();
   await fetchCases();
   await fetchDeliverables();
   await fetchInvoices();
@@ -386,6 +523,63 @@ const productsEngagedDisplay = computed(() =>
 const mdCreditsDisplay = computed(() =>
   formatZohoValue(resolvedZohoRecord.value?.MD_Credits)
 );
+
+const parseWebsiteRecord = (payload: unknown): Record<string, unknown> | null => {
+  let data = payload;
+  if (typeof data === "string") {
+    const trimmed = data.trim();
+    if (!trimmed.startsWith("{")) return null;
+    try {
+      data = JSON.parse(trimmed);
+    } catch {
+      return null;
+    }
+  }
+
+  if (!data || typeof data !== "object") return null;
+  const records = (data as { data?: unknown }).data;
+  if (!Array.isArray(records) || records.length === 0) return null;
+
+  const websites = records.filter(
+    (record): record is Record<string, unknown> =>
+      Boolean(record) && typeof record === "object"
+  );
+  if (!websites.length) return null;
+
+  return websites.reduce((latest, record) => {
+    const latestTime = Date.parse(String(latest.Modified_Time ?? ""));
+    const recordTime = Date.parse(String(record.Modified_Time ?? ""));
+    if (Number.isNaN(recordTime)) return latest;
+    if (Number.isNaN(latestTime) || recordTime > latestTime) return record;
+    return latest;
+  });
+};
+
+const fetchWebsiteStatus = async () => {
+  websiteLoading.value = true;
+  websiteError.value = "";
+  websiteStatus.value = "";
+
+  try {
+    const companyId = authStore.getCompanyId();
+    if (!companyId) {
+      return;
+    }
+
+    const response = await axios.get(`${API_BASE_URL}/Zoho/zoho/website/${companyId}`);
+    const record = parseWebsiteRecord(response?.data);
+    const status = record?.Website_Status;
+    websiteStatus.value = status === null || status === undefined ? "" : String(status);
+  } catch (err) {
+    console.error("Error fetching website status:", err);
+    const errorMessage = axios.isAxiosError(err)
+      ? err.response?.data?.message || err.message
+      : "Unknown error";
+    websiteError.value = `Unable to fetch website status. (${errorMessage})`;
+  } finally {
+    websiteLoading.value = false;
+  }
+};
 
 // Utility function to format date to 'YYYY-MM'
 function getMonthYear(dateString: string | undefined): string | null {
@@ -582,5 +776,167 @@ function getRandomColor(count: any) {
 
 .clickable-card {
   cursor: pointer;
+}
+
+.website-status-card {
+  background: #f4f8fd;
+  border: none;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.website-status__summary {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.website-status__badge {
+  flex: 0 0 auto;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: #2f6fed;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.website-status__badge span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.website-status__badge strong {
+  margin: 4px 0;
+  font-size: 42px;
+  font-weight: 700;
+}
+
+.website-status__copy {
+  min-width: 0;
+  padding-left: 28px;
+  border-left: 1px solid #d5deea;
+}
+
+.website-status__copy h3 {
+  margin: 0 0 8px;
+  color: #1c2434;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.website-status__copy p {
+  margin: 0;
+  max-width: 760px;
+  color: #5d6b7c;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.website-status__track {
+  display: flex;
+  gap: 8px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  position: relative;
+}
+
+.website-status__track::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 24px;
+  right: 24px;
+  height: 2px;
+  background: #d7e0ea;
+}
+
+.website-status__step {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.website-status__dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #c5d0dc;
+  background: #fff;
+  color: #8b97a8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.website-status__label {
+  margin-top: 10px;
+  max-width: 110px;
+  color: #8b97a8;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.website-status__step.is-current .website-status__dot,
+.website-status__step.is-complete .website-status__dot {
+  border-color: #2f6fed;
+  background: #2f6fed;
+  color: #fff;
+}
+
+.website-status__step.is-current .website-status__label {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #e7f0ff;
+  color: #2458d6;
+  font-weight: 600;
+}
+
+@media (max-width: 767.98px) {
+  .website-status__summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .website-status__badge {
+    width: 88px;
+    height: 88px;
+  }
+
+  .website-status__badge strong {
+    font-size: 32px;
+  }
+
+  .website-status__copy {
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .website-status__copy h3 {
+    font-size: 22px;
+  }
+
+  .website-status__track {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .website-status__step {
+    flex: 0 0 96px;
+  }
 }
 </style>
