@@ -13,6 +13,7 @@
             <div class="card card-height-100">
               <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Company Information</h4>
+                <span v-if="isWebsiteLive" class="company-live-badge">Live</span>
               </div>
               <div class="card-body">
                 <p v-if="zohoApiLoading" class="mb-0">Loading Zoho data...</p>
@@ -26,11 +27,10 @@
               </div>
             </div>
           </div>
-          <div class="col-12 mb-3">
+          <div v-if="showWebsiteProgress" class="col-12 mb-3">
             <div class="card website-status-card">
               <div class="card-body">
-                <p v-if="websiteLoading" class="mb-0">Loading website status...</p>
-                <p v-else-if="websiteError" class="text-danger mb-0">{{ websiteError }}</p>
+                <p v-if="websiteError" class="text-danger mb-0">{{ websiteError }}</p>
                 <p v-else-if="!websiteStatus" class="mb-0">No website status available.</p>
                 <div v-else class="website-status">
                   <div class="website-status__summary">
@@ -232,7 +232,7 @@ const websiteSteps: WebsiteBuildStep[] = [
     title: "Launch / Post-Launch",
     description:
       "The site is live or in its final launch stage. We're confirming everything is in place and supporting what comes next.",
-    statuses: ["launch / post-launch", "launch", "post-launch", "active", "live"],
+    statuses: ["launch / post-launch", "launch", "post-launch"],
   },
 ];
 
@@ -242,6 +242,25 @@ const normalizeWebsiteStatus = (value: string) =>
     .replace(/&/g, " and ")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+
+const settledWebsiteStatuses = new Set([
+  "active",
+  "self hosted",
+  "suspended",
+  "terminated",
+]);
+
+const normalizedWebsiteStatus = computed(() =>
+  normalizeWebsiteStatus(websiteStatus.value)
+);
+
+const isWebsiteLive = computed(() => normalizedWebsiteStatus.value === "active");
+
+const showWebsiteProgress = computed(() => {
+  if (websiteLoading.value) return false;
+  if (websiteError.value || !websiteStatus.value) return true;
+  return !settledWebsiteStatuses.has(normalizedWebsiteStatus.value);
+});
 
 const websiteStepIndex = computed(() => {
   const normalized = normalizeWebsiteStatus(websiteStatus.value);
@@ -776,6 +795,14 @@ function getRandomColor(count: any) {
 
 .clickable-card {
   cursor: pointer;
+}
+
+.company-live-badge {
+  flex: 0 0 auto;
+  color: #1b8a3e;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .website-status-card {
