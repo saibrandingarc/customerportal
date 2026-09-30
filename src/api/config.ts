@@ -1,7 +1,7 @@
 // src/config.ts
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ??
-  'https://customerportalapi-g4ghhxakewedafak.eastus2-01.azurewebsites.net';
+  'https://customerportalapitest-g4ghhxakewedafak.eastus2-01.azurewebsites.net';
 
 export const GOOGLE_DRIVE_FOLDER_URL =
   'https://drive.google.com/drive/folders/1TiHjrFhsimDHb5VphpuNkxaCyIenAeRh?usp=drive_link';
