@@ -18,15 +18,17 @@ watch(
 </script>
 
 <template>
-  <div class="layout-root">
-    <SidebarMenu />
-    <div class="vertical-overlay" @click="closeSidebar"></div>
-    <div class="wrapper d-flex flex-column min-vh-100">
-      <NavBar />
-      <div class="body flex-grow-1">
-        <router-view />
+  <div class="portal-shell">
+    <NavBar />
+    <div class="portal-body">
+      <SidebarMenu />
+      <div class="vertical-overlay" @click="closeSidebar"></div>
+      <div class="portal-main">
+        <div class="body flex-grow-1">
+          <router-view />
+        </div>
+        <Footer />
       </div>
-      <Footer />
     </div>
   </div>
 </template>

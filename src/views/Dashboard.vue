@@ -8,26 +8,16 @@
   <div class="main-content">
     <div class="page-content">
       <div class="container-fluid">
+        <OutstandingApprovalsNotice />
         <div class="row">
-          <div class="col-12 mt-3">
-            <div class="card card-height-100">
-              <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Company Information</h4>
-                <span v-if="isWebsiteLive" class="company-live-badge">Live</span>
-              </div>
+          <div class="col-12">
+            <div class="card">
               <div class="card-body">
-                <p v-if="zohoApiLoading" class="mb-0">Loading Zoho data...</p>
-                <p v-else-if="zohoApiError" class="text-danger mb-2">{{ zohoApiError }}</p>
-                <p v-else-if="!zohoApiData" class="mb-0">No Zoho data available.</p>
-                <div v-else>
-                  <div class="mb-1"><strong>Company Name:</strong> {{ companyNameDisplay }}</div>
-                  <div class="mb-1"><strong>Products Engaged:</strong> {{ productsEngagedDisplay }}</div>
-                  <div class="mb-1"><strong>MD Credits:</strong> {{ mdCreditsDisplay }}</div>
-                </div>
+                <CreditStatus />
               </div>
             </div>
           </div>
-          <div v-if="showWebsiteProgress" class="col-12 mb-3">
+          <div v-if="showWebsiteProgress" class="col-12">
             <div class="card website-status-card">
               <div class="card-body">
                 <p v-if="websiteError" class="text-danger mb-0">{{ websiteError }}</p>
@@ -62,7 +52,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-6 mb-3">
+          <div class="col-12 col-md-6">
             <div class="card clickable-card" role="button" tabindex="0" @click="goToInvoices" @keydown.enter="goToInvoices">
               <div class="card-body">
                 <h4>Outstanding Balance</h4>
@@ -70,7 +60,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-6 mb-3">
+          <div class="col-12 col-md-6">
             <div class="card clickable-card" role="button" tabindex="0" @click="goToInvoices" @keydown.enter="goToInvoices">
               <div class="card-body">
                 <h4>Past Due</h4>
@@ -80,10 +70,16 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-12 col-lg-6 mb-4">
-            <div class="card card-height-100">
+          <div class="col-12 col-lg-6">
+            <div
+              class="card card-height-100 clickable-card"
+              role="button"
+              tabindex="0"
+              @click="goToActiveDeliverables"
+              @keydown.enter="goToActiveDeliverables"
+            >
               <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Deliverables</h4>
+                <h4 class="card-title mb-0 flex-grow-1">Active Deliverables</h4>
                 <div class="flex-shrink-0">
                   <!-- <div class="dropdown card-header-dropdown">
                     <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true"
@@ -109,10 +105,16 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-lg-6 mb-4">
-            <div class="card card-height-100">
+          <div class="col-12 col-lg-6">
+            <div
+              class="card card-height-100 clickable-card"
+              role="button"
+              tabindex="0"
+              @click="goToCases"
+              @keydown.enter="goToCases"
+            >
               <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Cases</h4>
+                <h4 class="card-title mb-0 flex-grow-1">Website Cases</h4>
                 <div class="flex-shrink-0">
                   <!-- <div class="dropdown card-header-dropdown">
                     <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true"
@@ -135,6 +137,78 @@
             </div>
           </div>
         </div>
+        <div class="row">
+          <div class="col-12 col-lg-6">
+            <div
+              class="card clickable-card"
+              role="button"
+              tabindex="0"
+              @click="goToActiveDeliverables"
+              @keydown.enter="goToActiveDeliverables"
+            >
+              <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Active Deliverables</h4>
+              </div>
+              <div class="card-body">
+                <p v-if="!dataLabels.length" class="text-muted mb-0">No active deliverables.</p>
+                <div v-else class="pie-layout">
+                  <div class="chart-wrap pie-chart-wrap">
+                    <PieChart
+                      :key="deliverablesPieKey"
+                      v-bind="deliverablesPieChartProps"
+                      ref="deliverablesPieChartRef"
+                    />
+                  </div>
+                  <ul class="pie-legend">
+                    <li v-for="(label, index) in dataLabels" :key="label">
+                      <span
+                        class="pie-legend__swatch"
+                        :style="{ backgroundColor: pieSliceColors(dataLabels.length)[index] }"
+                      ></span>
+                      <span>{{ label }}</span>
+                      <strong>{{ dataValues[index] }}</strong>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div
+              class="card clickable-card"
+              role="button"
+              tabindex="0"
+              @click="goToCases"
+              @keydown.enter="goToCases"
+            >
+              <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Website Cases</h4>
+              </div>
+              <div class="card-body">
+                <p v-if="!casesChartLabels.length" class="text-muted mb-0">No website cases.</p>
+                <div v-else class="pie-layout">
+                  <div class="chart-wrap pie-chart-wrap">
+                    <PieChart
+                      :key="casesPieKey"
+                      v-bind="casesPieChartProps"
+                      ref="casesPieChartRef"
+                    />
+                  </div>
+                  <ul class="pie-legend">
+                    <li v-for="(label, index) in casesChartLabels" :key="label">
+                      <span
+                        class="pie-legend__swatch"
+                        :style="{ backgroundColor: pieSliceColors(casesChartLabels.length)[index] }"
+                      ></span>
+                      <span>{{ label }}</span>
+                      <strong>{{ casesChartValues[index] }}</strong>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -147,8 +221,12 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/userStore';
 import { API_BASE_URL } from '@/api/config';
+import { useWebsiteStatus } from '@/composables/useWebsiteStatus';
+import { publishDeliverableRows } from '@/composables/useOutstandingApprovals';
+import OutstandingApprovalsNotice from '@/components/OutstandingApprovalsNotice.vue';
+import CreditStatus from '@/components/CreditStatus.vue';
 
-import { DoughnutChart, useDoughnutChart } from "vue-chart-3";
+import { PieChart, usePieChart } from "vue-chart-3";
 import { BarChart, useBarChart } from 'vue-chart-3';
 import { Chart, ChartData, ChartOptions, registerables } from "chart.js";
 
@@ -158,17 +236,19 @@ const authStore = useAuthStore();
 const goToInvoices = () => {
   router.push('/invoices');
 };
+
+const goToActiveDeliverables = () => {
+  router.push({ path: '/deliverables', query: { tab: 'active' } });
+};
+
+const goToCases = () => {
+  router.push('/cases');
+};
 const snackbar = ref<boolean>(false);
 const loading = ref(false);
 const outstandingBalance = ref(0);
 const pastDue = ref(0);
-const ZOHO_API_STORAGE_KEY = "dashboardZohoData";
-const zohoApiData = ref<Record<string, unknown> | null>(null);
-const zohoApiLoading = ref(false);
-const zohoApiError = ref("");
-const websiteLoading = ref(false);
-const websiteError = ref("");
-const websiteStatus = ref("");
+const { websiteStatus, websiteLoading, websiteError, loadWebsiteStatus } = useWebsiteStatus();
 
 interface WebsiteBuildStep {
   label: string;
@@ -253,8 +333,6 @@ const settledWebsiteStatuses = new Set([
 const normalizedWebsiteStatus = computed(() =>
   normalizeWebsiteStatus(websiteStatus.value)
 );
-
-const isWebsiteLive = computed(() => normalizedWebsiteStatus.value === "active");
 
 const showWebsiteProgress = computed(() => {
   if (websiteLoading.value) return false;
@@ -425,8 +503,72 @@ const deliverablesChartData = computed<ChartData<"bar">>(() => ({
 }));
 
 const deliverablesChartOptions = computed<ChartOptions<"bar">>(() =>
-  verticalBarOptions("Deliverables by Type (Records)")
+  verticalBarOptions("Active Deliverables")
 );
+
+const PIE_COLORS = [
+  "#42A5F5",
+  "#0192d0",
+  "#5C6BC0",
+  "#26A69A",
+  "#66BB6A",
+  "#FFA726",
+  "#EF5350",
+  "#AB47BC",
+  "#8D6E63",
+  "#78909C",
+  "#EC407A",
+  "#7E57C2",
+  "#9CCC65",
+  "#FFCA28",
+  "#26C6DA",
+  "#FF7043",
+];
+
+function pieSliceColors(count: number): string[] {
+  return Array.from({ length: count }, (_, index) => PIE_COLORS[index % PIE_COLORS.length]);
+}
+
+function pieOptions(): ChartOptions<"pie"> {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label(item) {
+            const value = Number(item.raw ?? 0);
+            const data = (item.dataset.data as number[]).map((entry) => Number(entry) || 0);
+            const total = data.reduce((sum, entry) => sum + entry, 0);
+            const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+            return ` ${item.label}: ${value} (${percent}%)`;
+          },
+        },
+      },
+    },
+  };
+}
+
+const deliverablesPieKey = computed(
+  () => `deliverables-pie-${dataLabels.value.join("|")}-${dataValues.value.join("|")}`
+);
+const deliverablesPieData = computed<ChartData<"pie">>(() => ({
+  labels: dataLabels.value,
+  datasets: [
+    {
+      data: dataValues.value,
+      backgroundColor: pieSliceColors(dataValues.value.length),
+      borderColor: "#ffffff",
+      borderWidth: 2,
+    },
+  ],
+}));
+const deliverablesPieOptions = computed<ChartOptions<"pie">>(() => pieOptions());
+const { pieChartProps: deliverablesPieChartProps, pieChartRef: deliverablesPieChartRef } = usePieChart({
+  chartData: deliverablesPieData,
+  options: deliverablesPieOptions,
+});
 
 const { barChartProps: deliverablesBarChartProps, barChartRef: deliverablesBarChartRef } = useBarChart({
   chartData: deliverablesChartData,
@@ -447,17 +589,7 @@ onMounted(async () => {
   updateIsMobile();
   window.addEventListener('resize', updateIsMobile);
 
-  const cachedZohoData = localStorage.getItem(ZOHO_API_STORAGE_KEY);
-  if (cachedZohoData) {
-    try {
-      zohoApiData.value = JSON.parse(cachedZohoData);
-    } catch {
-      localStorage.removeItem(ZOHO_API_STORAGE_KEY);
-    }
-  }
-
-  await fetchZohoDetails();
-  await fetchWebsiteStatus();
+  await loadWebsiteStatus();
   await fetchCases();
   await fetchDeliverables();
   await fetchInvoices();
@@ -466,139 +598,6 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('resize', updateIsMobile);
 });
-
-const fetchZohoDetails = async () => {
-  zohoApiLoading.value = true;
-  zohoApiError.value = "";
-
-  try {
-    const companyId = authStore.getCompanyId();
-    const response = await axios.get(`${API_BASE_URL}/Zoho/zoho/${companyId}`);
-    const data = response?.data ?? null;
-    zohoApiData.value = data;
-
-    if (data) {
-      localStorage.setItem(ZOHO_API_STORAGE_KEY, JSON.stringify(data));
-    } else {
-      localStorage.removeItem(ZOHO_API_STORAGE_KEY);
-    }
-  } catch (err) {
-    console.error("Error fetching Zoho details:", err);
-    const errorMessage = axios.isAxiosError(err)
-      ? err.response?.data?.message || err.message
-      : "Unknown error";
-    zohoApiError.value = `Unable to fetch Zoho data from local API. (${errorMessage})`;
-  } finally {
-    zohoApiLoading.value = false;
-  }
-};
-
-const formatZohoValue = (value: unknown): string => {
-  if (value === null || value === undefined) {
-    return "-";
-  }
-
-  if (Array.isArray(value)) {
-    return value.length ? value.map((item) => String(item)).join(", ") : "-";
-  }
-
-  if (typeof value === "object") {
-    return JSON.stringify(value);
-  }
-
-  return String(value);
-};
-
-const resolvedZohoRecord = computed<Record<string, unknown> | null>(() => {
-  const payload = zohoApiData.value;
-  if (!payload || typeof payload !== "object") {
-    return null;
-  }
-
-  const rootData = (payload as { data?: unknown }).data;
-
-  if (Array.isArray(rootData)) {
-    const firstRecord = rootData[0];
-    return firstRecord && typeof firstRecord === "object"
-      ? (firstRecord as Record<string, unknown>)
-      : null;
-  }
-
-  if (rootData && typeof rootData === "object") {
-    return rootData as Record<string, unknown>;
-  }
-
-  return payload;
-});
-
-const companyNameDisplay = computed(() =>
-  formatZohoValue(resolvedZohoRecord.value?.Account_Name)
-);
-
-const productsEngagedDisplay = computed(() =>
-  formatZohoValue(resolvedZohoRecord.value?.Products_Engaged)
-);
-
-const mdCreditsDisplay = computed(() =>
-  formatZohoValue(resolvedZohoRecord.value?.MD_Credits)
-);
-
-const parseWebsiteRecord = (payload: unknown): Record<string, unknown> | null => {
-  let data = payload;
-  if (typeof data === "string") {
-    const trimmed = data.trim();
-    if (!trimmed.startsWith("{")) return null;
-    try {
-      data = JSON.parse(trimmed);
-    } catch {
-      return null;
-    }
-  }
-
-  if (!data || typeof data !== "object") return null;
-  const records = (data as { data?: unknown }).data;
-  if (!Array.isArray(records) || records.length === 0) return null;
-
-  const websites = records.filter(
-    (record): record is Record<string, unknown> =>
-      Boolean(record) && typeof record === "object"
-  );
-  if (!websites.length) return null;
-
-  return websites.reduce((latest, record) => {
-    const latestTime = Date.parse(String(latest.Modified_Time ?? ""));
-    const recordTime = Date.parse(String(record.Modified_Time ?? ""));
-    if (Number.isNaN(recordTime)) return latest;
-    if (Number.isNaN(latestTime) || recordTime > latestTime) return record;
-    return latest;
-  });
-};
-
-const fetchWebsiteStatus = async () => {
-  websiteLoading.value = true;
-  websiteError.value = "";
-  websiteStatus.value = "";
-
-  try {
-    const companyId = authStore.getCompanyId();
-    if (!companyId) {
-      return;
-    }
-
-    const response = await axios.get(`${API_BASE_URL}/Zoho/zoho/website/${companyId}`);
-    const record = parseWebsiteRecord(response?.data);
-    const status = record?.Website_Status;
-    websiteStatus.value = status === null || status === undefined ? "" : String(status);
-  } catch (err) {
-    console.error("Error fetching website status:", err);
-    const errorMessage = axios.isAxiosError(err)
-      ? err.response?.data?.message || err.message
-      : "Unknown error";
-    websiteError.value = `Unable to fetch website status. (${errorMessage})`;
-  } finally {
-    websiteLoading.value = false;
-  }
-};
 
 // Utility function to format date to 'YYYY-MM'
 function getMonthYear(dateString: string | undefined): string | null {
@@ -661,6 +660,7 @@ const fetchDeliverables = async () => {
     );
     console.log("Deliverables Response:", response);
     deliverables.value = response.data.data;
+    publishDeliverableRows(response.data);
 
     // Process the response data to extract necessary chart data
     const statusCount: { [key: string]: number } = {};
@@ -766,13 +766,33 @@ const chartData = computed<ChartData<"bar">>(() => ({
 }));
 
 const chartOptions = computed<ChartOptions<"bar">>(() =>
-  verticalBarOptions("Monthly Case Count")
+  verticalBarOptions("Website Cases")
 );
 
 // Initialize Bar Chart with vue-chart-3
 const { barChartProps, barChartRef } = useBarChart({
   chartData,
   options: chartOptions,
+});
+
+const casesPieKey = computed(
+  () => `cases-pie-${casesChartLabels.value.join("|")}-${casesChartValues.value.join("|")}`
+);
+const casesPieData = computed<ChartData<"pie">>(() => ({
+  labels: casesChartLabels.value,
+  datasets: [
+    {
+      data: casesChartValues.value,
+      backgroundColor: pieSliceColors(casesChartValues.value.length),
+      borderColor: "#ffffff",
+      borderWidth: 2,
+    },
+  ],
+}));
+const casesPieOptions = computed<ChartOptions<"pie">>(() => pieOptions());
+const { pieChartProps: casesPieChartProps, pieChartRef: casesPieChartRef } = usePieChart({
+  chartData: casesPieData,
+  options: casesPieOptions,
 });
 
 
@@ -789,20 +809,54 @@ function getRandomColor(count: any) {
 </script>
 
 <style scoped>
+.pie-layout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card:has(.pie-layout) .card-body {
+  overflow: visible;
+}
+
+.pie-chart-wrap {
+  flex: 1 1 58%;
+  height: 280px;
+  min-width: 0;
+}
+
+.pie-legend {
+  flex: 0 1 42%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pie-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #212529;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.pie-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+}
+
 .v-btn {
   min-width: 80px;
 }
 
 .clickable-card {
   cursor: pointer;
-}
-
-.company-live-badge {
-  flex: 0 0 auto;
-  color: #1b8a3e;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
 }
 
 .website-status-card {

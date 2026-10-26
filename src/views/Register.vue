@@ -163,7 +163,12 @@
             errorMessage.value = response.data.message;
         }
       } catch (err) {
-        console.log(err);
+        if (axios.isAxiosError(err) && err.response?.status === 423) {
+          const data = err.response.data as { message?: string } | undefined;
+          errorMessage.value = data?.message || "Your account is locked after too many failed login attempts. Try again later.";
+        } else {
+          console.log(err);
+        }
       } finally {
         loading.value = false;
       }

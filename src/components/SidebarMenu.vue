@@ -1,57 +1,70 @@
 <template>
-  <div class="app-menu navbar-menu">
-    <div class="navbar-brand-box">
-      <router-link to="/dashboard" class="logo logo-dark">
-        <span class="logo-sm">
-          <img src="/logo.png" alt="" width="120">
-        </span>
-        <span class="logo-lg">
-          <img src="/logo.png" alt="" width="120">
-        </span>
-      </router-link>
-      <router-link to="/dashboard" class="logo logo-light">
-        <span class="logo-sm">
-          <img src="/logo.png" alt="" width="120">
-        </span>
-        <span class="logo-lg">
-          <img src="/logo.png" alt="" width="120">
-        </span>
-      </router-link>
-    </div>
-
-    <div v-if="isLoggedIn" class="h-100">
-      <div class="container-fluid">
-        <ul class="navbar-nav" id="navbar-nav">
-          <li class="menu-title"><span data-key="t-menu">Menu</span></li>
-          <ul class="nav nav-sm flex-column">
-            <li
-              class="nav-item my-2"
-              v-for="(item, index) in filteredMenuItems"
-              :key="index"
-              @click="navigate(item.route)"
-              role="button"
+  <aside class="app-menu navbar-menu" aria-label="Portal navigation">
+    <nav v-if="isLoggedIn" class="portal-nav">
+      <template v-for="item in filteredMenuItems" :key="item.title">
+        <div v-if="item.children?.length" class="portal-nav-group">
+          <button
+            type="button"
+            class="portal-nav-link portal-nav-toggle"
+            :class="{ 'is-open': isOpen(item.title), 'is-active': isGroupActive(item) }"
+            :aria-expanded="isOpen(item.title)"
+            :aria-controls="`nav-group-${item.title}`"
+            @click="toggle(item.title)"
+          >
+            <span>{{ item.title }}</span>
+            <i class="mdi mdi-chevron-right" aria-hidden="true"></i>
+          </button>
+          <div
+            v-show="isOpen(item.title)"
+            :id="`nav-group-${item.title}`"
+            class="portal-nav-children"
+          >
+            <router-link
+              v-for="child in item.children"
+              :key="child.route"
+              :to="child.route"
+              class="portal-nav-link portal-nav-child"
+              :class="{ 'router-link-active': isChildActive(child.route) }"
+              @click="closeSidebar"
             >
-              <div class="d-flex align-items-center nav-link">
-                <span>{{ item.title }}</span>
-              </div>
-            </li>
-          </ul>
-        </ul>
-      </div>
-    </div>
-
-    <div class="sidebar-background"></div>
-  </div>
+              {{ child.title }}
+            </router-link>
+          </div>
+        </div>
+        <router-link
+          v-else-if="item.route"
+          :to="item.route"
+          class="portal-nav-link"
+          @click="closeSidebar"
+        >
+          {{ item.title }}
+        </router-link>
+      </template>
+    </nav>
+  </aside>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/userStore';
 import { closeSidebar } from '@/composables/useSidebar';
 
-const router = useRouter();
+interface MenuChild {
+  title: string;
+  route: string;
+  roles: string[];
+}
+
+interface MenuItem {
+  title: string;
+  route?: string;
+  roles: string[];
+  children?: MenuChild[];
+}
+
+const route = useRoute();
 const authStore = useAuthStore();
 const { isLoggedIn } = storeToRefs(authStore);
 const userRoles = computed(() => {
@@ -59,20 +72,64 @@ const userRoles = computed(() => {
   return roles.length ? roles : ['User'];
 });
 
-const menuItems = [
-  { title: 'Dashboard', icon: 'mdi-view-dashboard', route: '/dashboard', roles: ['Admin', 'User'] },
-  { title: 'Admin User', icon: 'mdi-account', route: '/admin/users', roles: ['Admin'] },
-  { title: 'Deliverables', icon: 'mdi-package-variant', route: '/deliverables', roles: ['Admin', 'User'] },
-  { title: 'Cases', icon: 'mdi-file-document', route: '/cases', roles: ['Admin', 'User'] },
-  { title: 'Invoices', icon: 'mdi-package-variant', route: '/invoices', roles: ['Admin', 'User'] },
+const menuItems: MenuItem[] = [
+  { title: 'Dashboard', route: '/dashboard', roles: ['Admin', 'User'] },
+  { title: 'Admin User', route: '/admin/users', roles: ['Admin'] },
+  { title: 'Deliverables', route: '/deliverables', roles: ['Admin', 'User'] },
+  { title: 'Cases', route: '/cases', roles: ['Admin', 'User'] },
+  { title: 'Invoices', route: '/invoices', roles: ['Admin', 'User'] },
+  { title: 'FAQ', route: '/faq', roles: ['Admin', 'User'] },
+  {
+    title: 'Resources',
+    roles: ['Admin', 'User'],
+    children: [
+      { title: 'Instructional Videos', route: '/resources/videos', roles: ['Admin', 'User'] },
+      { title: 'Scribes', route: '/resources/scribes', roles: ['Admin', 'User'] },
+      { title: 'Articles', route: '/resources/articles', roles: ['Admin', 'User'] },
+    ],
+  },
 ];
 
+const canSee = (roles: string[]) => roles.some((role) => userRoles.value.includes(role));
+
 const filteredMenuItems = computed(() => {
-  return menuItems.filter(item => item.roles.some(role => userRoles.value.includes(role)));
+  return menuItems
+    .filter((item) => canSee(item.roles))
+    .map((item) => {
+      if (!item.children) return item;
+      return {
+        ...item,
+        children: item.children.filter((child) => canSee(child.roles)),
+      };
+    })
+    .filter((item) => !item.children || item.children.length > 0);
 });
 
-const navigate = (route: string) => {
-  closeSidebar();
-  router.push(route);
+const openGroups = ref<Record<string, boolean>>({});
+
+const isOpen = (title: string) => Boolean(openGroups.value[title]);
+
+const isChildActive = (path: string) => route.path === path || route.path.startsWith(`${path}/`);
+
+const isGroupActive = (item: MenuItem) =>
+  item.children?.some((child) => isChildActive(child.route)) ?? false;
+
+const toggle = (title: string) => {
+  openGroups.value = {
+    ...openGroups.value,
+    [title]: !openGroups.value[title],
+  };
 };
+
+watch(
+  () => route.path,
+  () => {
+    for (const item of filteredMenuItems.value) {
+      if (item.children && isGroupActive(item)) {
+        openGroups.value = { ...openGroups.value, [item.title]: true };
+      }
+    }
+  },
+  { immediate: true }
+);
 </script>

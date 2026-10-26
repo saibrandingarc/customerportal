@@ -18,7 +18,7 @@
               >
                 {{ loading ? 'Refreshing...' : 'Refresh' }}
               </button>
-              <button class="btn btn-primary" @click="dialog = true">New Case</button>
+              <button class="btn btn-primary" @click="openNewCase">New Case</button>
             </div>
           </div>
           <div class="card-body">
@@ -50,29 +50,33 @@
 
             <div class="tab-content">
               <div class="tab-pane fade" :class="{ 'show active': activeCasesTab === 'open' }">
-                <input v-model="searchOpen" class="form-control mb-3" placeholder="Search..." />
                 <div class="d-none d-md-block">
-                  <EasyDataTable
+                  <PortalDataTable
                     :headers="headers"
                     :items="openitems"
                     :rows-per-page="10"
-                    table-class="table-bordered"
-                    show-index
-                    :searchable="true"
+                    body-row-class-name="case-row"
+                    @click-row="onCaseRowClick"
                   >
-                    <template #item-Operation="{ id, Case_Number }">
+                    <template #item-Operation="{ id }">
                       <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
                       <button class="btn btn-sm btn-warning me-2" @click="editItem(id)">Edit</button>
                       <button class="btn btn-sm btn-danger" @click="deleteItem(id)">Delete</button>
                     </template>
-                  </EasyDataTable>
+                  </PortalDataTable>
                 </div>
 
                 <div class="d-md-none case-cards">
+                  <input v-model="searchOpen" class="form-control mb-3" placeholder="Search..." />
                   <p v-if="!filteredOpenItems.length" class="text-muted text-center py-3 mb-0">
                     No Available Data
                   </p>
-                  <div v-for="(row, i) in filteredOpenItems" :key="row.id ?? i" class="case-card">
+                  <div
+                    v-for="(row, i) in filteredOpenItems"
+                    :key="row.id ?? i"
+                    class="case-card"
+                    @click="viewItem(row.id)"
+                  >
                     <div class="dc-row">
                       <span class="dc-label">Case Number</span>
                       <span class="dc-value fw-semibold">{{ row.Case_Number }}</span>
@@ -80,6 +84,10 @@
                     <div class="dc-row">
                       <span class="dc-label">Subject</span>
                       <span class="dc-value">{{ row.Subject }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Reported By</span>
+                      <span class="dc-value">{{ row.Reported_By || '—' }}</span>
                     </div>
                     <div class="dc-row">
                       <span class="dc-label">Status</span>
@@ -93,11 +101,7 @@
                       <span class="dc-label">Type</span>
                       <span class="dc-value">{{ row.Type }}</span>
                     </div>
-                    <div class="dc-row">
-                      <span class="dc-label">Reason</span>
-                      <span class="dc-value">{{ row.Case_Reason }}</span>
-                    </div>
-                    <div class="dc-actions">
+                    <div class="dc-actions" @click.stop>
                       <button class="btn btn-sm btn-primary" @click="viewItem(row.id)">View</button>
                       <button class="btn btn-sm btn-warning" @click="editItem(row.id)">Edit</button>
                       <button class="btn btn-sm btn-danger" @click="deleteItem(row.id)">Delete</button>
@@ -107,30 +111,33 @@
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeCasesTab === 'closed' }">
-                <input v-model="searchClosed" class="form-control mb-3" placeholder="Search..." />
                 <div class="d-none d-md-block">
-                  <EasyDataTable
+                  <PortalDataTable
                     :headers="closedheaders"
                     :items="closeditems"
                     :rows-per-page="10"
-                    table-class="table-bordered"
-                    show-index
-                    :searchable="true"
-                    buttons-pagination
                     sort-by="Case_Closed_Date"
                     sort-type="desc"
+                    body-row-class-name="case-row"
+                    @click-row="onCaseRowClick"
                   >
-                    <template #item-Operation="{ id, Case_Number }">
+                    <template #item-Operation="{ id }">
                       <button class="btn btn-sm btn-primary me-2" @click="viewItem(id)">View</button>
                     </template>
-                  </EasyDataTable>
+                  </PortalDataTable>
                 </div>
 
                 <div class="d-md-none case-cards">
+                  <input v-model="searchClosed" class="form-control mb-3" placeholder="Search..." />
                   <p v-if="!filteredClosedItems.length" class="text-muted text-center py-3 mb-0">
                     No Available Data
                   </p>
-                  <div v-for="(row, i) in filteredClosedItems" :key="row.id ?? i" class="case-card">
+                  <div
+                    v-for="(row, i) in filteredClosedItems"
+                    :key="row.id ?? i"
+                    class="case-card"
+                    @click="viewItem(row.id)"
+                  >
                     <div class="dc-row">
                       <span class="dc-label">Case Number</span>
                       <span class="dc-value fw-semibold">{{ row.Case_Number }}</span>
@@ -138,6 +145,10 @@
                     <div class="dc-row">
                       <span class="dc-label">Subject</span>
                       <span class="dc-value">{{ row.Subject }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Reported By</span>
+                      <span class="dc-value">{{ row.Reported_By || '—' }}</span>
                     </div>
                     <div class="dc-row">
                       <span class="dc-label">Open Date</span>
@@ -151,11 +162,7 @@
                       <span class="dc-label">Type</span>
                       <span class="dc-value">{{ row.Type }}</span>
                     </div>
-                    <div class="dc-row">
-                      <span class="dc-label">Reason</span>
-                      <span class="dc-value">{{ row.Case_Reason }}</span>
-                    </div>
-                    <div class="dc-actions">
+                    <div class="dc-actions" @click.stop>
                       <button class="btn btn-sm btn-primary" @click="viewItem(row.id)">View</button>
                     </div>
                   </div>
@@ -183,6 +190,10 @@
         </div>
         <div class="case-modal-body">
           <div v-if="error" class="alert alert-danger py-2">{{ error }}</div>
+          <div class="mb-3">
+            <label class="form-label">Case owner</label>
+            <input type="text" class="form-control" :value="caseOwnerLabel" readonly />
+          </div>
           <div class="mb-3">
             <label class="form-label">Subject</label>
             <input type="text" class="form-control" v-model="editedItem.Subject" />
@@ -271,12 +282,35 @@ import SidebarMenu from '@/components/SidebarMenu.vue';
 import { useAuthStore } from '@/stores/userStore';
 import { Header } from 'vue3-easy-data-table';
 import { API_BASE_URL } from '@/api/config';
+import PortalDataTable from '@/components/PortalDataTable.vue';
 import Toastify from 'toastify-js'
 import 'toastify-js/src/toastify.css'
 
 const router = useRouter();
 const authStore = useAuthStore();
 const activeCasesTab = ref<'open' | 'closed'>('open');
+
+type SessionUser = {
+  email?: string | null;
+  Email?: string | null;
+  username?: string | null;
+  Username?: string | null;
+  name?: string | null;
+};
+
+function loggedInCaseOwner(): { email: string; reportedBy: string } {
+  const user = authStore.authResponse as SessionUser | null;
+  const email = (user?.email || user?.Email || '').trim();
+  const name = (user?.username || user?.Username || user?.name || '').trim();
+  const reportedBy = (
+    name && email && name.toLowerCase() !== email.toLowerCase()
+      ? `${name} (${email})`
+      : name || email
+  ).slice(0, 120);
+  return { email, reportedBy };
+}
+
+const caseOwnerLabel = computed(() => loggedInCaseOwner().reportedBy || 'Signed-in user');
 
 interface Account {
   id: string;
@@ -298,6 +332,7 @@ interface Case {
   Subject: string | null;
   Type: string | null;
   Phone: string | null;
+  Created_Time?: string | null;
 }
 
 const heading = ref("Cases")
@@ -309,26 +344,22 @@ const headers: Header[] = [
   { text: 'Case Number', value: 'Case_Number' },
   // { title: 'Company Name', key: 'Account_Name.name' },
   { text: 'Subject', value: 'Subject' },
+  { text: 'Reported By', value: 'Reported_By' },
   { text: 'Status', value: 'Status' },
   // { text: 'Close Date', value: 'Case_Closed_Date' },
   { text: 'Open Date', value: 'Case_Open_Date' },
   { text: 'Type', value: 'Type' },
-  { text: 'Reason', value: 'Case_Reason' },
-  
-  // { text: 'View Details', value: 'Operation', sortable: false }
 ];
 
 const closedheaders: Header[] = [
   { text: 'Case Number', value: 'Case_Number' },
   // { title: 'Company Name', key: 'Account_Name.name' },
   { text: 'Subject', value: 'Subject' },
+  { text: 'Reported By', value: 'Reported_By' },
   // { text: 'Status', value: 'Status' },
   { text: 'Open Date', value: 'Case_Open_Date' },
   { text: 'Close Date', value: 'Case_Closed_Date' },
   { text: 'Type', value: 'Type' },
-  { text: 'Reason', value: 'Case_Reason' },
-  
-  // { text: 'View Details', value: 'Operation', sortable: false }
 ];
 
 const dialog = ref(false)
@@ -356,7 +387,7 @@ const filterCases = (list: Case[], term: string): Case[] => {
   const q = term.trim().toLowerCase();
   if (!q) return list;
   return list.filter((c) =>
-    [c.Case_Number, c.Subject, c.Status, c.Type, c.Case_Reason].some((v) =>
+    [c.Case_Number, c.Subject, c.Status, c.Type, c.Case_Reason, c.Reported_By].some((v) =>
       String(v ?? '').toLowerCase().includes(q)
     )
   );
@@ -395,6 +426,20 @@ function getCaseActionMessage(
   return message.charAt(0).toUpperCase() + message.slice(1);
 }
 
+function readCaseRows(payload: unknown): Case[] {
+  let data = payload;
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+  if (!data || typeof data !== 'object') return [];
+  const rows = (data as { data?: unknown }).data;
+  return Array.isArray(rows) ? rows as Case[] : [];
+}
+
 const fetchCases = async () => {
   loading.value = true;
     try {
@@ -403,18 +448,19 @@ const fetchCases = async () => {
       const response = await axios.get(API_BASE_URL+'/Zoho/zoho/cases/'+companyId);
       console.log(response);
       error.value = '';
-      items.value = response.data.data;
-      openitems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'New')
+      const rows = readCaseRows(response.data);
+      items.value = rows;
+      openitems.value = rows.filter((c) => c.Status === 'New')
       .sort((a, b) => {
         const dateA = a.Created_Time ? new Date(a.Created_Time).getTime() : 0;
         const dateB = b.Created_Time ? new Date(b.Created_Time).getTime() : 0;
         return dateB - dateA; // Descending
       });
       console.log(openitems.value);
-      closeditems.value = response.data.data.filter((c: { Status: string; }) => c.Status === 'Closed');
+      closeditems.value = rows.filter((c) => c.Status === 'Closed');
       console.log(closeditems);
     } catch (err) {
-      error.value = err.message;
+      error.value = err instanceof Error ? err.message : 'Unable to load cases.';
     } finally {
       loading.value = false;
     }
@@ -438,9 +484,22 @@ const defaultItem: Case = {
   Phone: ""
 };
 const editedItem = ref<Case>({ ...defaultItem })
-const viewItem = (id: string) => {
-  console.log(id);
-  router.push({ name: 'case', params: { Case_Number: id } });
+
+const openNewCase = () => {
+  error.value = '';
+  editedIndex.value = -1;
+  editedItem.value = { ...defaultItem };
+  caseAttachments.value = [];
+  dialog.value = true;
+};
+
+const viewItem = (id: string | null | undefined) => {
+  if (!id) return;
+  router.push({ name: 'Case', params: { Case_Number: id } });
+};
+
+const onCaseRowClick = (row: object) => {
+  viewItem((row as Case).id);
 };
 const formTitle = computed(() => (editedIndex.value === -1 ? 'New Case' : 'Edit Case'))
 
@@ -552,12 +611,13 @@ const save = async () => {
     return
   }
 
-  const user = authStore.authResponse
   const companyId = authStore.getCompanyId()
+  const owner = loggedInCaseOwner()
 
   editedItem.value.Account_Name = editedItem.value.Account_Name ?? { id: '', name: '' }
   editedItem.value.Account_Name.id = companyId
-  editedItem.value.Email = user?.Email
+  editedItem.value.Email = owner.email
+  editedItem.value.Reported_By = owner.reportedBy
 
   loading.value = true
   error.value = ''
@@ -641,7 +701,12 @@ const save = async () => {
   color: #ffffff;
 }
 
+:deep(.case-row) {
+  cursor: pointer;
+}
+
 .case-card {
+  cursor: pointer;
   border: 1px solid #e9ebec;
   border-radius: 8px;
   padding: 12px 14px;

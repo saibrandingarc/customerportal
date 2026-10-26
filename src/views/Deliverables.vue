@@ -13,20 +13,19 @@
             <div class="d-flex align-items-center mb-3">
               <h5 class="me-3 mb-0">Deliverables</h5>
               <div class="flex-grow-1 border-start mx-3" style="height: 24px;"></div>
+              <router-link
+                :to="{ name: 'DeliverableMenu' }"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="deliverables-menu-link"
+              >
+                Menu
+              </router-link>
             </div>
 
+            <CreditStatus class="mb-3" :year="selectedYear" />
+
             <ul class="nav nav-tabs nav-justified deliverables-tabs mb-3">
-              <li class="nav-item">
-                <button
-                  class="nav-link"
-                  :class="{ active: activeDeliverablesTab === 'pending' }"
-                  data-value="pending"
-                  type="button"
-                  @click="changeDeliverablesTab('pending')"
-                >
-                  Pending Approvals
-                </button>
-              </li>
               <li class="nav-item">
                 <button
                   class="nav-link"
@@ -36,6 +35,28 @@
                   @click="changeDeliverablesTab('upcoming')"
                 >
                   Upcoming
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  :class="{ active: activeDeliverablesTab === 'active' }"
+                  data-value="active"
+                  type="button"
+                  @click="changeDeliverablesTab('active')"
+                >
+                  Active Deliverables
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  :class="{ active: activeDeliverablesTab === 'pending' }"
+                  data-value="pending"
+                  type="button"
+                  @click="changeDeliverablesTab('pending')"
+                >
+                  Pending Approvals
                 </button>
               </li>
               <li class="nav-item">
@@ -57,18 +78,14 @@
                   <strong>Note:</strong> Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
                 </p> -->
                 <div class="pending-deliverables-wrapper d-none d-md-block">
-                  <EasyDataTable
+                  <PortalDataTable
                     :headers="pendingheaders"
                     :items="pendingDeliverables"
                     :rows-per-page="10"
-                    table-class="table-bordered"
                     body-expand-row-class-name="deliverable-expand-row"
                     :body-row-class-name="getPendingRowClassName"
-                    show-index
-                    :searchable="true"
                     sort-by="Block"
                     sort-type="desc"
-                    buttons-pagination
                   >
                     <!-- Drive folder expand disabled — pending deliverables shown directly
                     <template #item-expand="deliverableRow">
@@ -78,6 +95,9 @@
                       ></i>
                     </template>
                     -->
+                    <template #item-Credits="{ Credits }">
+                      {{ formatCredits(Credits) }}
+                    </template>
                     <template #item-content_doc_url="{ content_doc_url }">
                       <a
                         v-if="content_doc_url"
@@ -206,7 +226,7 @@
                       </div>
                     </template>
                     -->
-                  </EasyDataTable>
+                  </PortalDataTable>
                 </div>
 
                 <div class="d-md-none deliverable-cards">
@@ -225,6 +245,10 @@
                     <div class="dc-row">
                       <span class="dc-label">Topic</span>
                       <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Credits</span>
+                      <span class="dc-value">{{ formatCredits(row.Credits) }}</span>
                     </div>
                     <div class="dc-row">
                       <span class="dc-label">Review Doc</span>
@@ -259,15 +283,15 @@
 
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'upcoming' }">
                 <div class="table-responsive d-none d-md-block">
-                  <EasyDataTable
+                  <PortalDataTable
                     :headers="headers"
                     :items="upcomingDeliverables"
                     :rows-per-page="10"
-                    table-class="table-bordered"
-                    show-index
-                    :searchable="true"
-                    buttons-pagination
-                  />
+                  >
+                    <template #item-Credits="{ Credits }">
+                      {{ formatCredits(Credits) }}
+                    </template>
+                  </PortalDataTable>
                 </div>
 
                 <div class="d-md-none deliverable-cards">
@@ -291,6 +315,10 @@
                       <span class="dc-label">Topic</span>
                       <span class="dc-value">{{ row.Name }}</span>
                     </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Credits</span>
+                      <span class="dc-value">{{ formatCredits(row.Credits) }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -305,16 +333,16 @@
                   </select>
                 </div>
                 <div class="table-responsive d-none d-md-block">
-                  <EasyDataTable
+                  <PortalDataTable
                     :headers="completedheaders"
                     :items="completedDeliverables"
                     sort-by="Publish_Date"
                     sort-type="desc"
                     :rows-per-page="10"
-                    table-class="table-bordered"
-                    show-index
-                    buttons-pagination
                   >
+                    <template #item-Credits="{ Credits }">
+                      {{ formatCredits(Credits) }}
+                    </template>
                     <template #item-Final_Publication="{ Final_Publication }">
                       <a
                         v-if="Final_Publication"
@@ -327,7 +355,7 @@
                       </a>
                       <span v-else class="text-muted">—</span>
                     </template>
-                  </EasyDataTable>
+                  </PortalDataTable>
                 </div>
 
                 <div class="d-md-none deliverable-cards">
@@ -352,12 +380,58 @@
                       <span class="dc-value">{{ row.Name }}</span>
                     </div>
                     <div class="dc-row">
+                      <span class="dc-label">Credits</span>
+                      <span class="dc-value">{{ formatCredits(row.Credits) }}</span>
+                    </div>
+                    <div class="dc-row">
                       <span class="dc-label">Link</span>
                       <span class="dc-value">
                         <a v-if="row.Final_Publication" :href="row.Final_Publication" target="_blank" rel="noopener"
                           class="text-primary">Final Publication</a>
                         <span v-else class="text-muted">—</span>
                       </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'active' }">
+                <div class="table-responsive d-none d-md-block">
+                  <PortalDataTable
+                    :headers="headers"
+                    :items="activeDeliverables"
+                    :rows-per-page="10"
+                  >
+                    <template #item-Credits="{ Credits }">
+                      {{ formatCredits(Credits) }}
+                    </template>
+                  </PortalDataTable>
+                </div>
+
+                <div class="d-md-none deliverable-cards">
+                  <p v-if="!activeDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    No data available
+                  </p>
+                  <div v-for="(row, i) in activeDeliverables" :key="row.id ?? i" class="deliverable-card">
+                    <div class="dc-row">
+                      <span class="dc-label">Block</span>
+                      <span class="dc-value fw-semibold">{{ row.Block }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Status</span>
+                      <span class="dc-value">{{ row.Status }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Type</span>
+                      <span class="dc-value">{{ row.Main_Content_Type }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Topic</span>
+                      <span class="dc-value">{{ row.Name }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Credits</span>
+                      <span class="dc-value">{{ formatCredits(row.Credits) }}</span>
                     </div>
                   </div>
                 </div>
@@ -499,12 +573,15 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/userStore';
 import { Header } from 'vue3-easy-data-table';
 import Toastify from 'toastify-js'
 import 'toastify-js/src/toastify.css'
 import { API_BASE_URL } from '@/api/config';
+import CreditStatus from '@/components/CreditStatus.vue';
+import PortalDataTable from '@/components/PortalDataTable.vue';
 // import { GOOGLE_DRIVE_FOLDER_URL } from '@/api/config';
 // import { fetchDriveFolderFiles, type DriveItem } from '@/api/googleDrive';
 import {
@@ -514,8 +591,19 @@ import {
 } from '@/api/deliverableFileApproval';
 
 const authStore = useAuthStore();
-type DeliverablesTab = 'upcoming' | 'pending' | 'completed';
-const activeDeliverablesTab = ref<DeliverablesTab>('pending');
+const route = useRoute();
+const router = useRouter();
+type DeliverablesTab = 'upcoming' | 'pending' | 'completed' | 'active';
+
+function isDeliverablesTab(value: unknown): value is DeliverablesTab {
+  return value === 'upcoming' || value === 'pending' || value === 'completed' || value === 'active';
+}
+
+function tabFromRoute(): DeliverablesTab {
+  return isDeliverablesTab(route.query.tab) ? route.query.tab : 'pending';
+}
+
+const activeDeliverablesTab = ref<DeliverablesTab>(tabFromRoute());
 
 interface Case {
   Case_Number: string;
@@ -537,10 +625,14 @@ interface DeliverableRow {
   id?: string | number;
   Block?: string | number | null;
   Main_Status: string;
+  Status?: string;
   Main_Content_Type?: string;
   Client_Approved?: boolean | null;
   Publish_Date?: string;
   Name?: string;
+  TotalCredit?: string | number | null;
+  Credit_Cost?: string | number | null;
+  Credits?: string | number | null;
   Account?: { name?: string };
   Content_Doc?: string;
   Client_Review_Folder?: string;
@@ -709,6 +801,12 @@ const generateRelativeMonthsArray = (past: number, future: number): string[] => 
 const monthsArray = ref<string[]>(["2026", "2025", "2024"]);
 
 const selectedBlock = ref<string>("2026");
+const selectedYear = computed(() => {
+  const year = Number(selectedBlock.value);
+  return Number.isInteger(year) && year >= 2000 && year <= 2100
+    ? year
+    : new Date().getFullYear();
+});
 
 const heading = ref("Deliverables")
 const search = ref('');
@@ -719,13 +817,14 @@ const headers: Header[] = [
   { text: "Status", value: "Status", sortable: true },
   { text: "Content Type", value: "Main_Content_Type", sortable: true },
   { text: "Topic", value: "Name", sortable: true },
-  // { text: "Credit Cost", value: "Credit_Cost", sortable: true }
+  { text: "Credits", value: "Credits", sortable: true },
 ];
 
 const pendingheaders: Header[] = [
   { text: 'Block', value: 'Block', sortable: true },
   { text: 'Content Type', value: 'Main_Content_Type', sortable: true },
   { text: 'Topic', value: 'Name', sortable: true },
+  { text: 'Credits', value: 'Credits', sortable: true },
   { text: 'Review Doc', value: 'content_doc_url' },
   { text: 'Actions', value: 'actions' },
 ];
@@ -741,6 +840,7 @@ const completedheaders = [
   { text: 'Date Published', value: 'Publish_Date' },
   { text: 'Content Type', value: 'Main_Content_Type' },
   { text: 'Topic', value: 'Name', class: "topicWidth" },
+  { text: 'Credits', value: 'Credits', sortable: true },
   { text: 'Link', value: 'Final_Publication' }
 ];
 
@@ -751,6 +851,16 @@ onMounted(() => {
   fetchDeliverables();
 });
 
+watch(
+  () => route.query.tab,
+  async () => {
+    const tab = tabFromRoute();
+    if (tab === activeDeliverablesTab.value) return;
+    activeDeliverablesTab.value = tab;
+    await fetchDeliverables(tab);
+  }
+);
+
 const isChecked = ref(false);
 const isDisabled = ref(false)
 const loading = ref(false);
@@ -760,8 +870,9 @@ const items = ref<Case[]>([]);
 const upcomingDeliverables = ref<any[]>([]);
 const completedDeliverables = ref<any[]>([]);
 const pendingDeliverables = ref<any[]>([]);
+const activeDeliverables = ref<any[]>([]);
 
-const deliverablesTabs: DeliverablesTab[] = ['upcoming', 'pending', 'completed'];
+const deliverablesTabs: DeliverablesTab[] = ['upcoming', 'active', 'pending', 'completed'];
 const deliverablesByKey = new Map<string, DeliverableRow[]>();
 
 function deliverablesCacheKey(companyId: string, block: string, tab: DeliverablesTab): string {
@@ -815,7 +926,60 @@ function findDeliverable(
   );
 }
 
+function rowCredits(row: DeliverableRow): number | null {
+  const raw = row.TotalCredit ?? row.Credit_Cost;
+  if (raw === null || raw === undefined || raw === '') return null;
+  const numeric = Number(raw);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function formatCredits(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '—';
+  return String(value);
+}
+
+function rowStatus(row: DeliverableRow): string {
+  return (row.Main_Status || row.Status || '').toString().trim();
+}
+
+function isPendingDeliverable(row: DeliverableRow): boolean {
+  return rowStatus(row).includes('Client Approval') && row.Client_Approved === false;
+}
+
+function isUpcomingDeliverable(row: DeliverableRow): boolean {
+  const status = rowStatus(row);
+  if (status === 'Completed' || status === 'Cancelled') return false;
+  return status.toLowerCase().startsWith('idea');
+}
+
+function isCompletedDeliverable(row: DeliverableRow): boolean {
+  return rowStatus(row) === 'Completed';
+}
+
+function isCancelledDeliverable(row: DeliverableRow): boolean {
+  const status = rowStatus(row).toLowerCase();
+  return status === 'cancelled' || status === 'canceled';
+}
+
+function readDeliverableRows(payload: unknown): DeliverableRow[] {
+  let data = payload;
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+  if (!data || typeof data !== 'object') return [];
+  const rows = (data as { data?: DeliverableRow[] }).data;
+  return Array.isArray(rows) ? rows : [];
+}
+
 async function applyDeliverablesResponse(tab: DeliverablesTab, rows: DeliverableRow[]) {
+  rows = rows.map((row) => ({
+    ...row,
+    Credits: rowCredits(row),
+  }));
   items.value = rows as unknown as Case[];
   if (tab === 'upcoming') {
     upcomingDeliverables.value = rows
@@ -832,6 +996,24 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
         const dateA = a.Publish_Date ? new Date(a.Publish_Date).getTime() : 0;
         const dateB = b.Publish_Date ? new Date(b.Publish_Date).getTime() : 0;
         return dateB - dateA;
+      });
+  } else if (tab === 'active') {
+    activeDeliverables.value = rows
+      .filter(
+        (row) =>
+          !isPendingDeliverable(row) &&
+          !isUpcomingDeliverable(row) &&
+          !isCompletedDeliverable(row) &&
+          !isCancelledDeliverable(row)
+      )
+      .map((row) => ({
+        ...row,
+        Status: row.Status || row.Main_Status,
+      }))
+      .sort((a, b) => {
+        const blockA = (a.Block || '').toString();
+        const blockB = (b.Block || '').toString();
+        return blockA.localeCompare(blockB);
       });
   } else {
     const pendingRows = rows
@@ -899,6 +1081,9 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
 
 const changeDeliverablesTab = async (tab: DeliverablesTab) => {
   activeDeliverablesTab.value = tab;
+  if (route.query.tab !== tab) {
+    await router.replace({ query: { ...route.query, tab } });
+  }
   await fetchDeliverables(tab);
 };
 
@@ -919,20 +1104,23 @@ const fetchDeliverables = async (
   loading.value = true;
   try {
     console.log(authStore);
-    // if (tab === 'pending' && force) {
-    //   cachedDriveFiles = null;
-    // }
-    const response = await axios.get(
-      API_BASE_URL + '/Zoho/zoho/deliverables/' + companyId + '/' + block + '/' + tab
-    );
+    const url = tab === 'active'
+      ? `${API_BASE_URL}/Zoho/zoho/deliverables/${companyId}`
+      : `${API_BASE_URL}/Zoho/zoho/deliverables/${companyId}/${block}/${tab}`;
+    const response = await axios.get(url);
     console.log(response);
     error.value = '';
-    const rows = [...(response.data.data as DeliverableRow[])];
+    const rows = tab === 'active'
+      ? readDeliverableRows(response.data)
+      : [...(response.data.data as DeliverableRow[])];
     deliverablesByKey.set(key, rows);
     await applyDeliverablesResponse(tab, rows);
     console.log('test :' + completedDeliverables);
   } catch (err) {
     error.value = err instanceof Error ? err.message : String(err);
+    if (tab === 'active') {
+      activeDeliverables.value = [];
+    }
   } finally {
     loading.value = false;
   }
@@ -1403,6 +1591,18 @@ const submitRejection = async () => {
   font-size: 0.8rem;
   font-style: italic;
   line-height: 1.5;
+}
+
+.deliverables-menu-link {
+  color: #0192d0;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.deliverables-menu-link:hover {
+  color: #0177ab;
+  text-decoration: underline;
 }
 
 .deliverables-tabs {

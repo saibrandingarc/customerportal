@@ -8,7 +8,7 @@
     <div class="page-content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-12 col-md-6 mb-3">
+          <div class="col-12 col-md-6">
             <div class="card">
               <div class="card-body">
                 <h4>Outstanding Balance</h4>
@@ -16,7 +16,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-6 mb-3">
+          <div class="col-12 col-md-6">
             <div class="card">
               <div class="card-body">
                 <h4>Past Due</h4>
@@ -33,8 +33,7 @@
             </div>
             <div class="row">
               <div class="col-12 d-none d-md-block">
-                <EasyDataTable :headers="headers" :items="items" :rows-per-page="10" table-class="table-bordered"
-                  show-index :searchable="true">
+                <PortalDataTable :headers="headers" :items="items" :rows-per-page="10">
                   <template #item-TotalAmount="{ TotalAmount }">
                     {{ Number(TotalAmount).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
                   </template>
@@ -43,7 +42,7 @@
                     <a v-if="Status !== 'Paid'" :href="InvoiceLink" target="_blank" rel="noopener noreferrer"
                       class="btn btn-sm btn-primary mx-2">Pay Now</a>
                   </template>
-                </EasyDataTable>
+                </PortalDataTable>
               </div>
             </div>
 
@@ -101,6 +100,7 @@ import { useAuthStore } from '@/stores/userStore';
 import { Invoice } from "@/interfaces/Invoice";
 import { Header } from 'vue3-easy-data-table';
 import { API_BASE_URL } from '@/api/config';
+import PortalDataTable from '@/components/PortalDataTable.vue';
 const authStore = useAuthStore();
 
 // Totals
