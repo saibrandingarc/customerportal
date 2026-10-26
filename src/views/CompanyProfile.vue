@@ -90,6 +90,26 @@
                     />
                   </div>
                 </li>
+                <li v-if="item.id === 'invoice-billing'" class="contacts-row">
+                  <div class="contacts-block">
+                    <h6 class="contacts-heading">Billing contact</h6>
+                    <p v-if="billingLoading" class="text-muted mb-0">Loading billing details...</p>
+                    <p v-else-if="billingError" class="text-danger mb-0">{{ billingError }}</p>
+                    <dl v-else class="billing-details mb-0">
+                      <div>
+                        <dt>Email</dt>
+                        <dd>
+                          <a v-if="billingEmail" :href="`mailto:${billingEmail}`">{{ billingEmail }}</a>
+                          <span v-else>-</span>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Billing address</dt>
+                        <dd>{{ billingAddress }}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                </li>
                 <li v-if="item.id === 'project-client-approval'" class="contacts-row">
                   <div class="contacts-block">
                     <h6 class="contacts-heading">Contacts</h6>
@@ -175,6 +195,10 @@ const {
 const { websiteStatus, isWebsiteLive, loadWebsiteStatus } = useWebsiteStatus();
 
 const invoicesLoading = ref(false);
+const billingLoading = ref(false);
+const billingError = ref('');
+const billingEmail = ref('');
+const billingAddress = ref('-');
 const contactsLoading = ref(false);
 const contactsError = ref('');
 const contacts = ref<CompanyContact[]>([]);
@@ -270,6 +294,38 @@ const fetchContacts = async () => {
   }
 };
 
+const fetchBilling = async () => {
+  billingLoading.value = true;
+  billingError.value = '';
+  try {
+    const parsedData = JSON.parse(localStorage.getItem('user') || '{}') as { companyName?: string };
+    const company = parsedData.companyName;
+    if (!company) {
+      billingEmail.value = '';
+      billingAddress.value = '-';
+      return;
+    }
+    const response = await axios.get(`${API_BASE_URL}/Intuit/customer/${encodeURIComponent(company)}`);
+    const email = response.data?.primaryEmailAddr?.address as string | undefined;
+    const bill = response.data?.billAddr as {
+      line1?: string;
+      city?: string;
+      countrySubDivisionCode?: string;
+      postalCode?: string;
+    } | null;
+    billingEmail.value = email || '';
+    const parts = [bill?.line1, bill?.city, bill?.countrySubDivisionCode, bill?.postalCode].filter(Boolean);
+    billingAddress.value = parts.length ? parts.join(', ') : '-';
+  } catch (err) {
+    console.error('Error fetching billing contact:', err);
+    billingEmail.value = '';
+    billingAddress.value = '-';
+    billingError.value = 'Unable to load billing details.';
+  } finally {
+    billingLoading.value = false;
+  }
+};
+
 const fetchInvoices = async () => {
   invoicesLoading.value = true;
   try {
@@ -317,6 +373,7 @@ onMounted(() => {
   loadWebsiteStatus();
   fetchContacts();
   fetchInvoices();
+  fetchBilling();
 });
 </script>
 
@@ -450,6 +507,23 @@ onMounted(() => {
   cursor: pointer;
 }
 
+.billing-details {
+  display: grid;
+  gap: 8px;
+}
+.billing-details div {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 8px;
+}
+.billing-details dt {
+  margin: 0;
+  color: #495057;
+  font-weight: 600;
+}
+.billing-details dd {
+  margin: 0;
+}
 .preference-saved {
   margin: 12px 0 0;
   color: #1b8a3e;
