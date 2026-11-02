@@ -94,6 +94,11 @@ export const resourceLibraries: Record<ResourceLibrary['key'], ResourceLibrary> 
           },
         ],
       },
+      {
+        slug: 'publish-an-article-on-linkedin',
+        title: 'How to Publish an Article on LinkedIn',
+        url: 'https://drive.google.com/file/d/1856NT2-6GTY8ONro49055nhoalQqN4Oo/view?usp=sharing',
+      },
     ],
   },
   articles: {
