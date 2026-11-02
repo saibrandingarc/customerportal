@@ -27,6 +27,19 @@
               <p class="mb-3">That page is not in this list.</p>
               <router-link class="resource-back" :to="listPath">Back to {{ library.title }}</router-link>
             </template>
+            <div v-else-if="isGallery" class="resource-gallery">
+              <a
+                v-for="entry in library.items"
+                :key="entry.slug"
+                class="resource-tile"
+                :href="entry.url"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img :src="entry.thumbnail" :alt="entry.title" loading="lazy" />
+                <span>{{ entry.title }}</span>
+              </a>
+            </div>
             <template v-else>
               <p class="resource-intro">{{ library.intro }}</p>
               <div class="resource-list">
@@ -76,6 +89,10 @@ const item = computed(() => {
   return library.value.items.find((entry) => entry.slug === slug) ?? null;
 });
 const missing = computed(() => Boolean(route.params.slug) && !item.value);
+const isGallery = computed(
+  () => Boolean(library.value?.items.length) &&
+    library.value!.items.every((entry) => entry.url && entry.thumbnail)
+);
 </script>
 
 <style scoped>
@@ -123,6 +140,44 @@ const missing = computed(() => Boolean(route.params.slug) && !item.value);
 
 .resource-card:hover span {
   color: #495057;
+}
+
+.resource-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.resource-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px solid #e9ebec;
+  border-radius: 8px;
+  background: #fff;
+  color: #212529;
+  text-decoration: none;
+}
+
+.resource-tile img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #f3f6f9;
+}
+
+.resource-tile span {
+  padding: 0 12px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.resource-tile:hover {
+  border-color: #0192d0;
+  color: #0192d0;
 }
 
 .resource-back {

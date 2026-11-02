@@ -8,6 +8,7 @@ export interface ResourceItem {
   title: string;
   summary?: string;
   url?: string;
+  thumbnail?: string;
   paragraphs?: string[];
   steps?: ResourceStep[];
 }
@@ -110,31 +111,37 @@ export const resourceLibraries: Record<ResourceLibrary['key'], ResourceLibrary> 
         slug: 'email-deliverables-process',
         title: 'How Branding Arc Manages Your Email Deliverables',
         url: 'https://brandingarc.com/email-deliverables-process/',
+        thumbnail: 'https://brandingarc.com/wp-content/uploads/2026/04/2026.04-BA-Article-HowWeManageYourEmails-AS-343349382-1200x630-1.jpg',
       },
       {
         slug: 'the-power-of-google-reviews',
         title: 'Investing in Google Reviews',
         url: 'https://brandingarc.com/the-power-of-google-reviews/',
+        thumbnail: 'https://brandingarc.com/wp-content/uploads/2025/09/2025.08-BA-PowerOfGoogleReviews-Spire-v1.jpg',
       },
       {
         slug: 'how-to-take-a-professional-headshot-with-your-cell-phone',
         title: 'How to Take a Headshot with Your Phone',
         url: 'https://brandingarc.com/how-to-take-a-professional-headshot-with-your-cell-phone/',
+        thumbnail: 'https://brandingarc.com/wp-content/uploads/2025/06/2025.05-TakingaDecentHeadshot-Slide1-AS-517342785-1920x1080-1.jpg',
       },
       {
         slug: 'getting-the-most-out-of-conferences',
         title: 'Getting the Most Out of Conferences',
         url: 'https://brandingarc.com/getting-the-most-out-of-conferences-according-to-debt-collection-experts/',
+        thumbnail: 'https://brandingarc.com/wp-content/uploads/2024/12/2024.12-BA-HowToGet-AS-668054333-1200x630-1.jpg',
       },
       {
         slug: 'how-to-optimize-your-time-at-events',
         title: 'How to Optimize Time at Events',
         url: 'https://brandingarc.com/how-to-optimize-your-time-at-events/',
+        thumbnail: 'https://brandingarc.com/wp-content/uploads/2024/11/2024.11-BA-OptimizeTime-AS-565359822-1200x630-1.jpg',
       },
       {
         slug: 'tips-and-tricks-for-home-office-filming',
         title: 'Tips & Tricks for Filming from Your Office',
         url: 'https://brandingarc.com/tips-and-tricks-for-home-office-filming/',
+        thumbnail: 'https://brandingarc.com/wp-content/uploads/2024/08/2024.07-BA-TipsTricksHomeOffice-AS-346136575-1024x512-v2.jpg',
       },
     ],
   },
