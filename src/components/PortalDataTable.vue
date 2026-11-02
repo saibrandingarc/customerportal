@@ -144,7 +144,9 @@ const filterChoices = computed<Record<string, string[]>>(() => {
       values.add(String(value));
     }
     if (values.size >= 2 && values.size <= props.maxFilterOptions) {
-      choices[header.value] = [...values].sort((a, b) => a.localeCompare(b));
+      choices[header.value] = [...values].sort((a, b) =>
+        a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+      );
     }
   }
   return choices;

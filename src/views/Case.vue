@@ -186,7 +186,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 const caseId = route.params.Case_Number as string;
 
-const model = ref<'overview' | 'timeline'>('timeline');
+const model = ref<'overview' | 'timeline'>('overview');
 const timelineFilter = ref<'all' | 'updated' | 'created'>('all');
 const item = ref<CaseRecord | null>(null);
 const emailNotes = ref<EmailNote[]>([]);
