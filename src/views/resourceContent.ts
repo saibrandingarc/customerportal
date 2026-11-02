@@ -26,75 +26,75 @@ export const resourceLibraries: Record<ResourceLibrary['key'], ResourceLibrary> 
     title: 'Scribes',
     intro: 'Short walkthroughs for the tasks you do most often in the portal.',
     items: [
-      {
-        slug: 'submit-a-case',
-        title: 'Submit a case',
-        summary: 'Send a question, a small website update, or a technical issue to the Branding Arc team.',
-        steps: [
-          {
-            title: 'Open Cases',
-            detail: 'In the left menu, choose Cases. Open requests are listed on the Open tab.',
-          },
-          {
-            title: 'Start a new case',
-            detail: 'Click New Case. Use this for minor updates, technical issues, questions, or general support.',
-          },
-          {
-            title: 'Describe the request',
-            detail: 'Write what you need and where it appears on the site. Include the page name or URL when you have it.',
-          },
-          {
-            title: 'Attach files',
-            detail: 'Add screenshots, copy, or other files that show the change. A picture of the current page usually speeds up the first reply.',
-          },
-          {
-            title: 'Submit and track it',
-            detail: 'Submit the case. It stays on the Open tab until the team resolves it, then it moves to Closed.',
-          },
-        ],
-      },
-      {
-        slug: 'review-a-deliverable',
-        title: 'Review a deliverable',
-        summary: 'Find work that is waiting on you and record your approval or feedback.',
-        steps: [
-          {
-            title: 'Open Deliverables',
-            detail: 'Choose Deliverables in the left menu. Pending Approvals shows items that need a response.',
-          },
-          {
-            title: 'Open the item',
-            detail: 'Select the deliverable you want to review. Check the files, notes, and current status before you respond.',
-          },
-          {
-            title: 'Approve or send feedback',
-            detail: 'Approve the work if it is ready. If something needs to change, describe the revision in the item so the team can pick it up.',
-          },
-          {
-            title: 'Confirm the status',
-            detail: 'After you respond, the status updates. Completed and canceled items leave the pending list.',
-          },
-        ],
-      },
-      {
-        slug: 'check-an-invoice',
-        title: 'Check an invoice',
-        summary: 'See what is outstanding, what is past due, and open the invoice details.',
-        steps: [
-          {
-            title: 'Open Invoices',
-            detail: 'Choose Invoices in the left menu, or click Outstanding Balance or Past Due on the dashboard.',
-          },
-          {
-            title: 'Read the totals',
-            detail: 'Outstanding Balance is everything still unpaid. Past Due is the portion whose due date has already passed.',
-          },
-          {
-            title: 'Open a row',
-            detail: 'Use the invoice list to find the document, amount, and due date you want to review.',
-          },
-        ],
-      },
+      // {
+      //   slug: 'submit-a-case',
+      //   title: 'Submit a case',
+      //   summary: 'Send a question, a small website update, or a technical issue to the Branding Arc team.',
+      //   steps: [
+      //     {
+      //       title: 'Open Cases',
+      //       detail: 'In the left menu, choose Cases. Open requests are listed on the Open tab.',
+      //     },
+      //     {
+      //       title: 'Start a new case',
+      //       detail: 'Click New Case. Use this for minor updates, technical issues, questions, or general support.',
+      //     },
+      //     {
+      //       title: 'Describe the request',
+      //       detail: 'Write what you need and where it appears on the site. Include the page name or URL when you have it.',
+      //     },
+      //     {
+      //       title: 'Attach files',
+      //       detail: 'Add screenshots, copy, or other files that show the change. A picture of the current page usually speeds up the first reply.',
+      //     },
+      //     {
+      //       title: 'Submit and track it',
+      //       detail: 'Submit the case. It stays on the Open tab until the team resolves it, then it moves to Closed.',
+      //     },
+      //   ],
+      // },
+      // {
+      //   slug: 'review-a-deliverable',
+      //   title: 'Review a deliverable',
+      //   summary: 'Find work that is waiting on you and record your approval or feedback.',
+      //   steps: [
+      //     {
+      //       title: 'Open Deliverables',
+      //       detail: 'Choose Deliverables in the left menu. Pending Approvals shows items that need a response.',
+      //     },
+      //     {
+      //       title: 'Open the item',
+      //       detail: 'Select the deliverable you want to review. Check the files, notes, and current status before you respond.',
+      //     },
+      //     {
+      //       title: 'Approve or send feedback',
+      //       detail: 'Approve the work if it is ready. If something needs to change, describe the revision in the item so the team can pick it up.',
+      //     },
+      //     {
+      //       title: 'Confirm the status',
+      //       detail: 'After you respond, the status updates. Completed and canceled items leave the pending list.',
+      //     },
+      //   ],
+      // },
+      // {
+      //   slug: 'check-an-invoice',
+      //   title: 'Check an invoice',
+      //   summary: 'See what is outstanding, what is past due, and open the invoice details.',
+      //   steps: [
+      //     {
+      //       title: 'Open Invoices',
+      //       detail: 'Choose Invoices in the left menu, or click Outstanding Balance or Past Due on the dashboard.',
+      //     },
+      //     {
+      //       title: 'Read the totals',
+      //       detail: 'Outstanding Balance is everything still unpaid. Past Due is the portion whose due date has already passed.',
+      //     },
+      //     {
+      //       title: 'Open a row',
+      //       detail: 'Use the invoice list to find the document, amount, and due date you want to review.',
+      //     },
+      //   ],
+      // },
       {
         slug: 'publish-an-article-on-linkedin',
         title: 'How to Publish an Article on LinkedIn',
