@@ -31,6 +31,15 @@
           </option>
         </select>
       </label>
+      <button
+        v-if="hasActiveFilters"
+        type="button"
+        class="btn btn-outline-secondary portal-data-table__reset"
+        @click="resetFilters"
+      >
+        <i class="mdi mdi-filter-remove-outline me-1" aria-hidden="true"></i>
+        Reset filters
+      </button>
     </div>
 
     <EasyDataTable
@@ -173,6 +182,17 @@ function headerLabel(field: string): string {
 function onFilterChange(field: string, event: Event): void {
   selectedFilters[field] = (event.target as HTMLSelectElement).value;
 }
+
+const hasActiveFilters = computed(
+  () => search.value.trim() !== '' || Object.values(selectedFilters).some(Boolean)
+);
+
+function resetFilters(): void {
+  search.value = '';
+  for (const field of Object.keys(selectedFilters)) {
+    selectedFilters[field] = '';
+  }
+}
 </script>
 
 <style scoped>
@@ -203,5 +223,11 @@ function onFilterChange(field: string, event: Event): void {
 
 .portal-data-table__filter {
   flex: 0 1 200px;
+}
+
+.portal-data-table__reset {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 </style>

@@ -952,6 +952,12 @@ function isUpcomingDeliverable(row: DeliverableRow): boolean {
   return status.toLowerCase().startsWith('idea');
 }
 
+function hasIdeaStatus(row: DeliverableRow): boolean {
+  return [row.Status, row.Main_Status].some((value) =>
+    (value || '').toString().trim().toLowerCase().startsWith('idea')
+  );
+}
+
 function isCompletedDeliverable(row: DeliverableRow): boolean {
   return rowStatus(row) === 'Completed';
 }
@@ -1003,6 +1009,7 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
         (row) =>
           !isPendingDeliverable(row) &&
           !isUpcomingDeliverable(row) &&
+          !hasIdeaStatus(row) &&
           !isCompletedDeliverable(row) &&
           !isCancelledDeliverable(row)
       )

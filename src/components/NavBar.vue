@@ -37,6 +37,7 @@
                 <span class="user-name-text">Hi <strong>{{ username }}</strong>!</span>
                 <strong v-if="companyname" class="portal-user-company">{{ companyname }}</strong>
               </span>
+              <i class="mdi mdi-chevron-down fs-18 portal-user-caret" aria-hidden="true"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-end portal-user-menu">
               <h6 class="dropdown-header">Welcome {{ username }}!</h6>
@@ -171,6 +172,16 @@ const logoutUser = async () => {
   align-items: flex-start;
   line-height: 1.25;
   text-align: left;
+}
+
+.portal-user-caret {
+  color: #6c757d;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.portal-user-btn[aria-expanded="true"] .portal-user-caret {
+  transform: rotate(180deg);
 }
 
 .portal-user-company {
