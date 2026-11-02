@@ -30,15 +30,29 @@
             <template v-else>
               <p class="resource-intro">{{ library.intro }}</p>
               <div class="resource-list">
-                <router-link
-                  v-for="entry in library.items"
-                  :key="entry.slug"
-                  class="resource-card"
-                  :to="`${listPath}/${entry.slug}`"
-                >
-                  <strong>{{ entry.title }}</strong>
-                  <span>{{ entry.summary }}</span>
-                </router-link>
+                <template v-for="entry in library.items" :key="entry.slug">
+                  <a
+                    v-if="entry.url"
+                    class="resource-card resource-card--external"
+                    :href="entry.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <strong>
+                      {{ entry.title }}
+                      <i class="mdi mdi-open-in-new" aria-hidden="true"></i>
+                    </strong>
+                    <span v-if="entry.summary">{{ entry.summary }}</span>
+                  </a>
+                  <router-link
+                    v-else
+                    class="resource-card"
+                    :to="`${listPath}/${entry.slug}`"
+                  >
+                    <strong>{{ entry.title }}</strong>
+                    <span v-if="entry.summary">{{ entry.summary }}</span>
+                  </router-link>
+                </template>
               </div>
             </template>
           </div>
@@ -99,6 +113,12 @@ const missing = computed(() => Boolean(route.params.slug) && !item.value);
 .resource-card:hover {
   border-color: #0192d0;
   color: #0192d0;
+}
+
+.resource-card--external .mdi {
+  margin-left: 4px;
+  color: #878a99;
+  font-size: 14px;
 }
 
 .resource-card:hover span {

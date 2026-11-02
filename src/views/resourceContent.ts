@@ -6,7 +6,8 @@ export interface ResourceStep {
 export interface ResourceItem {
   slug: string;
   title: string;
-  summary: string;
+  summary?: string;
+  url?: string;
   paragraphs?: string[];
   steps?: ResourceStep[];
 }
@@ -98,38 +99,37 @@ export const resourceLibraries: Record<ResourceLibrary['key'], ResourceLibrary> 
   articles: {
     key: 'articles',
     title: 'Articles',
-    intro: 'Short guides about how your website project and portal account work.',
+    intro: 'Guides from the Branding Arc blog. Each article opens on brandingarc.com in a new tab.',
     items: [
       {
-        slug: 'from-planning-to-launch',
-        title: 'From planning to launch',
-        summary: 'What each stage of a website build is for, and what you will see on the dashboard.',
-        paragraphs: [
-          'The dashboard timeline follows the website from the first planning conversation through launch. The current step is the one the team is working in now.',
-          'Planning and framework is where the site structure, requirements, and starting materials are confirmed. Content development is the writing and gathering of pages. Design and element building shapes the look and builds the pieces those pages need.',
-          'Site configuration connects the build to the tools it will use. Internal review is the team check before you see a round. Client review and approval is your turn to respond. Launch preparation covers the final checks, and launch is when the site goes live or moves into support.',
-          'When the website status is Active, the timeline card is replaced by a Live label in the header.',
-        ],
+        slug: 'email-deliverables-process',
+        title: 'How Branding Arc Manages Your Email Deliverables',
+        url: 'https://brandingarc.com/email-deliverables-process/',
       },
       {
-        slug: 'cases-and-project-requests',
-        title: 'Cases and project requests',
-        summary: 'Which requests belong in the portal, and which ones should be emailed as a new project.',
-        paragraphs: [
-          'A case is the right place for a minor update, a technical issue, a question, or general support. Describe the change, attach any files, and the team tracks it until it is resolved.',
-          'A new page, a full content rewrite, or a larger website change is a separate project. Send those by email so they can be scoped instead of being handled as a support case.',
-          'If you are unsure, open a case and say what outcome you want. The team will tell you if it needs to move into a project.',
-        ],
+        slug: 'the-power-of-google-reviews',
+        title: 'Investing in Google Reviews',
+        url: 'https://brandingarc.com/the-power-of-google-reviews/',
       },
       {
-        slug: 'md-credits',
-        title: 'Credits',
-        summary: 'Where to see the credits on your account and how they relate to the work in progress.',
-        paragraphs: [
-          'Credits are shown in the account menu at the top of the portal, with your company name and the products you are engaged in. Open that menu any time you need the current number.',
-          'Credits describe the capacity available on the account. Deliverables and cases are the work itself. An open deliverable does not change the credit number until the team updates the account record.',
-          'If the number looks wrong, open a case and include the figure you expected. The team can check it against the account.',
-        ],
+        slug: 'how-to-take-a-professional-headshot-with-your-cell-phone',
+        title: 'How to Take a Headshot with Your Phone',
+        url: 'https://brandingarc.com/how-to-take-a-professional-headshot-with-your-cell-phone/',
+      },
+      {
+        slug: 'getting-the-most-out-of-conferences',
+        title: 'Getting the Most Out of Conferences',
+        url: 'https://brandingarc.com/getting-the-most-out-of-conferences-according-to-debt-collection-experts/',
+      },
+      {
+        slug: 'how-to-optimize-your-time-at-events',
+        title: 'How to Optimize Time at Events',
+        url: 'https://brandingarc.com/how-to-optimize-your-time-at-events/',
+      },
+      {
+        slug: 'tips-and-tricks-for-home-office-filming',
+        title: 'Tips & Tricks for Filming from Your Office',
+        url: 'https://brandingarc.com/tips-and-tricks-for-home-office-filming/',
       },
     ],
   },
