@@ -343,6 +343,18 @@
                     <template #item-Credits="{ Credits }">
                       {{ formatCredits(Credits) }}
                     </template>
+                    <template #item-content_doc_url="{ content_doc_url }">
+                      <a
+                        v-if="content_doc_url"
+                        :href="content_doc_url"
+                        target="_blank"
+                        rel="noopener"
+                        class="text-primary text-truncate d-inline-block content-doc-link"
+                      >
+                        Content Doc
+                      </a>
+                      <span v-else class="text-muted">—</span>
+                    </template>
                     <template #item-Final_Publication="{ Final_Publication }">
                       <a
                         v-if="Final_Publication"
@@ -382,6 +394,14 @@
                     <div class="dc-row">
                       <span class="dc-label">Credits</span>
                       <span class="dc-value">{{ formatCredits(row.Credits) }}</span>
+                    </div>
+                    <div class="dc-row">
+                      <span class="dc-label">Content Doc</span>
+                      <span class="dc-value">
+                        <a v-if="row.content_doc_url" :href="row.content_doc_url" target="_blank" rel="noopener"
+                          class="text-primary">Content Doc</a>
+                        <span v-else class="text-muted">—</span>
+                      </span>
                     </div>
                     <div class="dc-row">
                       <span class="dc-label">Link</span>
@@ -841,6 +861,7 @@ const completedheaders = [
   { text: 'Content Type', value: 'Main_Content_Type' },
   { text: 'Topic', value: 'Name', class: "topicWidth" },
   { text: 'Credits', value: 'Credits', sortable: true },
+  { text: 'Content Doc', value: 'content_doc_url' },
   { text: 'Link', value: 'Final_Publication' }
 ];
 
@@ -1002,7 +1023,11 @@ async function applyDeliverablesResponse(tab: DeliverablesTab, rows: Deliverable
         const dateA = a.Publish_Date ? new Date(a.Publish_Date).getTime() : 0;
         const dateB = b.Publish_Date ? new Date(b.Publish_Date).getTime() : 0;
         return dateB - dateA;
-      });
+      })
+      .map((row) => ({
+        ...row,
+        content_doc_url: row.Content_Doc?.trim() || undefined,
+      }));
   } else if (tab === 'active') {
     activeDeliverables.value = rows
       .filter(
