@@ -32,8 +32,8 @@
         </select>
       </label>
       <button
-        v-if="hasActiveFilters"
         type="button"
+        :disabled="!hasActiveFilters"
         class="btn btn-outline-secondary portal-data-table__reset"
         @click="resetFilters"
       >

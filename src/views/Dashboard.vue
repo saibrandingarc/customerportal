@@ -137,78 +137,6 @@
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-12 col-lg-6">
-            <div
-              class="card clickable-card"
-              role="button"
-              tabindex="0"
-              @click="goToActiveDeliverables"
-              @keydown.enter="goToActiveDeliverables"
-            >
-              <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Active Deliverables</h4>
-              </div>
-              <div class="card-body">
-                <p v-if="!dataLabels.length" class="text-muted mb-0">No active deliverables.</p>
-                <div v-else class="pie-layout">
-                  <div class="chart-wrap pie-chart-wrap">
-                    <PieChart
-                      :key="deliverablesPieKey"
-                      v-bind="deliverablesPieChartProps"
-                      ref="deliverablesPieChartRef"
-                    />
-                  </div>
-                  <ul class="pie-legend">
-                    <li v-for="(label, index) in dataLabels" :key="label">
-                      <span
-                        class="pie-legend__swatch"
-                        :style="{ backgroundColor: pieSliceColors(dataLabels.length)[index] }"
-                      ></span>
-                      <span>{{ label }}</span>
-                      <strong>{{ dataValues[index] }}</strong>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-lg-6">
-            <div
-              class="card clickable-card"
-              role="button"
-              tabindex="0"
-              @click="goToCases"
-              @keydown.enter="goToCases"
-            >
-              <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Website Cases</h4>
-              </div>
-              <div class="card-body">
-                <p v-if="!casesChartLabels.length" class="text-muted mb-0">No website cases.</p>
-                <div v-else class="pie-layout">
-                  <div class="chart-wrap pie-chart-wrap">
-                    <PieChart
-                      :key="casesPieKey"
-                      v-bind="casesPieChartProps"
-                      ref="casesPieChartRef"
-                    />
-                  </div>
-                  <ul class="pie-legend">
-                    <li v-for="(label, index) in casesChartLabels" :key="label">
-                      <span
-                        class="pie-legend__swatch"
-                        :style="{ backgroundColor: pieSliceColors(casesChartLabels.length)[index] }"
-                      ></span>
-                      <span>{{ label }}</span>
-                      <strong>{{ casesChartValues[index] }}</strong>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -226,7 +154,6 @@ import { publishDeliverableRows } from '@/composables/useOutstandingApprovals';
 import OutstandingApprovalsNotice from '@/components/OutstandingApprovalsNotice.vue';
 import CreditStatus from '@/components/CreditStatus.vue';
 
-import { PieChart, usePieChart } from "vue-chart-3";
 import { BarChart, useBarChart } from 'vue-chart-3';
 import { Chart, ChartData, ChartOptions, registerables } from "chart.js";
 
@@ -505,71 +432,6 @@ const deliverablesChartData = computed<ChartData<"bar">>(() => ({
 const deliverablesChartOptions = computed<ChartOptions<"bar">>(() =>
   verticalBarOptions("Active Deliverables")
 );
-
-const PIE_COLORS = [
-  "#42A5F5",
-  "#0192d0",
-  "#5C6BC0",
-  "#26A69A",
-  "#66BB6A",
-  "#FFA726",
-  "#EF5350",
-  "#AB47BC",
-  "#8D6E63",
-  "#78909C",
-  "#EC407A",
-  "#7E57C2",
-  "#9CCC65",
-  "#FFCA28",
-  "#26C6DA",
-  "#FF7043",
-];
-
-function pieSliceColors(count: number): string[] {
-  return Array.from({ length: count }, (_, index) => PIE_COLORS[index % PIE_COLORS.length]);
-}
-
-function pieOptions(): ChartOptions<"pie"> {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label(item) {
-            const value = Number(item.raw ?? 0);
-            const data = (item.dataset.data as number[]).map((entry) => Number(entry) || 0);
-            const total = data.reduce((sum, entry) => sum + entry, 0);
-            const percent = total > 0 ? Math.round((value / total) * 100) : 0;
-            return ` ${item.label}: ${value} (${percent}%)`;
-          },
-        },
-      },
-    },
-  };
-}
-
-const deliverablesPieKey = computed(
-  () => `deliverables-pie-${dataLabels.value.join("|")}-${dataValues.value.join("|")}`
-);
-const deliverablesPieData = computed<ChartData<"pie">>(() => ({
-  labels: dataLabels.value,
-  datasets: [
-    {
-      data: dataValues.value,
-      backgroundColor: pieSliceColors(dataValues.value.length),
-      borderColor: "#ffffff",
-      borderWidth: 2,
-    },
-  ],
-}));
-const deliverablesPieOptions = computed<ChartOptions<"pie">>(() => pieOptions());
-const { pieChartProps: deliverablesPieChartProps, pieChartRef: deliverablesPieChartRef } = usePieChart({
-  chartData: deliverablesPieData,
-  options: deliverablesPieOptions,
-});
-
 const { barChartProps: deliverablesBarChartProps, barChartRef: deliverablesBarChartRef } = useBarChart({
   chartData: deliverablesChartData,
   options: deliverablesChartOptions,
@@ -775,27 +637,6 @@ const { barChartProps, barChartRef } = useBarChart({
   options: chartOptions,
 });
 
-const casesPieKey = computed(
-  () => `cases-pie-${casesChartLabels.value.join("|")}-${casesChartValues.value.join("|")}`
-);
-const casesPieData = computed<ChartData<"pie">>(() => ({
-  labels: casesChartLabels.value,
-  datasets: [
-    {
-      data: casesChartValues.value,
-      backgroundColor: pieSliceColors(casesChartValues.value.length),
-      borderColor: "#ffffff",
-      borderWidth: 2,
-    },
-  ],
-}));
-const casesPieOptions = computed<ChartOptions<"pie">>(() => pieOptions());
-const { pieChartProps: casesPieChartProps, pieChartRef: casesPieChartRef } = usePieChart({
-  chartData: casesPieData,
-  options: casesPieOptions,
-});
-
-
 function getRandomColor(count: any) {
   // Generate random RGB values
   const r = Math.floor(Math.random() * 256);
@@ -809,48 +650,6 @@ function getRandomColor(count: any) {
 </script>
 
 <style scoped>
-.pie-layout {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.card:has(.pie-layout) .card-body {
-  overflow: visible;
-}
-
-.pie-chart-wrap {
-  flex: 1 1 58%;
-  height: 280px;
-  min-width: 0;
-}
-
-.pie-legend {
-  flex: 0 1 42%;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.pie-legend li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #212529;
-  font-size: 12px;
-  line-height: 1.3;
-}
-
-.pie-legend__swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  flex: none;
-}
-
 .v-btn {
   min-width: 80px;
 }
