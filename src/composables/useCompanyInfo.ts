@@ -93,7 +93,7 @@ async function fetchCompanyInfo() {
       localStorage.removeItem(STORAGE_KEY);
     }
 
-    await loadAccountImage(companyId, resolvedRecord.value?.Record_Image);
+    loadAccountImage(companyId, resolvedRecord.value?.Record_Image);
   } catch (err) {
     console.error('Error fetching company information:', err);
     const errorMessage = axios.isAxiosError(err)
@@ -105,40 +105,19 @@ async function fetchCompanyInfo() {
   }
 }
 
-let accountImageRequest = 0;
-
-async function loadAccountImage(companyId: string, recordImage: unknown) {
-  const requestId = ++accountImageRequest;
+function loadAccountImage(companyId: string, recordImage: unknown) {
   if (recordImage === null || recordImage === undefined || recordImage === '') {
     accountImageUrl.value = '';
     return;
   }
 
-  try {
-    const response = await axios.get(`${API_BASE_URL}/Zoho/zoho/${companyId}/photo`, {
-      responseType: 'blob',
-    });
-    if (requestId !== accountImageRequest) return;
+  // Load the photo from the API as a normal image. Embedding it as a data URL
+  // fails for larger Zoho photos and is blocked when a host CSP omits data:.
+  accountImageUrl.value = `${API_BASE_URL}/Zoho/zoho/${encodeURIComponent(companyId)}/photo`;
+}
 
-    const blob = response.data as Blob;
-    if (!blob?.type?.startsWith('image/') || blob.size === 0) {
-      accountImageUrl.value = '';
-      return;
-    }
-
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-    if (requestId !== accountImageRequest || !dataUrl.startsWith('data:image/')) return;
-    accountImageUrl.value = dataUrl;
-  } catch (err) {
-    if (requestId !== accountImageRequest) return;
-    console.error('Error fetching account image:', err);
-    accountImageUrl.value = '';
-  }
+function clearAccountImage() {
+  accountImageUrl.value = '';
 }
 
 export function useCompanyInfo() {
@@ -188,6 +167,7 @@ export function useCompanyInfo() {
     mdCreditsNumber,
     accountJson,
     accountImageUrl,
+    clearAccountImage,
     loadCompanyInfo,
   };
 }

@@ -20,6 +20,7 @@
                 :src="accountImageUrl"
                 alt=""
                 class="account-logo"
+                @error="clearAccountImage"
               />
               <dl class="account-facts">
                 <div>
@@ -190,6 +191,7 @@ const {
   productsEngaged,
   mdCredits,
   accountImageUrl,
+  clearAccountImage,
   loadCompanyInfo,
 } = useCompanyInfo();
 const { websiteStatus, isWebsiteLive, loadWebsiteStatus } = useWebsiteStatus();

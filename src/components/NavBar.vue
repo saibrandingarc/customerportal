@@ -31,6 +31,7 @@
                 :src="accountImageUrl"
                 alt=""
                 class="portal-user-logo"
+                @error="clearAccountImage"
               />
               <i v-else class="mdi mdi-account-circle fs-24" aria-hidden="true"></i>
               <span class="portal-user-copy">
@@ -98,6 +99,7 @@ const {
   productsEngaged,
   mdCredits,
   accountImageUrl,
+  clearAccountImage,
   loadCompanyInfo,
 } = useCompanyInfo();
 const { isWebsiteLive, loadWebsiteStatus } = useWebsiteStatus();

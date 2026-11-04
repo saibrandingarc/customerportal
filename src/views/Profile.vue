@@ -10,10 +10,11 @@
           <div class="card-body">
             <div class="profile-overview">
               <img
-                v-if="photoUrl"
+                v-if="photoUrl && !photoFailed"
                 :src="photoUrl"
                 alt=""
                 class="profile-photo"
+                @error="photoFailed = true"
               />
               <span v-else class="profile-photo profile-photo-fallback" aria-hidden="true">
                 <i class="mdi mdi-account"></i>
@@ -45,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useAuthStore } from '@/stores/userStore';
 import { useCompanyInfo } from '@/composables/useCompanyInfo';
 
@@ -86,6 +87,7 @@ const roleLabel = computed(() => {
   return roles.length ? roles.join(', ') : 'User';
 });
 
+const photoFailed = ref(false);
 const photoUrl = computed(() => user.value?.picture || accountImageUrl.value || '');
 
 onMounted(() => {
