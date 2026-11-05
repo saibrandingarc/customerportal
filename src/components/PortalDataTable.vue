@@ -10,27 +10,51 @@
           placeholder="Search this table"
         />
       </label>
-      <label
+      <div
         v-for="field in filterFields"
         :key="field"
         class="portal-data-table__filter"
+        :ref="(element) => setFilterRoot(field, element)"
       >
-        <span>{{ headerLabel(field) }}</span>
-        <select
-          class="form-select"
-          :value="selectedFilters[field] ?? ''"
-          @change="onFilterChange(field, $event)"
+        <span :id="filterLabelId(field)">{{ headerLabel(field) }}</span>
+        <button
+          type="button"
+          class="form-select text-start portal-data-table__toggle"
+          :aria-expanded="openField === field"
+          :aria-labelledby="filterLabelId(field)"
+          @click="toggleOpen(field)"
         >
-          <option value="">All</option>
-          <option
+          {{ filterSummary(field) }}
+        </button>
+        <div
+          v-if="openField === field"
+          class="portal-data-table__menu"
+          role="group"
+          :aria-labelledby="filterLabelId(field)"
+        >
+          <label class="portal-data-table__option">
+            <input
+              type="checkbox"
+              :checked="!(selectedFilters[field]?.length)"
+              @change="clearField(field)"
+            />
+            All
+          </label>
+          <label
             v-for="option in filterChoices[field]"
             :key="option"
-            :value="option"
+            class="portal-data-table__option"
+            :class="{ 'is-selected': isSelected(field, option) }"
           >
+            <input
+              type="checkbox"
+              :checked="isSelected(field, option)"
+              @change="toggleOption(field, option)"
+            />
             {{ option }}
-          </option>
-        </select>
-      </label>
+          </label>
+        </div>
+      </div>
       <button
         type="button"
         :disabled="!hasActiveFilters"
@@ -65,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import type { Header } from 'vue3-easy-data-table';
 
 type TableItem = Record<string, unknown>;
@@ -116,7 +140,10 @@ const emit = defineEmits<{
 }>();
 
 const search = ref('');
-const selectedFilters = reactive<Record<string, string>>({});
+const instanceId = Math.random().toString(36).slice(2, 8);
+const selectedFilters = reactive<Record<string, string[]>>({});
+const openField = ref<string | null>(null);
+const filterRoots = new Map<string, HTMLElement>();
 
 function onClickRow(item: object) {
   emit('click-row', item);
@@ -156,9 +183,10 @@ const filterFields = computed(() => Object.keys(filterChoices.value));
 
 watch(filterChoices, (choices) => {
   for (const field of Object.keys(selectedFilters)) {
-    const selected = selectedFilters[field];
-    if (selected && !choices[field]?.includes(selected)) {
-      selectedFilters[field] = '';
+    const selected = selectedFilters[field] ?? [];
+    const valid = selected.filter((value) => choices[field]?.includes(value));
+    if (valid.length !== selected.length) {
+      selectedFilters[field] = valid;
     }
   }
 });
@@ -167,8 +195,10 @@ const visibleItems = computed(() => {
   const query = search.value.trim().toLowerCase();
   return props.items.filter((item) => {
     for (const field of filterFields.value) {
-      const selected = selectedFilters[field];
-      if (selected && String(readField(item, field) ?? '') !== selected) return false;
+      const selected = selectedFilters[field] ?? [];
+      if (selected.length && !selected.includes(String(readField(item, field) ?? ''))) {
+        return false;
+      }
     }
     if (!query) return true;
     return searchFields.value.some((field) =>
@@ -181,24 +211,74 @@ function headerLabel(field: string): string {
   return props.headers.find((header) => header.value === field)?.text ?? field;
 }
 
-function onFilterChange(field: string, event: Event): void {
-  selectedFilters[field] = (event.target as HTMLSelectElement).value;
+function filterLabelId(field: string): string {
+  return `portal-filter-${instanceId}-${field.replace(/[^A-Za-z0-9_-]/g, '-')}`;
 }
 
+function setFilterRoot(field: string, element: unknown): void {
+  if (element instanceof HTMLElement) {
+    filterRoots.set(field, element);
+    return;
+  }
+  filterRoots.delete(field);
+}
+
+function toggleOpen(field: string): void {
+  openField.value = openField.value === field ? null : field;
+}
+
+function isSelected(field: string, option: string): boolean {
+  return selectedFilters[field]?.includes(option) ?? false;
+}
+
+function clearField(field: string): void {
+  selectedFilters[field] = [];
+}
+
+function toggleOption(field: string, option: string): void {
+  const current = selectedFilters[field] ?? [];
+  selectedFilters[field] = current.includes(option)
+    ? current.filter((value) => value !== option)
+    : [...current, option];
+}
+
+function filterSummary(field: string): string {
+  const selected = selectedFilters[field] ?? [];
+  if (!selected.length) return 'All';
+  return selected.join(', ');
+}
+
+function onPointerDown(event: PointerEvent): void {
+  const field = openField.value;
+  if (!field) return;
+  const root = filterRoots.get(field);
+  if (root && event.target instanceof Node && !root.contains(event.target)) {
+    openField.value = null;
+  }
+}
+
+onMounted(() => document.addEventListener('pointerdown', onPointerDown));
+onBeforeUnmount(() => document.removeEventListener('pointerdown', onPointerDown));
+
 const hasActiveFilters = computed(
-  () => search.value.trim() !== '' || Object.values(selectedFilters).some(Boolean)
+  () =>
+    search.value.trim() !== '' ||
+    Object.values(selectedFilters).some((selected) => selected.length > 0)
 );
 
 function resetFilters(): void {
   search.value = '';
+  openField.value = null;
   for (const field of Object.keys(selectedFilters)) {
-    selectedFilters[field] = '';
+    selectedFilters[field] = [];
   }
 }
 </script>
 
 <style scoped>
 .portal-data-table__tools {
+  position: relative;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -224,7 +304,52 @@ function resetFilters(): void {
 }
 
 .portal-data-table__filter {
+  position: relative;
   flex: 0 1 200px;
+}
+
+.portal-data-table__toggle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portal-data-table__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 2px);
+  left: 0;
+  min-width: 100%;
+  max-height: 240px;
+  overflow: auto;
+  padding: 4px 0;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+.portal-data-table__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 12px;
+  color: #212529;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.portal-data-table__option:hover,
+.portal-data-table__option.is-selected {
+  background: #0192d0;
+  color: #fff;
+}
+
+.portal-data-table__option input {
+  margin: 0;
 }
 
 .portal-data-table__reset {

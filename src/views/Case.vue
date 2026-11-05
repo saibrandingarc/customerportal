@@ -239,10 +239,13 @@ const addContext = async () => {
   contextSaved.value = false;
   try {
     const companyId = authStore.getCompanyId();
-    await axios.post(`${API_BASE_URL}/Zoho/zoho/case/${companyId}/${caseId}/context`, { comments });
+    await axios.post(`${API_BASE_URL}/Zoho/zoho/case/${companyId}/${caseId}/context`, {
+      comments,
+      submittedBy: loggedInSubmitter(),
+    });
     contextText.value = '';
     contextSaved.value = true;
-    await fetchCase(caseId, false);
+    await Promise.all([fetchCase(caseId, false), fetchTimeline(caseId)]);
   } catch (err) {
     const data = axios.isAxiosError(err) ? err.response?.data : null;
     const parsed = typeof data === 'string' ? readBody(data) : (data as Record<string, unknown> | null);
@@ -325,6 +328,24 @@ const singularModule = (apiName: string): string => {
   return apiName;
 };
 
+function loggedInSubmitter(): string {
+  const user = authStore.authResponse as {
+    email?: string | null;
+    Email?: string | null;
+    username?: string | null;
+    Username?: string | null;
+    name?: string | null;
+    nickname?: string | null;
+  } | null;
+  const email = (user?.email || user?.Email || '').trim();
+  const name = (user?.username || user?.Username || user?.name || user?.nickname || '').trim();
+  return (
+    name && email && name.toLowerCase() !== email.toLowerCase()
+      ? `${name} (${email})`
+      : name || email
+  ).slice(0, 120);
+}
+
 const isCreatedAction = (action: string): boolean =>
   action === 'added' || action === 'created' || action.includes('create');
 
@@ -338,7 +359,7 @@ const timelineRows = computed<TimelineRow[]>(() => {
     const dateKey = validDate ? validDate.toISOString().slice(0, 10) : `unknown-${index}`;
     const sortTime = validDate ? validDate.getTime() : 0;
     const action = (entry.action ?? '').toLowerCase();
-    const actor = entry.done_by?.name?.trim() || 'a user';
+    const actor = entry.done_by?.name?.trim() || '';
     const suffix = automationSuffix(entry);
     const fields = entry.field_history ?? [];
     const recordModule = entry.record?.module?.api_name ?? '';
@@ -346,9 +367,10 @@ const timelineRows = computed<TimelineRow[]>(() => {
 
     if (isCreatedAction(action) && fields.length === 0) {
       const relatedName = entry.record?.name?.trim();
+      const createdBy = actor || 'a user';
       const text = isCaseRecord
-        ? `Case Created by ${actor}${dateLabel === 'Unknown date' ? '' : ` ${dateLabel}`}`
-        : `${singularModule(recordModule)} ${relatedName || ''} was added by ${actor}`.replace(/\s+/g, ' ');
+        ? `Case Created by ${createdBy}${dateLabel === 'Unknown date' ? '' : ` ${dateLabel}`}`
+        : `${singularModule(recordModule)} ${relatedName || ''} was added by ${createdBy}`.replace(/\s+/g, ' ');
       rows.push({
         id: entry.id ?? `created-${index}`,
         kind: isCaseRecord ? 'created' : 'other',
@@ -367,10 +389,12 @@ const timelineRows = computed<TimelineRow[]>(() => {
         const oldValue = formatValue(field._value?.old, field.data_type);
         const newValue = formatValue(field._value?.new, field.data_type);
         const fromLabel = oldValue === 'blank value' ? 'blank value' : oldValue;
+        const alreadyAttributed = /\bby\s+\S/i.test(newValue);
+        const actorClause = !suffix && actor && !alreadyAttributed ? ` by ${actor}` : '';
         rows.push({
           id: `${entry.id ?? index}-${field.api_name ?? fieldIndex}`,
           kind: 'updated',
-          text: `${label} was updated from ${fromLabel} to ${newValue}${suffix}`,
+          text: `${label} was updated from ${fromLabel} to ${newValue}${actorClause}${suffix}`,
           timeLabel,
           dateKey,
           dateLabel,
@@ -384,7 +408,7 @@ const timelineRows = computed<TimelineRow[]>(() => {
     rows.push({
       id: entry.id ?? `event-${index}`,
       kind: isCreatedAction(action) ? 'created' : 'other',
-      text: `Case ${readable} by ${actor}${suffix}`,
+      text: actor ? `Case ${readable} by ${actor}${suffix}` : `Case ${readable}${suffix}`,
       timeLabel,
       dateKey,
       dateLabel,
@@ -630,6 +654,7 @@ onMounted(() => {
   padding-top: 4px;
   color: #1f2937;
   line-height: 1.45;
+  white-space: pre-line;
 }
 
 .history-empty {
