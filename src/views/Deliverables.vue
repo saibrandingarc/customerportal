@@ -77,7 +77,7 @@
                 <!-- <p class="pending-tab-note text-muted mb-3">
                   <strong>Note:</strong> Please provide all feedback by directly redlining the project content document. If you have any additional questions or notes for clarification, please add them in the comments section below.
                 </p> -->
-                <div class="pending-deliverables-wrapper d-none d-md-block">
+                <div class="pending-deliverables-wrapper">
                   <PortalDataTable
                     :headers="pendingheaders"
                     :items="pendingDeliverables"
@@ -86,6 +86,7 @@
                     :body-row-class-name="getPendingRowClassName"
                     sort-by="Block"
                     sort-type="desc"
+                    stack-on-mobile
                   >
                     <!-- Drive folder expand disabled — pending deliverables shown directly
                     <template #item-expand="deliverableRow">
@@ -226,14 +227,12 @@
                       </div>
                     </template>
                     -->
-                  </PortalDataTable>
-                </div>
-
-                <div class="d-md-none deliverable-cards">
-                  <p v-if="!pendingDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    <template #mobile="{ items }">
+                <div class="deliverable-cards">
+                  <p v-if="!items.length" class="text-muted text-center py-3 mb-0">
                     No data available
                   </p>
-                  <div v-for="(row, i) in pendingDeliverables" :key="row.id ?? i" class="deliverable-card">
+                  <div v-for="(row, i) in items" :key="row.id ?? i" class="deliverable-card">
                     <div class="dc-row">
                       <span class="dc-label">Block</span>
                       <span class="dc-value fw-semibold">{{ row.Block }}</span>
@@ -275,30 +274,32 @@
                         class="btn btn-success btn-sm"
                         :disabled="actionLoading"
                         @click="openApproveForDeliverable(row.id)"
-                      >Approve</button>
+                      >Approve                      </button>
                     </div>
                   </div>
+                </div>
+                    </template>
+                  </PortalDataTable>
                 </div>
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'upcoming' }">
-                <div class="table-responsive d-none d-md-block">
+                <div class="table-responsive">
                   <PortalDataTable
                     :headers="headers"
                     :items="upcomingDeliverables"
                     :rows-per-page="10"
+                    stack-on-mobile
                   >
                     <template #item-Credits="{ Credits }">
                       {{ formatCredits(Credits) }}
                     </template>
-                  </PortalDataTable>
-                </div>
-
-                <div class="d-md-none deliverable-cards">
-                  <p v-if="!upcomingDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    <template #mobile="{ items }">
+                <div class="deliverable-cards">
+                  <p v-if="!items.length" class="text-muted text-center py-3 mb-0">
                     No data available
                   </p>
-                  <div v-for="(row, i) in upcomingDeliverables" :key="row.id ?? i" class="deliverable-card">
+                  <div v-for="(row, i) in items" :key="row.id ?? i" class="deliverable-card">
                     <div class="dc-row">
                       <span class="dc-label">Block</span>
                       <span class="dc-value fw-semibold">{{ row.Block }}</span>
@@ -321,6 +322,9 @@
                     </div>
                   </div>
                 </div>
+                    </template>
+                  </PortalDataTable>
+                </div>
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'completed' }">
@@ -332,13 +336,14 @@
                     </option>
                   </select>
                 </div>
-                <div class="table-responsive d-none d-md-block">
+                <div class="table-responsive">
                   <PortalDataTable
                     :headers="completedheaders"
                     :items="completedDeliverables"
                     sort-by="Publish_Date"
                     sort-type="desc"
                     :rows-per-page="10"
+                    stack-on-mobile
                   >
                     <template #item-Credits="{ Credits }">
                       {{ formatCredits(Credits) }}
@@ -367,14 +372,12 @@
                       </a>
                       <span v-else class="text-muted">—</span>
                     </template>
-                  </PortalDataTable>
-                </div>
-
-                <div class="d-md-none deliverable-cards">
-                  <p v-if="!completedDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    <template #mobile="{ items }">
+                <div class="deliverable-cards">
+                  <p v-if="!items.length" class="text-muted text-center py-3 mb-0">
                     No data available
                   </p>
-                  <div v-for="(row, i) in completedDeliverables" :key="row.id ?? i" class="deliverable-card">
+                  <div v-for="(row, i) in items" :key="row.id ?? i" class="deliverable-card">
                     <div class="dc-row">
                       <span class="dc-label">Block</span>
                       <span class="dc-value fw-semibold">{{ row.Block }}</span>
@@ -413,26 +416,28 @@
                     </div>
                   </div>
                 </div>
+                    </template>
+                  </PortalDataTable>
+                </div>
               </div>
 
               <div class="tab-pane fade" :class="{ 'show active': activeDeliverablesTab === 'active' }">
-                <div class="table-responsive d-none d-md-block">
+                <div class="table-responsive">
                   <PortalDataTable
                     :headers="headers"
                     :items="activeDeliverables"
                     :rows-per-page="10"
+                    stack-on-mobile
                   >
                     <template #item-Credits="{ Credits }">
                       {{ formatCredits(Credits) }}
                     </template>
-                  </PortalDataTable>
-                </div>
-
-                <div class="d-md-none deliverable-cards">
-                  <p v-if="!activeDeliverables.length" class="text-muted text-center py-3 mb-0">
+                    <template #mobile="{ items }">
+                <div class="deliverable-cards">
+                  <p v-if="!items.length" class="text-muted text-center py-3 mb-0">
                     No data available
                   </p>
-                  <div v-for="(row, i) in activeDeliverables" :key="row.id ?? i" class="deliverable-card">
+                  <div v-for="(row, i) in items" :key="row.id ?? i" class="deliverable-card">
                     <div class="dc-row">
                       <span class="dc-label">Block</span>
                       <span class="dc-value fw-semibold">{{ row.Block }}</span>
@@ -454,6 +459,9 @@
                       <span class="dc-value">{{ formatCredits(row.Credits) }}</span>
                     </div>
                   </div>
+                </div>
+                    </template>
+                  </PortalDataTable>
                 </div>
               </div>
             </div>
@@ -1682,6 +1690,12 @@ const submitRejection = async () => {
 
 .pending-deliverables-wrapper {
   overflow: visible;
+}
+
+@media (max-width: 767.98px) {
+  .table-responsive {
+    overflow: visible;
+  }
 }
 
 .pending-deliverables-wrapper :deep(.vue3-easy-data-table__main) {

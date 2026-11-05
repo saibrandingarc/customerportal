@@ -66,30 +66,35 @@
       </button>
     </div>
 
-    <EasyDataTable
-      :headers="headers"
-      :items="visibleItems"
-      :rows-per-page="rowsPerPage"
-      :rows-items="[10, 25, 50, 100]"
-      :sort-by="sortBy"
-      :sort-type="sortType"
-      :table-class-name="tableClassName"
-      :body-row-class-name="bodyRowClassName"
-      :body-expand-row-class-name="bodyExpandRowClassName"
-      show-index
-      buttons-pagination
-      theme-color="#0192d0"
-      @click-row="onClickRow"
-    >
-      <template v-for="(_, slotName) in $slots" :key="slotName" #[slotName]="slotProps">
-        <slot :name="slotName" v-bind="slotProps" />
-      </template>
-    </EasyDataTable>
+    <div :class="{ 'd-none d-md-block': stackOnMobile }">
+      <EasyDataTable
+        :headers="headers"
+        :items="visibleItems"
+        :rows-per-page="rowsPerPage"
+        :rows-items="[10, 25, 50, 100]"
+        :sort-by="sortBy"
+        :sort-type="sortType"
+        :table-class-name="tableClassName"
+        :body-row-class-name="bodyRowClassName"
+        :body-expand-row-class-name="bodyExpandRowClassName"
+        show-index
+        buttons-pagination
+        theme-color="#0192d0"
+        @click-row="onClickRow"
+      >
+        <template v-for="(_, slotName) in tableSlots" :key="slotName" #[slotName]="slotProps">
+          <slot :name="slotName" v-bind="slotProps" />
+        </template>
+      </EasyDataTable>
+    </div>
+    <div v-if="stackOnMobile" class="d-md-none">
+      <slot name="mobile" :items="visibleItems" />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, useSlots, watch } from 'vue';
 import type { Header } from 'vue3-easy-data-table';
 
 type TableItem = Record<string, unknown>;
@@ -123,6 +128,7 @@ const props = withDefaults(
     bodyRowClassName?: string | Function;
     bodyExpandRowClassName?: string;
     maxFilterOptions?: number;
+    stackOnMobile?: boolean;
   }>(),
   {
     rowsPerPage: 10,
@@ -132,8 +138,16 @@ const props = withDefaults(
     bodyRowClassName: '',
     bodyExpandRowClassName: '',
     maxFilterOptions: 15,
+    stackOnMobile: false,
   }
 );
+
+const slots = useSlots();
+const tableSlots = computed(() => {
+  const names = { ...slots };
+  delete names.mobile;
+  return names;
+});
 
 const emit = defineEmits<{
   (event: 'click-row', item: object): void;
