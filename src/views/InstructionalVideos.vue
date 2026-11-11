@@ -30,6 +30,11 @@
 <script lang="ts" setup>
 const videos = [
   {
+    id: 'lEwmlHdh86A',
+    title: 'About Branding Arc',
+    url: 'https://www.youtube.com/watch?v=lEwmlHdh86A',
+  },
+  {
     id: '6CLwRxxSSPI',
     title: 'Microsoft Teams - How to Apply Custom Virtual Backgrounds',
     url: 'https://www.youtube.com/watch?v=6CLwRxxSSPI',
