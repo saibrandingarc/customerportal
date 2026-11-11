@@ -338,6 +338,7 @@
                 </div>
                 <div class="table-responsive">
                   <PortalDataTable
+                    :key="selectedBlock"
                     :headers="completedheaders"
                     :items="completedDeliverables"
                     sort-by="Publish_Date"
@@ -903,6 +904,7 @@ const activeDeliverables = ref<any[]>([]);
 
 const deliverablesTabs: DeliverablesTab[] = ['upcoming', 'active', 'pending', 'completed'];
 const deliverablesByKey = new Map<string, DeliverableRow[]>();
+let deliverablesRequestId = 0;
 
 function deliverablesCacheKey(companyId: string, block: string, tab: DeliverablesTab): string {
   return `${companyId}:${block}:${tab}`;
@@ -999,15 +1001,24 @@ function isCancelledDeliverable(row: DeliverableRow): boolean {
 function readDeliverableRows(payload: unknown): DeliverableRow[] {
   let data = payload;
   if (typeof data === 'string') {
+    const trimmed = data.trim();
+    if (!trimmed) return [];
     try {
-      data = JSON.parse(data);
+      data = JSON.parse(trimmed);
     } catch {
       return [];
     }
   }
-  if (!data || typeof data !== 'object') return [];
+  if (data == null || data === 0 || typeof data !== 'object') return [];
   const rows = (data as { data?: DeliverableRow[] }).data;
   return Array.isArray(rows) ? rows : [];
+}
+
+function clearDeliverablesTab(tab: DeliverablesTab) {
+  if (tab === 'upcoming') upcomingDeliverables.value = [];
+  else if (tab === 'completed') completedDeliverables.value = [];
+  else if (tab === 'active') activeDeliverables.value = [];
+  else pendingDeliverables.value = [];
 }
 
 async function applyDeliverablesResponse(tab: DeliverablesTab, rows: DeliverableRow[]) {
@@ -1131,6 +1142,7 @@ const fetchDeliverables = async (
   tab: DeliverablesTab = activeDeliverablesTab.value,
   force = false
 ) => {
+  const requestId = ++deliverablesRequestId;
   const companyId = authStore.getCompanyId();
   const block = selectedBlock.value;
   const key = deliverablesCacheKey(companyId, block, tab);
@@ -1141,6 +1153,7 @@ const fetchDeliverables = async (
     return;
   }
 
+  clearDeliverablesTab(tab);
   loading.value = true;
   try {
     console.log(authStore);
@@ -1148,21 +1161,19 @@ const fetchDeliverables = async (
       ? `${API_BASE_URL}/Zoho/zoho/deliverables/${companyId}`
       : `${API_BASE_URL}/Zoho/zoho/deliverables/${companyId}/${block}/${tab}`;
     const response = await axios.get(url);
+    if (requestId !== deliverablesRequestId) return;
     console.log(response);
     error.value = '';
-    const rows = tab === 'active'
-      ? readDeliverableRows(response.data)
-      : [...(response.data.data as DeliverableRow[])];
+    const rows = readDeliverableRows(response.data);
     deliverablesByKey.set(key, rows);
     await applyDeliverablesResponse(tab, rows);
     console.log('test :' + completedDeliverables);
   } catch (err) {
+    if (requestId !== deliverablesRequestId) return;
     error.value = err instanceof Error ? err.message : String(err);
-    if (tab === 'active') {
-      activeDeliverables.value = [];
-    }
+    clearDeliverablesTab(tab);
   } finally {
-    loading.value = false;
+    if (requestId === deliverablesRequestId) loading.value = false;
   }
 };
 
