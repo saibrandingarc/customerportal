@@ -29,6 +29,17 @@
               <li class="nav-item">
                 <button
                   class="nav-link"
+                  :class="{ active: activeDeliverablesTab === 'pending' }"
+                  data-value="pending"
+                  type="button"
+                  @click="changeDeliverablesTab('pending')"
+                >
+                  Pending Approvals
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-link"
                   :class="{ active: activeDeliverablesTab === 'upcoming' }"
                   data-value="upcoming"
                   type="button"
@@ -46,17 +57,6 @@
                   @click="changeDeliverablesTab('active')"
                 >
                   Active Deliverables
-                </button>
-              </li>
-              <li class="nav-item">
-                <button
-                  class="nav-link"
-                  :class="{ active: activeDeliverablesTab === 'pending' }"
-                  data-value="pending"
-                  type="button"
-                  @click="changeDeliverablesTab('pending')"
-                >
-                  Pending Approvals
                 </button>
               </li>
               <li class="nav-item">
