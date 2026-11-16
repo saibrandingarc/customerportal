@@ -23,7 +23,7 @@
               </router-link>
             </div>
 
-            <CreditStatus class="mb-3" :year="selectedYear" />
+            <CreditStatus class="mb-3" :year="selectedYear" color-by-balance />
 
             <ul class="nav nav-tabs nav-justified deliverables-tabs mb-3">
               <li class="nav-item">
