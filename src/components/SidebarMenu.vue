@@ -83,9 +83,9 @@ const menuItems: MenuItem[] = [
     title: 'Resources',
     roles: ['Admin', 'User'],
     children: [
+      { title: 'Articles', route: '/resources/articles', roles: ['Admin', 'User'] },
       { title: 'Instructional Videos', route: '/resources/videos', roles: ['Admin', 'User'] },
       { title: 'Scribes', route: '/resources/scribes', roles: ['Admin', 'User'] },
-      { title: 'Articles', route: '/resources/articles', roles: ['Admin', 'User'] },
     ],
   },
 ];
