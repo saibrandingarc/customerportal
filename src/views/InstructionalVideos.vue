@@ -35,6 +35,11 @@ const videos = [
     url: 'https://www.youtube.com/watch?v=lEwmlHdh86A',
   },
   {
+    id: 'lqW2EPaaZmg',
+    title: 'How to Prepare for Your Receivables Podcast Episode',
+    url: 'https://www.youtube.com/watch?v=lqW2EPaaZmg',
+  },
+  {
     id: '6CLwRxxSSPI',
     title: 'Microsoft Teams - How to Apply Custom Virtual Backgrounds',
     url: 'https://www.youtube.com/watch?v=6CLwRxxSSPI',

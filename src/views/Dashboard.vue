@@ -13,7 +13,7 @@
           <div class="col-12">
             <div class="card">
               <div class="card-body">
-                <CreditStatus />
+                <CreditStatus color-by-balance />
               </div>
             </div>
           </div>

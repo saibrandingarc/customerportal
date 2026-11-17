@@ -102,12 +102,8 @@ const routes = [
       {
         path: '/faq',
         name: 'Faq',
-        component: () => import('../views/Section.vue'),
-        meta: {
-          requiresAuth: true,
-          title: 'FAQ',
-          summary: 'Common questions about your account, deliverables, cases, and invoices.',
-        },
+        component: () => import('../views/Faq.vue'),
+        meta: { requiresAuth: true },
       },
       {
         path: '/resources/videos',
