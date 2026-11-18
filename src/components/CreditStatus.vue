@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-12 col-md-4">
-        <div class="credit-status-card">
+        <div class="credit-status-card credit-status-card-zero">
           <span class="credit-status-label">Credits Used</span>
           <span class="credit-status-value">{{ formatCredits(creditsUsed) }}</span>
         </div>
